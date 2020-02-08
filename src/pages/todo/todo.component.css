@@ -1,0 +1,62 @@
+.todoNote {
+  text-align: left;
+  color: grey;
+  font-size:12px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-weight:500;
+  margin: 0px;
+}
+
+
+.todoTitle {
+  text-align: left;
+  color: var(--ion-color-dark);
+  font-size:16px;
+  font-family: Roboto, sans-serif, "Helvetica Neue";
+  font-weight:1000;
+  margin: 0px;
+}
+
+.todoTitleColumn {
+  margin-top:6px;
+}
+
+.todoRowBorder {
+  border-bottom: 1px solid var(--ion-color-medium);
+}
+
+.bufferColumnParent {
+  position: relative;
+  height: 100%;
+  width: 10px;
+}
+
+.bufferColumn {
+  position: absolute;
+  color: grey !important;
+  border-right: 5px solid var(--ion-color-medium) !important;
+  margin-bottom: 5px;
+  width: 20px !important;
+  top: 10px;
+  bottom: 10px;
+  left:-2px;
+}
+
+.todoListItemIcons {
+  position: absolute;
+  right: 0px;
+  bottom: -2px;
+  font-size: 12px;
+}
+
+
+.todoBadgeSubtodos {
+  position: relative;
+  left: 5px;
+  top: 3px;
+}
+
+.showAddSubtask {
+  position: absolute;
+  right: 50px;
+}

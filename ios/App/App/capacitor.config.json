@@ -1,0 +1,8 @@
+{
+  "appId": "com.mlflabs.habitville",
+  "appName": "HabitVille",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build",
+  "cordova": {}
+}

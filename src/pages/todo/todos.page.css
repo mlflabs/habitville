@@ -1,0 +1,14 @@
+.floating-menu {
+  z-index: 100;
+  position: fixed;
+
+  top: 60px;
+  right: 0;
+  width: 300px;
+}
+
+.todoHeaderButtons {
+  font-size: 12px;
+  padding: 0px;
+  margin: 0px;
+}

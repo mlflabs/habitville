@@ -1,5 +1,7 @@
 {
   "name": "HabitVille",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "react"
 }

@@ -1,0 +1,144 @@
+
+
+.cityParent {
+  display: flex;
+  position: absolute;
+  width: 400px;
+  height: 150px;
+  right: 20px;
+}
+
+.statsParent {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  top: 5px;
+  left:5px;
+}
+
+.statsBarParent {
+  align-items: stretch;
+  position: relative;
+  left: 2px;
+  width: 200px;
+
+
+}
+
+.statsBarIcon {
+  position: relative;
+  top:3px;
+  padding-right: 2px;
+}
+
+.statsBarLine {
+  width: 100px;
+  height: 10px;
+}
+
+.statsBarBadge {
+  position: relative;
+  top: 3px;
+  font-size: 10px;
+  left: 5px;
+}
+
+.statsBarMoneyBadge {
+  position: relative;
+  top: 3px;
+  font-size: 16px;
+  left: 0px;
+  margin-right: 10px;
+}
+
+
+.statsBarMoneyParent {
+  left: 5px;
+  top: 5px;
+  width: 200;
+  position: relative;
+  display: flex;
+  font-size: 16px;
+}
+
+
+
+
+
+
+.headerWithAvatar {
+  height: 150px;
+  background-color: var(--ion-color-background);
+  align-content: center;
+  position: relative;
+  display: flex;
+  
+}
+
+
+
+.headerWithAvatar h1 {
+  position: absolute;
+  bottom: 0px;
+  left: 20px;
+}
+
+.menuHeaderWithAvatar {
+  height: 150px;
+  background-color: var(--ion-color-background);
+  align-content: center;
+  text-align: center;
+  position: relative;
+ 
+  
+}
+
+
+
+.menuHeaderWithAvatar h1 {
+  position: absolute;
+  bottom: 0px;
+  left: 20px;
+}
+
+.headerGround {
+  position: absolute;
+  
+  height: 10px;
+  bottom: 0px;
+  right: 10px;
+}
+
+.headerHills {
+  position: absolute;
+  height: 25px;
+  bottom: 0px;
+  right: 50px;
+
+}
+
+
+
+.headerClouds {
+  position: absolute;
+  width: 10%;
+  bottom: 0px;
+  left: 30%;
+}
+
+.headerSkyDetail {
+  position: absolute;
+  width: 10%;
+}
+
+
+
+
+
+
+
+
+
+

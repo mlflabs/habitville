@@ -1,0 +1,28 @@
+
+
+
+
+
+
+
+.menuButton {
+  color: var(--ion-color-dark-tint);
+  text-transform: none;
+  font-size: 14px;
+}
+
+.leftMenuCol {
+  position: relative;
+  left: -12px;
+}
+
+.leftSubMenuCol {
+  position: relative;
+  font-size: 12px;
+  height: 40px;
+  left: 20px;
+}
+
+.selectedMainMenuItem {
+  background-color: aqua;
+}

@@ -1,0 +1,66 @@
+
+.todoEditCard {
+  background: var(--ion-color-medium) !important;
+  height: '-webkit-fill-available' !important;
+}
+
+.todoCardComponets {
+  background: var(--ion-color-medium) !important;
+}
+
+.todoDoneButton {
+  z-index: 101;
+  position: relative;
+
+  top: 10px;
+
+  right: 50px;
+
+}
+
+.editButton {
+  text-align: end;
+}
+
+.todoEditInlineParent {
+  position: relative;
+  top: -16px;
+}
+
+.todoEditInlineTextArea {
+  border: 1px solid var(--ion-color-medium); 
+  /*
+  background-color: var(--ion-color-light);
+  */
+  border-radius: 5px;
+}
+
+.todoEditInlineIconScrollParent {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.todoEditInlineIconScrollParent::-webkit-scrollbar {
+  flex: 0 0 auto;
+}
+
+.todoEditInlineIconScrollChild {
+  display: inline-block;
+}
+
+.todoButtonsRightAlign {
+  position: absolute;
+  right: 10px;
+}
+
+.todoButtonsLeftAlign {
+  position: absolute;
+  left: 0px;
+}
+.todoInlineEditPadding {
+  padding: 10px;
+}
+
