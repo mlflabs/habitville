@@ -69,7 +69,7 @@ export class TodoService {
     await waitMS(500);
     console.log('Loadng new project::: ');
     this._project = project;
-    // this._docs = await dataService.getAllByProjectAndType(project.childId, TYPE_TODO);
+
     // console.log("Init Docs: ", this._docs);
     //this.filterTodos();
     this.reloadTodos();
@@ -77,7 +77,7 @@ export class TodoService {
 
     //manage changes
 
-    const sub = dataService.subscribeProjectCollectionChanges(project.childId,TYPE_TODO)
+    const sub = dataService.subscribeProjectCollectionChanges(project._id,TYPE_TODO)
       .subscribe((doc: Todo) => {
         console.log("TodoService subscription: ", doc); 
         this.reloadTodos();

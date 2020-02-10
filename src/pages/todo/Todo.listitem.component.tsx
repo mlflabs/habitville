@@ -45,8 +45,8 @@ const loadSubtodos = async (data:{todo:Todo, dispatch, dataFunctions: DataFuncti
 
 
 //Component Start
-const TodoListItemComp = ({todo, tags, projectChildId, selectedTodo, lastChild,  dataFunctions}:
-  {todo:Todo, tags:string[], projectChildId: string, lastChild: boolean,  selectedTodo: Todo|null,  dataFunctions: DataFunctions}) => {
+const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  dataFunctions}:
+  {todo:Todo, tags:string[], projectId: string, lastChild: boolean,  selectedTodo: Todo|null,  dataFunctions: DataFunctions}) => {
   
 
   const [state, dispatch] = useReducer(reducer, 
@@ -101,7 +101,7 @@ const TodoListItemComp = ({todo, tags, projectChildId, selectedTodo, lastChild, 
     console.log(state.todo.title, state.todo.subTodos);
 
   }
-  
+
   const printTag = (tag: string) => {
     if(tag === 'today')
       return (<IonIcon  icon={sunny} key={tag} color="sunny" />);
@@ -152,7 +152,7 @@ const TodoListItemComp = ({todo, tags, projectChildId, selectedTodo, lastChild, 
           
           {(showSubAddSubtask)? (
             <TodoNewComp  parentId={state.todo._id} 
-              projectChildId={projectChildId} 
+              projectId={projectId} 
               saveFunc={dataFunctions.save} />
           ) : (<></>)}
         
@@ -165,7 +165,7 @@ const TodoListItemComp = ({todo, tags, projectChildId, selectedTodo, lastChild, 
               <TodoListItemComp todo={todo} 
                   tags={tags}
                   selectedTodo={selectedTodo}
-                  projectChildId={projectChildId}
+                  projectId={projectId}
                   dataFunctions={dataFunctions}
                   lastChild={amILast(state.subTodos, todo)}
                   key={todo._id + "sub"} />

@@ -1,26 +1,39 @@
 import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR } from './models';
 
-const nanoid = require('nanoid');
+import shortid from 'shortid';
 
 
-export function generateProjectUUID():string {
-  return PROJECT_SERVICE + DIV + PROJECT_INDEX_SERVICE + DIV + nanoid();
+export function generateUUID():string {
+  let id;
+  let ok = false;
+  while (!ok) {
+    id = shortid.generate();
+    if(id.substring(0,1)!== '_' && id.substring(0,1)!== '-')
+      ok = true;
+  }
+
+  return id;
 }
 
-export function generateProjectChildId(projectId: string, type: string):string {
-  return PROJECT_SERVICE+ DIV + projectId.split(DIV)[2] + 
-          DIV + nanoid();
+export function getProjectChildId(id:string|undefined): string {
+  if(id === undefined)return '';
+  let length = PROJECT_INDEX_SERVICE.length;
+  return id.substring(0, id.length-length);
 }
 
-
-export function generateUUID(prefix:string ="id"): string{
-  return prefix + nanoid();
+export function generateProjectUUID(id = generateUUID(), prefix = '', sufix = ''):string {
+  return PROJECT_SERVICE  + DIV + prefix + id +  DIV + PROJECT_INDEX_SERVICE;
 }
 
-export function generateShortUUID(prefix:string ="id"): string{
-  return prefix + nanoid();
+export function generateProjectChildId(projectId: string, type: string, id = generateUUID()):string {
+  return PROJECT_SERVICE+ DIV + projectId.split(DIV)[1] + DIV + type +
+          DIV + id;
 }
 
+export function generateCollectionId(projectid: string, collection, id = generateUUID()): string {
+  const length = PROJECT_INDEX_SERVICE.length;
+  return projectid.substring(0, projectid.length-length)+collection+ DIV +id; 
+}
 
 export const waitMS = (ms) => {
   return new Promise((resolve) => {
@@ -37,6 +50,10 @@ export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string 
   return [...ary.slice(0, i),
   Object.assign({}, item),
   ...ary.slice(i + 1)];
+}
+
+export function genrateMetaData(userid:string){
+    return [ 'u|'+ userid]; 
 }
 
 

@@ -46,7 +46,7 @@ const TodosPage  = () => {
         
         <IonItem>  
           <TodoNewComp parentId ={undefined} 
-                       projectChildId={project.childId} 
+                       projectId={project._id} 
                        saveFunc={dataFunc.save} />
         </IonItem>
         <div>
@@ -73,7 +73,7 @@ const TodosPage  = () => {
                                   tags={tags}
                                   lastChild = {false}
                                   selectedTodo={selectedTodo}
-                                  projectChildId = {project.childId}
+                                  projectId = {project._id}
                                   dataFunctions={dataFunc}
                                   key={todo._id} />
             ))}

@@ -16,18 +16,9 @@ export const waitMS = (ms: number) => {
   });
 };
 
-export function generateShortUUID(): string {
-  return 'i'+nanoid();
-}
-
 export function getAction(todo:string, data = {}){
   return {type:todo, data:data};
 }
-
-export function generateUUID() { // Public Domain/MIT
-  return 'id'+nanoid();
-}
-
 
 export function printCleanNote(text: string) {
   const t = text.replace(/(\r\n|\n|\r)/gm," ");
@@ -35,7 +26,6 @@ export function printCleanNote(text: string) {
     return t.substring(0,37)+'...';
   return t;
 }
-
 
 export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string = '_id'): Array<any> {
   let i = getIndexById(item[idKey], ary, idKey);
@@ -70,7 +60,7 @@ export function getIndexById(id: string, ary: any, idKey: string = '_id'): numbe
 }
 
 export function findById(id:any, ary: any[], idKey: string = "_id"): any {
-  for (let i = 0; i < ary.length; i++) {
+for (let i = 0; i < ary.length; i++) {
     if (id === ary[i][idKey]) {
       return ary[i];
     }

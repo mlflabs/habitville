@@ -54,13 +54,13 @@ export class HabitsService {
 
     this._project = project;
     await waitMS(500);
-    this._docs = await dataService.getAllByProjectAndType(project.childId, TYPE_HABBIT);
+    this._docs = await dataService.getAllByProjectAndType(project._id, TYPE_HABBIT);
     console.log("Init Docs: ", this._docs);
     this.filterhabits();
 
     //manage changes
 
-    const sub = dataService.subscribeProjectCollectionChanges(project.childId, TYPE_HABBIT)
+    const sub = dataService.subscribeProjectCollectionChanges(project._id, TYPE_HABBIT)
       .subscribe(doc => {
         console.log("habit Service Subscription: ", doc);
         if(doc._deleted)

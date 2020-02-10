@@ -68,7 +68,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
             }
           },
           {
-            text: 'Add User',
+            text: 'Invite User',
             handler: (data) => {
               partyService.addUser(data.userid, project);
               hideAddUser();

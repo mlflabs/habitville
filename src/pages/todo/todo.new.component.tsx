@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { Todo, TYPE_TODO } from './models';
-import { generateProjectCollectionId } from '../../modules/data/dataService';
+import {IonInput} from '@ionic/react';
+import { generateCollectionId } from '../../modules/data/utilsData';
 
-import {
-  IonInput} from '@ionic/react';
-
-
-const TodoNewComp = ({parentId = undefined, saveFunc, projectChildId}:
-  {parentId: string|undefined, projectChildId: string, saveFunc: Function}) => {
+const TodoNewComp = ({parentId = undefined, saveFunc, projectId}:
+  {parentId: string|undefined, projectId: string, saveFunc: Function}) => {
 
   const [state, setState] = useState({title:''});
 
@@ -25,7 +22,7 @@ const TodoNewComp = ({parentId = undefined, saveFunc, projectChildId}:
 
 
   const save = async () => {
-      const id = generateProjectCollectionId(projectChildId, TYPE_TODO)
+      const id = generateCollectionId(projectId, TYPE_TODO)
       const newDoc = new Todo({_id: id, title: state.title, parent: parentId, _new: true});
       console.log('NEW TODO::::::::::::::: ', newDoc)
       await saveFunc(newDoc, parentId);

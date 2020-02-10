@@ -47,11 +47,11 @@ const PartiesPage = () => {
   useEffect(() => {
     const subs = [
       authService.username$.subscribe(username => {
-        setState({...state, ...{userId: authService.getUserId()}})
+        setState({...state, ...{userId: authService.userid}})
       }),
 
       partyService.state$.subscribe(changes => {
-        setState({...state, ...{partyList: changes.docs, userId: authService.getUserId()}});
+        setState({...state, ...{partyList: changes.docs, userId: authService.userid}});
       }),
 
     ]

@@ -2,12 +2,15 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { toast } from 'react-toastify';
 import { Todo } from '../../pages/todo/models';
 import { Habit, HabitProgress } from '../../pages/habits/models';
-import { saveIntoArray, waitMS, generateShortUUID } from '../../utils';
+import { saveIntoArray, waitMS } from '../../utils';
 import { dataService } from '../data/dataService';
 import { calculateLevelExperience, calculateLevelHealth, calculateDoneTodoGold, calculateDoneTodoExperience } from './utilsGamify';
 import { throttleTime, debounceTime } from '../../../node_modules/rxjs/operators';
 import { isEqual } from 'lodash';
 import { getInitGamifyRewards } from '../../pages/habits/utilsHabits';
+import { generateProjectUUID, generateCollectionId, genrateMetaData } from '../data/utilsData';
+import { authService } from '../auth/authService';
+import { env } from '../../env';
 
 
 export const HABIT_REWARDS_GOLD_BASE = 5;
@@ -67,7 +70,7 @@ export class GamifyService {
       this._save();
     })
 
-    const sub2 = dataService.subscribeDocChanges('gamify_' + this._userId ,1000)
+    const sub2 = dataService.subscribeDocChanges(this.getGamifyDocId() ,1000)
       .subscribe(doc => {
         console.log("DOC================================", doc);
         const equal = isEqual(this._state, doc.state);
@@ -256,15 +259,15 @@ export class GamifyService {
   private _oldSave;
   private async _save() {
     try{
-      const doc = await dataService.getDoc('gamify_' + this._userId);
+      const doc = await dataService.getDoc(this.getGamifyDocId());
       console.log('========Gamify State Doc: ', doc);
       const equal = isEqual(this._state, doc.state);
       //make sure we are not saving the init state
       const initEqual = isEqual(this.state, getInitGamifyState());
 
       console.log('Saving gamify state::: ', equal, initEqual);
-      if(!equal && !initEqual && doc._id === 'gamify_' + this._userId) {
-        console.log("========888888888888888=========== Saving: ", {...doc, ...{state: this._state}})
+      if(!equal && !initEqual && doc.userid ===  this._userId) {
+        console.log("Saving: ".blue, {...doc, ...{state: this._state}})
         dataService.save({...doc, ...{state: this._state}});
       }
     }
@@ -274,22 +277,27 @@ export class GamifyService {
     
   }
 
+  private getGamifyDocId(): string {
+    const defaultProject = dataService.getDefaultProject();
+    return generateCollectionId(defaultProject._id, 'gamify', '');
+  }
+
   private async loadInitDocs(id: string) {
     await waitMS(500);
 
     try {
-      const s = await dataService.getDoc('gamify_' + id);
+      
+      const s = await dataService.getDoc(this.getGamifyDocId());
       console.log('--- gamify doc loaded: ', id, s);
       if(s) return;
       console.log('Saving gamify new doc');      
-
-      
-      const uuid = generateShortUUID();
+      await waitMS(500);
       if(id === this._userId){  //half second pased, see if state changed
         const res = await dataService.pouch.put({
-          _id: 'gamify_' + id,
+          _id: this.getGamifyDocId(),
           state: getInitGamifyState(),
-          meta_access: [ 'u|'+ id + '|' , ],
+          [env.ACCESS_META_KEY]: genrateMetaData(id),
+          userid: id,
         })
 
         console.log('Saving new UserDoc: ', res);

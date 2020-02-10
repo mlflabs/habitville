@@ -27,8 +27,6 @@ export class ProjectItem extends Doc {
   public note?: string;
 
   public meta_access?;
-  public childId?;
-
 }
 
 

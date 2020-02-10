@@ -2,28 +2,16 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, debounceTime, filter, throttleTime } from 'rxjs/operators';
-import { generateShortUUID, generateUUID, } from './utilsData';
+import { generateProjectUUID, generateProjectChildId, getProjectChildId, genrateMetaData, } from './utilsData';
 import { isEqual } from 'lodash';
 
+import colors, { underline } from 'colors';
 import ulog from 'ulog'
 import { ProjectItem, PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR } from './models';
 import { env } from '../../env';
 import { waitMS } from '../../utils';
 import { authService } from '../auth/authService';
 const log = ulog('service:data')
-
-export function generateShortCollectionId(prefix: string = ''): string {
-  return prefix + '|' + generateShortUUID();
-}
-
-export function generateCollectionId(prefix: string = ''): string {
-  return prefix + '|' + generateUUID();
-}
-
-export function generateProjectCollectionId(projectChildId: string, collectionType: string): string {
-  return projectChildId + DIV + generateShortCollectionId(collectionType);
-}
-
 
 
 
@@ -32,11 +20,11 @@ PouchDB.plugin(PouchDBFind);
 class DataService {
   private _pouch: any;
   private _pouch_syc: any;
+  private authId:string = '';
 
   public get pouch(): any {
     return this._pouch;
   }
-  private authId: string = '';
   private _ready = false;
   public pouchReady$ = new BehaviorSubject(this.ready);
 
@@ -69,9 +57,8 @@ class DataService {
       return doc;
     }
     catch (e) {
-      console.log('##############################################');
-      console.log('############################### Get Doc Error: ', id, e);
-      return null;
+      console.log(e.red);
+;      return null;
     }
   }
 
@@ -135,15 +122,8 @@ class DataService {
     return docs;
   }
 
-  async getProjectFromChildId(id) {
-    const pid = PROJECT_SERVICE + DIV + PROJECT_INDEX_SERVICE + DIV + id.split('|')[1];
-    console.log('GetPRojectFromChildID ID: ', pid);
-    const doc = await this.getDoc(pid);
-    console.log('Project:: ', doc);
-    return doc;
-  }
-
-  async getAllByProjectAndType(projectChildId, type, attachments = false) {
+  async getAllByProjectAndType(projectid, type, attachments = false) {
+    const projectChildId = getProjectChildId(projectid);
     const res = await this._pouch.allDocs({
       include_docs: true,
       attachments: attachments,
@@ -179,7 +159,7 @@ class DataService {
       doc.updated = Date.now();
 
       if (doc._id == null) {
-        doc._id = generateCollectionId(collection);
+        throw new Error("Save function can't be used to save new doc, use saveinproject")
       }
 
       res = await this._pouch.put({ ...oldDoc, ...doc });
@@ -206,23 +186,20 @@ class DataService {
   }
 
   getDefaultProject() {
-    const uuid = 'u-' + this.authId;
+    const uuid = 'u-' + authService.userid;
     return {
-      _id: PROJECT_SERVICE + '|' + PROJECT_INDEX_SERVICE + '|' + uuid,
-      childId: PROJECT_SERVICE+ '|' + uuid,
-      meta_access: [ 'u|' + this.authId + '|', ], 
+      _id: generateProjectUUID(uuid),
+      [env.ACCESS_META_KEY]: genrateMetaData(authService.userid), 
     }
   }
 
   async saveNewProject(doc, channel: string|null = null, syncRemote = true): Promise<any> {
-    const uuid = generateShortUUID();
-    doc._id = PROJECT_SERVICE + '|' + PROJECT_INDEX_SERVICE + '|' + uuid;
-    doc.childId = PROJECT_SERVICE+ '|' + uuid;
+    doc._id = generateProjectUUID(undefined, authService.userid);
 
     if(!channel)
-      doc.meta_access = [ 'u|'+ this.authId + '|' ]; 
+      doc[env.ACCESS_META_KEY] = genrateMetaData(authService.userid); 
     else
-      doc.meta_access = [channel];
+      doc[env.ACCESS_META_KEY] = [channel];
 
     try {
       const res = await this._pouch.put(doc);
@@ -232,7 +209,7 @@ class DataService {
       return res;
   }
     catch(e){
-      console.log('Error saving new project: ', e);
+      console.log('Error saving new project: '.red, e);
       return false;
     }
 
@@ -284,14 +261,15 @@ class DataService {
     }
 
     //make sure access is same as project
-    doc.meta_access = project.meta_access;
+    doc[env.ACCESS_META_KEY] = project[env.ACCESS_META_KEY];
 
     let res;
     try {
       doc.updated = Date.now();
 
       if (doc._id == null) {
-        doc._id = generateProjectCollectionId(project.childId, collection); 
+        if(!project._id) throw new Error('Project needs id, cannot save project children');
+        doc._id = generateProjectChildId(project._id, collection);
       }
 
       res = await this._pouch.put(doc);
@@ -305,7 +283,7 @@ class DataService {
       if (syncRemote)
         this.addSyncCall$.next();
 
-      log.trace('Saved doc: ', res);
+      log.trace('Saved doc: ', res.green);
 
       if (res.ok)
         return res;
@@ -313,7 +291,7 @@ class DataService {
         return false;
     }
     catch (e) {
-      console.log('Save Pouch Error: ', e);
+      log.error('Save Pouch Error: '.red, e);
       return false;
     }
   }
@@ -341,7 +319,7 @@ class DataService {
         return false;
     }
     catch (e) {
-      console.log('Remove Pouch Error:: ', e);
+      console.log('Remove Pouch Error:: '.red, e);
       return false;
     }
   }
@@ -349,10 +327,11 @@ class DataService {
   public async removeProject(project: ProjectItem, syncRemote = true) {
     try {
       //load all project children and remove them
+      //TODO, on server side, if notice project deleted, make sure all server children are also deleted
       const res = await this._pouch.allDocs({
         include_docs: true,
-        startkey: project.childId + DIV,
-        endkey: project.childId + DIV + LASTCHAR
+        startkey: getProjectChildId(project._id),
+        endkey: getProjectChildId(project._id) + LASTCHAR
       });
       const docs = res.rows.map(row => Object.assign(
         row.doc, { _deleted: true, updated: Date.now() }));
@@ -396,9 +375,12 @@ class DataService {
     );
   }
 
-  subscribeProjectCollectionChanges(projectChildId: string,
+  subscribeProjectCollectionChanges(projectid: string|undefined,
     type: string,
     debounce: number = 0): Observable<any> {
+    if(projectid === undefined) 
+      throw new Error('Project id, can not be undefined, can not subscribe to id') ;
+    const projectChildId = getProjectChildId(projectid);
     return this._changes.asObservable().pipe(
       debounceTime(debounce),
       filter((doc: any) => doc._id.startsWith(projectChildId + '|' + type + '|'))

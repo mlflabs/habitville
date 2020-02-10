@@ -37,6 +37,8 @@ export interface User {
   channels: any[];
 }
 
+
+
 export const getUser = (values: any):User => {
   if(values == null)
     return {
@@ -245,13 +247,15 @@ export class AuthService {
     return this._authStatus;
   }
 
-  public getUserId():string {
-    return this._user.id;
-  }
-
   public getToken():string {
     return this._user.token || '';
   }
+
+  public get userid(): string {
+    return this._user.id || '';
+  }
+
+
 
 }
 export const authService = new AuthService();

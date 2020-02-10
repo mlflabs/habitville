@@ -56,21 +56,21 @@ export function useDataCollectionFacade(project: ProjectItem, collection: string
   useEffect(() => {
     const getCurrentDocs = async (dispatch) => {
       if(state.docs.length > 0) return;
-      const docs = await dataService.getAllByProjectAndType(project.childId, collection);
+      const docs = await dataService.getAllByProjectAndType(project._id, collection);
       dispatch({type: 'loadAll', docs: docs});    
     }
     getCurrentDocs(dispatch);
-  }, [project.childId, collection, state])
+  }, [project._id, collection, state])
 
   useEffect(() => {
     const subscriptions: Subscription[] = [
-      dataService.subscribeProjectCollectionChanges(project.childId, collection, 0)
+      dataService.subscribeProjectCollectionChanges(project._id, collection, 0)
         .subscribe((doc) => {
             dispatch({type: 'modify', doc: doc});
         }),
     ];
     return () => { subscriptions.map(it => it.unsubscribe()) };
-  },[project.childId, collection]);
+  },[project._id, collection]);
 
 
   return [state, dao];
