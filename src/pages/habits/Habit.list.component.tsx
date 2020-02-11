@@ -33,8 +33,8 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
     if(action === 'save' && habit != null){
       dataFunc.save(habit);
     }
-    else if(action === 'remove' && habit != null && habit._id){
-      dataFunc.remove(habit._id);
+    else if(action === 'remove' && habit != null && habit.id){
+      dataFunc.remove(habit.id);
     }
   }
 
@@ -50,7 +50,7 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
                 <HabitListItemComponent
                           habit={habit} 
                           dataFunctions={dataFunc}
-                          key={habit._id} 
+                          key={habit.id} 
                           showEditModalFunction={addhabit}
                 />
           ))}

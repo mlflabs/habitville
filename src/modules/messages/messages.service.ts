@@ -1,12 +1,5 @@
 import { Subscription, BehaviorSubject, Subject } from "rxjs";
-import { getPostRequest, post } from '../ajax/ajax';
-import { env } from "../../env";
-import { AuthService, authService } from '../auth/authService';
-import { loadingService } from "../loading/loadingService";
-import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
-import { saveIntoArray, saveIntoDocList, waitMS } from '../../utils';
-import { Msg } from "./models";
 
 export interface Message {
   from: string,
@@ -33,16 +26,7 @@ export class MessageService {
   
   async init(){
     this.unsubscribe();
-
-    const dbreadysub = dataService.pouchReady$.subscribe(ready => {
-      if(!ready) return;
-      waitMS(2000);
-
-      dataService.addIndex(['messageType'], 'MessageTypeIndex');
-
-      dbreadysub.unsubscribe();
-    })
-
+    
     const sub = dataService.subscribeChanges().subscribe(doc => {
       console.log(doc);
     });

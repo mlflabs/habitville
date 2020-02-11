@@ -46,8 +46,8 @@ const TodoEditComponent = ({todo, tags, dataFunctions}:
   const remove = () => {
     hideRemoveWarrning();
     console.log('REMVE ACTION STATE::::::: ', state);
-    if(state.todo._id)
-      dataFunctions.remove(state.todo._id);
+    if(state.todo.id)
+      dataFunctions.remove(state.todo.id);
   }
 
   const printTag = (tag: string) => {
@@ -115,11 +115,11 @@ const TodoEditComponent = ({todo, tags, dataFunctions}:
             <IonItem color={backgroundColor}  class="todoCardComponets">
               <IonLabel position="floating">Title</IonLabel>
               <IonInput 
-                  name="title"
+                  name="name"
                   placeholder="What needs to be done?" 
                   onIonChange={handleChange}
                   onIonBlur={handleBlur}
-                  value={state.todo.title} />
+                  value={state.todo.name} />
             </IonItem>
             <IonItem color={backgroundColor}>
               <IonLabel position="floating">Note</IonLabel>

@@ -15,8 +15,7 @@ const detail = process.env.REACT_APP_STAGE === 'production' ? prod: dev;
 export const env = {...{
   APP_ID: 'hv',
   //myenvoy settings
-  ACCESS_META_KEY: 'meta_access',
-  POUCH_PREFIX: 'habits_',
+  ACCESS_META_KEY: 'access',
   
 
   //Auth

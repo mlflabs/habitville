@@ -18,9 +18,12 @@ export function useAppStatus(): [AppStatus] {
   console.log('APP Router Status: ', appStatus);
 
   useEffect(() => {
+    console.log('App Stats Effect::');
     const subscriptions: Subscription[] = [
-      dataService.pouchReady$.subscribe(ready => {
-        setStatusFunction();
+      dataService.getReady().subscribe(ready => {
+        console.log('DataService READY', ready, dataService.ready);
+        if(ready === appStatus.dataReady) return;
+          setStatusFunction();
       }),
       authService.username$.subscribe(async (username) => {
         console.log('USERNAME CHANGED: ', username);
@@ -33,12 +36,10 @@ export function useAppStatus(): [AppStatus] {
         setStatusFunction();
         console.log('USER:::::: ', authService.getUser(), authService.getIsAuthenticated())
         const userid = authService.getUser().id;
-        await dataService.init( userid,
-                          authService.getIsAuthenticated(), 
-                          username !== GUEST);
+        await dataService.init( userid, username !== GUEST);
         console.log("Ready to start gamify service");
         await gamifyService.init(userid);
-        await partyService.init(userid,authService.getUser().token||'');
+        await partyService.init();
       }),
 
     ];
@@ -50,6 +51,10 @@ export function useAppStatus(): [AppStatus] {
   const setStatusFunction = () => {
     const dataReady = dataService.ready;
     const username = authService.getUsername();
+    if(dataReady === appStatus.dataReady && username === appStatus.username)
+      return;
+    console.log('STATUS ----------------', dataReady, username, appStatus);
+    
     if(dataReady){
       if(username === GUEST)
         setAppStatus({ status:AppStatus.guest, username: username, dataReady: dataReady });

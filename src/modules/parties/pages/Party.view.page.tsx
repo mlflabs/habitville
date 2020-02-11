@@ -11,6 +11,7 @@ import { HabitsService } from '../../../pages/habits/habits.service';
 import HabitListComponent from '../../../pages/habits/Habit.list.component';
 import { waitMS } from '../../../utils';
 import PartyMembersListComponent from '../components/Members.list.component';
+import { first } from '../../../../node_modules/rxjs/operators';
 
 
 
@@ -25,23 +26,19 @@ const getInitState = {
 
 const loadParty = async (id:string, state, setState, history) => {
   console.log('Loading party');
-  const sub = dataService.pouchReady$.subscribe(async (ready) => {
-    console.log('DataService ready::: ', ready);
-    if(!ready) {
-      return;
-    }
-    waitMS(2000);
+  const dataSub = dataService.getReady().subscribe(async (ready) => {
+    if(!ready) return;
     console.log('==============================Load party, ', id);
     const party = await dataService.getDoc(id);
     console.log(party)
     if(!party){
-      sub.unsubscribe();
+      dataSub.unsubscribe();
       console.log('************************************* couldn load party', id);
       history.push('/parties');
       return
     }
     setState({...state, ...{party}})
-    sub.unsubscribe();
+    dataSub.unsubscribe();
   })
   
 }
@@ -75,7 +72,7 @@ const PartyViewPage = () => {
       <HeaderWithProgress title={"Party: " + state.party.name} />
       <IonContent>
         
-      {state.party._id? (
+      {state.party.id? (
         <>
           <PartyMembersListComponent  project={state.party} />
           <HabitListComponent project={state.party} />

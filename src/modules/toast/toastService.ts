@@ -1,7 +1,6 @@
 import { Subject } from 'rxjs';
 import { ajaxResponse } from '../ajax/ajax';
-import { toast, Type } from 'react-toastify';
-import { totalmem } from 'os';
+import { toast } from 'react-toastify';
 
 export interface ToastMessage {
   message: string,

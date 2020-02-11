@@ -9,7 +9,7 @@ import {
 import TodoNewComp from './todo.new.component';
 import TodoListItemComp from './Todo.listitem.component';
 import { dataService } from '../../modules/data/dataService';
-import { useTodosCollectionFacade, DataFunctions } from './hooks/todos.hook';
+import { useTodosCollectionFacade } from './hooks/todos.hook';
 import './todos.page.css';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
 import { useParams } from 'react-router-dom';
@@ -46,7 +46,7 @@ const TodosPage  = () => {
         
         <IonItem>  
           <TodoNewComp parentId ={undefined} 
-                       projectId={project._id} 
+                       projectId={project.id||''} 
                        saveFunc={dataFunc.save} />
         </IonItem>
         <div>
@@ -73,9 +73,9 @@ const TodosPage  = () => {
                                   tags={tags}
                                   lastChild = {false}
                                   selectedTodo={selectedTodo}
-                                  projectId = {project._id}
+                                  projectId = {project.id}
                                   dataFunctions={dataFunc}
-                                  key={todo._id} />
+                                  key={todo.id} />
             ))}
         </IonList>
         

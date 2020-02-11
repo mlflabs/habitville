@@ -5,10 +5,12 @@ import { clamp } from '../../utils';
 
 
 export interface GamifyRewards {
-  gold?:number,
-  experience?: number,
-  item?:any | undefined,
+  gold:number,
+  experience: number,
+  item:any
 }
+
+
 
 export const getInitGamifyRewards =  (base?:GamifyRewards):GamifyRewards =>  {
   return {...{ gold: 0, experience: 0, item:undefined }, ...base};

@@ -15,7 +15,7 @@ const PartyListItemComponent = ({partyProject, history,  showEditModalFunction}:
 
   return(
     <IonCard>
-      <IonCardHeader onClick={() => history.push('/parties/'+ encodeURI(state.party._id||''))}>
+      <IonCardHeader onClick={() => history.push('/parties/'+ encodeURI(state.party.id||''))}>
         <IonCardTitle>{state.party.name} 
               <IonBadge>{state.party.members.length}</IonBadge></IonCardTitle>
         <IonCardSubtitle>{state.party.note}</IonCardSubtitle>

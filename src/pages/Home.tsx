@@ -1,9 +1,6 @@
 import {
   IonPage,
-  IonContent,
-  IonHeader,
-  IonTitle,
-  IonToolbar} from '@ionic/react';
+  IonContent} from '@ionic/react';
 import React, {  } from 'react';
 import './Home.css';
 import HeaderWithProgress from '../components/HeaderWithProgress';

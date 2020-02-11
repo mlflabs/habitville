@@ -1,20 +1,16 @@
-export const PROJECT_SERVICE = 'p';
-export const PROJECT_INDEX_SERVICE = 'pi';
+export const PROJECT_SERVICE = '';
+export const PROJECT_INDEX_SERVICE = 'ch';
 
 export const LASTCHAR = String.fromCharCode(65535);
-export const DIV = '|';
-export const DOUBLE_DIV = '||';
-
-export const ACTION_SAVE = 'save';
-export const ACTION_REMOVE = 'remove';
-
-// user default project = u- + username
+export const DIV = '.';
+export const DOUBLE_DIV = '..';
 
 export class Doc {
-  public _id: string|undefined = undefined;
-  public _rev?: string;
-  public _deleted?: boolean;
-  public updated?: number;
+  public id: string|undefined = undefined;
+  public deleted?: boolean;
+  public created?: number = Date.now();
+  public updated?: number = Date.now();
+  public type: string = 'doc';
 
   constructor(values: Object = {}) {
       Object.assign(this, values);
@@ -23,10 +19,14 @@ export class Doc {
 }
 
 export class ProjectItem extends Doc {
-  public name?: string;
+  public name: string = '';
   public note?: string;
+  public access = [];
 
-  public meta_access?;
+  constructor(values: Object = {}) {
+    super();
+    Object.assign(this, values);
+}
 }
 
 

@@ -50,16 +50,18 @@ export class TodoService {
   public init(project: ProjectItem, tag: string) {
     //first unsubscribe
     this.unsubscribe();
-    const sub = dataService.pouchReady$.subscribe(ready => {
-      if(ready) this._init(project, tag);
+    const dataSub = dataService.getReady().subscribe(ready => {
+      if(!ready) return;
+      
+      this._init(project, tag);
+      dataSub.unsubscribe();
     });
-    this._subscription.push(sub);
   }
 
   async _init(project: ProjectItem, tag: string) {
     console.log('-------------------------------------------');
     console.log("Init: ", project, TYPE_TODO);
-    if(this._project && this._project._id === project._id && 
+    if(this._project && this._project.id === project.id && 
       this._state.selectedTag === tag) return;
 
     const showChildren = (tag === 'today' || tag === 'important')? true : false;
@@ -77,7 +79,7 @@ export class TodoService {
 
     //manage changes
 
-    const sub = dataService.subscribeProjectCollectionChanges(project._id,TYPE_TODO)
+    const sub = dataService.subscribeProjectCollectionChanges(project.id,TYPE_TODO)
       .subscribe((doc: Todo) => {
         console.log("TodoService subscription: ", doc); 
         this.reloadTodos();
@@ -86,8 +88,6 @@ export class TodoService {
       });
     this._subscription.push(sub);
 
-    //load views
-    this.loadQueryViews();
   }
 
   private async reloadBaseParent(todo:Todo){
@@ -96,8 +96,8 @@ export class TodoService {
     console.log("Base Parent::: ", baseParent);
     if(!baseParent) return this.reloadTodos();
 
-    if(baseParent._deleted){
-      this.filterAndSaveTodos(this.state.docs.filter(d => d._id !== todo._id));
+    if(baseParent.deleted){
+      this.filterAndSaveTodos(this.state.docs.filter(d => d.id !== todo.id));
     }
     else {
       this.filterAndSaveTodos(saveIntoArray(baseParent, this.state.docs));
@@ -125,21 +125,13 @@ export class TodoService {
   }
 
   private async reloadTodos() {
-    const test = await dataService.pouch.query('todo_index/by_tag',{
-      include_docs: true,
-    });
-    console.log('ALL: ', test)
+
+    
     const key = ((this.state.showSubTodos)? '':'2') +
                 ((this.state.doneTodos)? 1 : 0) + 
                 this.state.selectedTag;
     console.log('KEY: ', key);
-    const res = await dataService.pouch.query('todo_index/by_tag', {
-      include_docs: true,
-      key: key
-    });
-    console.log('=======================');
-    console.log(res);
-    const docs = res.rows.map(doc => doc.doc);
+    const docs = await dataService.queryByProperty('todoTags', 'INCLUDES', key );
     this.state = {...this._state, ...{docs: docs}};
   }
 
@@ -217,10 +209,9 @@ export class TodoService {
       }
       doc = gamifyService.calculateNewTodo(doc);
     }
-    const res = await dataService.saveInProject({...{done: false}, ...doc}, this._project, 
-                              TYPE_TODO, null, null, true, true);
-    if(parentId && doc._id) {
-      this.addSubTodoToParent(doc._id, parentId)
+    const res = await dataService.save({...{done: false}, ...doc}, {project: this._project});
+    if(parentId && doc.id) {
+      this.addSubTodoToParent(doc.id, parentId)
     }
     console.log(res);
     return res;
@@ -279,79 +270,6 @@ export class TodoService {
         sub.unsubscribe();
     });
   }
-
-  //load views/indexes
-  private async loadQueryViews() {
-    const version = 10;
-    const doc = await dataService.getDoc('_design/todo_index');
-
-    if(doc && doc.version && doc.version >= version) return; 
-
-    let rev = null;
-    if(doc)
-      rev = doc._rev;
-
-     // add view filters
-     dataService.pouch.put({
-      _id: '_design/todo_index',
-      version: version,
-      _rev: rev,
-      views: {
-        by_tag: {
-          map: function (doc) {
-            //console.log('View Function -------------------------: ', doc);
-            var i = doc._id.indexOf('|');
-            i = doc._id.indexOf('|', i+1)
-            var ii = doc._id.indexOf('|', i+1)
-            var id = doc._id.substring(i+1, ii);
-
-            if(id !== 'todo') return;
-
-            var done;
-            var child;
-            if(doc.done){
-              done = '1';
-            }
-            else {
-              done = '0';
-            }
-
-            if(doc.parent){
-              child = '1';
-            }
-            else {
-              child = '2'
-            }
-            // for 'all' tag
-            // @ts-ignore: internal pouch/couch function
-            emit(done + 'all');
-            if(child == '2'){
-              // @ts-ignore: internal pouch/couch function
-              emit(child + done + 'all');
-            }
-            //for all the other tags
-            if(doc.tags){
-              for(var x = 0; x < doc.tags.length; x++){
-                // @ts-ignore: internal pouch/couch function
-                emit(done + doc.tags[x]);
-                if(child == '2'){
-                  // @ts-ignore: internal pouch/couch function
-                  emit(child + done + doc.tags[x])
-                }
-                
-              }
-            }
-            
-          }.toString()
-        }
-      }
-    }).then((res) => {
-      console.log(res);
-    }).catch((err)=> {
-      console.log(err);
-    });
-  }
-
 
 }
 

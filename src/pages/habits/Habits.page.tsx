@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import {
   IonPage,
   IonContent,
-  IonHeader,
   IonList,
-  IonTitle,
-  IonToolbar,
   IonFabButton,
   IonFab,
   IonIcon,
@@ -18,38 +15,58 @@ import { Habit } from './models';
 import HabitListItemComponent from './Habit.listitem.component';
 import HabitAddComponent from './Habit.add.component';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
+import { habitsService } from './habits.service';
+import { DataFunctions } from '../todo/hooks/todos.hook';
 
 
 export interface habitPageState {
   showModal: boolean,
-  modalhabit: Habit
+  modalHabit: Habit|null,
+}
+
+const reducer = (state, action): habitPageState => {
+  switch(action.type) {
+    case 'showModal':
+      return {...state, ...{showModal: action.data.showModal, modalHabit: action.data.habit} }
+    case 'hideModal':
+      return state;
+    default:
+      return state;
+  }
+}
+
+export function getAction(todo:'showModal', data = {}){
+  return {type:todo, data:data};
 }
 
 
-
 const HabitsPage: React.FC = () => {
-  const [state, dataFunc] = useHabitsCollectionFacade(dataService.getDefaultProject());
-  const [modalState, setModalState] = useState({showModal: false, modalhabit: new Habit()});
-  console.log('0000000-----------------STATE::: ', state);
-  const { habits, selected } = state;
+  const [habitsState, dataFunc] = useHabitsCollectionFacade(dataService.getDefaultProject());
+  const [state, dispatch] = useReducer(reducer, {
+    showModal:false,
+    modalHabit: null,
+  })
+
+  console.log('STATE::: ', state);
+  const { habits } = habitsState;
 
   const addhabit = (habit:Habit = new Habit()) => {
     console.log('Add habit:  ', habit);
-    setModalState({showModal: true, modalhabit: habit});
+    dispatch(getAction('showModal', {showModal: true, habit}));
   }
 
   const hidehabitModal = () => {
-    setModalState({showModal: false, modalhabit: new Habit()});
+    dispatch(getAction('showModal', {showModal: false, habit: null}));
   }
 
   const habitDismissFunc = (habit: Habit|null, action:'save'|'remove'|'none') => {
     console.log('habit: ', habit)
-    setModalState({showModal: false, modalhabit: new Habit()});
+    dispatch(getAction('showModal', {showModal: false, habit: null}));
     if(action === 'save' && habit != null){
-      dataFunc.save(habit);
+      habitsService.save(habit);
     }
-    else if(action === 'remove' && habit != null && habit._id){
-      dataFunc.remove(habit._id);
+    else if(action === 'remove' && habit != null && habit.id){
+      habitsService.remove(habit.id);
     }
   }
 
@@ -64,14 +81,14 @@ const HabitsPage: React.FC = () => {
               <HabitListItemComponent
                         habit={habit} 
                         dataFunctions={dataFunc}
-                        key={habit._id} 
+                        key={habit.id} 
                         showEditModalFunction={addhabit}
               />
         ))}
       </IonList>
-      {modalState.showModal? (
-        <IonModal isOpen={modalState.showModal} onDidDismiss={() => hidehabitModal()}>
-        <HabitAddComponent habit={modalState.modalhabit} 
+      {state.showModal? (
+        <IonModal isOpen={state.showModal} onDidDismiss={() => hidehabitModal()}>
+        <HabitAddComponent habit={state.modalHabit||new Habit()} 
                             dismissFunc = {habitDismissFunc}  />
         </IonModal>
       ) : (

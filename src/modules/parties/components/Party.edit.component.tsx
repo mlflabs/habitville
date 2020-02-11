@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PartyProject } from '../models';
-import { IonHeader, IonToolbar, IonPage, IonTitle, IonContent, IonItem, IonInput, IonLabel, IonTextarea, IonFooter, IonButton } from '@ionic/react';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, 
+  IonInput, IonLabel, IonTextarea, IonFooter, IonButton } from '@ionic/react';
 
 
 

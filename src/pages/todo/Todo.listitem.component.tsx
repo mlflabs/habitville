@@ -46,7 +46,7 @@ const loadSubtodos = async (data:{todo:Todo, dispatch, dataFunctions: DataFuncti
 
 //Component Start
 const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  dataFunctions}:
-  {todo:Todo, tags:string[], projectId: string, lastChild: boolean,  selectedTodo: Todo|null,  dataFunctions: DataFunctions}) => {
+  {todo:Todo, tags:string[], projectId: string|undefined, lastChild: boolean,  selectedTodo: Todo|null,  dataFunctions: DataFunctions}) => {
   
 
   const [state, dispatch] = useReducer(reducer, 
@@ -54,11 +54,11 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
   
   const [showSubAddSubtask, setShowSubAddSubtask] = useState(false)
 
-  console.log('STATE TODONAME: ', state.todo.title);
+  console.log('STATE TODONAME: ', state.todo.name);
   console.log(state);
 
   useEffect(() => {
-    console.log("UseEffect TODOS-------- "+ todo.title, todo);
+    console.log("UseEffect TODOS-------- "+ todo.name, todo);
     //load our subtodos
     dispatch(getAction('fullupdate', {todo: todo, dispatch, dataFunctions}));
   }, [todo])
@@ -88,7 +88,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
   }
 
   const handleSelectTodo = (todo:Todo) => {
-    if(selectedTodo && todo._id === selectedTodo._id){
+    if(selectedTodo && todo.id === selectedTodo.id){
       dataFunctions.select(null);
     }
     else {
@@ -98,7 +98,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
 
   if(state.todo.subTodos && state.todo.subTodos.length > 0){
     console.log('*****************************************')
-    console.log(state.todo.title, state.todo.subTodos);
+    console.log(state.todo.name, state.todo.subTodos);
 
   }
 
@@ -126,7 +126,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
   const amILast = (list: Todo[], me: Todo): boolean => {
     if(list.length === 0) return true;
 
-    if(list[list.length-1]._id === me._id) return true;
+    if(list[list.length-1].id === me.id) return true;
 
     return false;
   }
@@ -151,7 +151,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
           </div>
           
           {(showSubAddSubtask)? (
-            <TodoNewComp  parentId={state.todo._id} 
+            <TodoNewComp  parentId={state.todo.id} 
               projectId={projectId} 
               saveFunc={dataFunctions.save} />
           ) : (<></>)}
@@ -168,7 +168,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
                   projectId={projectId}
                   dataFunctions={dataFunctions}
                   lastChild={amILast(state.subTodos, todo)}
-                  key={todo._id + "sub"} />
+                  key={todo.id + "sub"} />
           ))}
         </IonCol>
       </IonRow>
@@ -192,7 +192,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
               </IonCol>
               <IonCol class="todoTitleColumn" onClick={() => handleSelectTodo(todo)}  >
                         <IonLabel  class="todoTitle" >
-                          {state.todo.title}
+                          {state.todo.name}
                           {(state.todo.subTodos && state.subTodos.length> 0)? (
                             <IonBadge class="todoBadgeSubtodos" color="secondary">
                                 {state.subTodos.length}
@@ -233,7 +233,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
               </IonCol>
               
             </IonRow>
-            {(selectedTodo && selectedTodo._id === state.todo._id)? (
+            {(selectedTodo && selectedTodo.id === state.todo.id)? (
               <IonRow>
                 <IonCol>
                   <TodoEditInlineComponent 

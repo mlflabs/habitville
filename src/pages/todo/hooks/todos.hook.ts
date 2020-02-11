@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { Doc, ProjectItem } from '../../../modules/data/models';
+import { ProjectItem } from '../../../modules/data/models';
 import { Todo } from '../models';
 import { TodoService, TodoState, getInitTodoState } from '../todo.service';
-import { toastService } from '../../../modules/toast/toastService';
 
 
 export interface DataFunctions {
@@ -42,7 +41,7 @@ export function useTodosCollectionFacade(project: ProjectItem, tag: string):
     todoService.current.init(project, tag)
 
     return todoService.current.unsubscribe;
-  }, [project._id])
+  }, [project.id])
 
   useEffect(() => {
     const subscriptions: Subscription[] = [
@@ -52,7 +51,7 @@ export function useTodosCollectionFacade(project: ProjectItem, tag: string):
       })
     ];
     return () => { subscriptions.map(it => it.unsubscribe()) };
-  },[project._id]);
+  },[project.id]);
 
 
   return [state, dataFunctions];

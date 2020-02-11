@@ -74,7 +74,7 @@ const PartiesPage = () => {
     if(action === 'save' && party != null){
       partyService.save(party)
     }
-    else if(action === 'remove' && party != null && party._id){
+    else if(action === 'remove' && party != null && party.id){
       //dataFunc.remove(habit._id);
     }
   }
@@ -120,7 +120,7 @@ const PartiesPage = () => {
         {state.partyList.map(party => (
           <PartyListItemComponent partyProject={party} 
                                   history={history}
-                                  key={party._id}
+                                  key={party.id}
                                   showEditModalFunction={editParty} />
         ))}  
       </IonList>

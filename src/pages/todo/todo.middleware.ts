@@ -1,7 +1,4 @@
 
-import { dataService } from '../../modules/data/dataService';
-import { extractTypeCollectionFromDocId } from '../../modules/data/utilsData';
-import { TYPE_TODO } from '../todo/models';
 import { Todo } from './models';
 
 //TODO: start generating stats
@@ -20,7 +17,7 @@ class TodoMiddleware {
   async checkSubTodoState(todo:Todo) {
     
     // deleted
-    if(todo._deleted) {
+    if(todo.deleted) {
       
     }
     // has changes to parent

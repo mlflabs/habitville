@@ -3,7 +3,7 @@ import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabB
 import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS } from '../../colors';
 import { radioButtonOff, checkmarkCircleOutline, cog } from '../../../node_modules/ionicons/icons';
 import moment from 'moment';
-import { Habit, habitIntervals, MOMENT_DATE_FORMAT, HabitProgress } from './models';
+import { Habit, MOMENT_DATE_FORMAT, HabitProgress } from './models';
 import { habitDataFunctions } from './hooks/habits.hook';
 import './Habit.listitem.component.css';
 import { saveIntoArray, getIndexById } from '../../modules/data/utilsData';

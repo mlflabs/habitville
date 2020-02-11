@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { PartyProject } from '../models';
-import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonFab, IonFabButton, IonIcon, IonAlert, IonFooter, IonButton } from '@ionic/react';
-import { add } from 'ionicons/icons';
-import { alertController } from '../../../../node_modules/@ionic/core';
+import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton } from '@ionic/react';
 import { partyService } from '../party.service';
 
 

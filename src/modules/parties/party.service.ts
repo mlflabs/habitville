@@ -2,12 +2,12 @@ import { Subscription, BehaviorSubject } from "rxjs";
 import { PartyProject } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
-import { AuthService, authService } from '../auth/authService';
+import { authService } from '../auth/authService';
 import { loadingService } from "../loading/loadingService";
 import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
 import { waitMS } from '../data/utilsData';
-import { saveIntoArray, saveIntoDocList } from '../../utils';
+import { saveIntoDocList } from '../../utils';
 import { Msg } from "../messages/models";
 
 export interface PartyState {
@@ -26,17 +26,10 @@ export class PartyService {
   private _state: PartyState = initPartyState;
   public state$ = new BehaviorSubject(this._state);
   
-  async init(userId:string, token: string){
+  async init(){
     this.unsubscribe();
 
 
-    const sub1 = dataService.subscribeChanges().subscribe(doc => {
-      console.log(doc);
-      if(doc.type === 'party'){
-        const docs = saveIntoDocList(doc, this._state.docs);
-        this.state = {...this._state, ...{docs}};
-      }
-    });
 
     const docs = await  dataService.findDocsByProperty('party', 'type');
     this.state = {...this._state , ...{docs}};
@@ -55,7 +48,7 @@ export class PartyService {
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/sendAddMemberRequest',
                       { token: authService.getToken(), 
-                        projectid: party._id,
+                        projectid: party.id,
                         channel: party.channel,
                         id: id,
                         rights: '0121' //see all, edit own items 
@@ -81,7 +74,7 @@ export class PartyService {
   }
 
   public save(partyProject: PartyProject){
-    if (!partyProject._id) {
+    if (!partyProject.id) {
       this._createParty(partyProject);
     }
   }
@@ -141,7 +134,7 @@ export class PartyService {
     //lets send a request
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/acceptChannelInvitation',
-                      { token: authService.getToken(), msgId: msg._id,}, {} ), 
+                      { token: authService.getToken(), msgId: msg.id,}, {} ), 
                       true, 'Accept Request sent, waiting for reply.');
       console.log(res);
 

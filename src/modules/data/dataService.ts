@@ -1,46 +1,27 @@
-import PouchDB from 'pouchdb';
-import PouchDBFind from 'pouchdb-find';
+import { nSQL } from "@nano-sql/core";
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, debounceTime, filter, throttleTime } from 'rxjs/operators';
-import { generateProjectUUID, generateProjectChildId, getProjectChildId, genrateMetaData, } from './utilsData';
-import { isEqual } from 'lodash';
+import { generateProjectUUID, getProjectChildId, genrateMetaData, generateCollectionId } from './utilsData';
 
-import colors, { underline } from 'colors';
-import ulog from 'ulog'
-import { ProjectItem, PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR } from './models';
+import colors, {  } from 'colors';
+import { ProjectItem, PROJECT_SERVICE, PROJECT_INDEX_SERVICE, DIV } from './models';
 import { env } from '../../env';
 import { waitMS } from '../../utils';
 import { authService } from '../auth/authService';
-const log = ulog('service:data')
 
-
-
-PouchDB.plugin(PouchDBFind);
 
 class DataService {
-  private _pouch: any;
-  private _pouch_syc: any;
+  private _dbName = '';
+  private docTabel = 'docs';
   private authId:string = '';
-
-  public get pouch(): any {
-    return this._pouch;
-  }
   private _ready = false;
-  public pouchReady$ = new BehaviorSubject(this.ready);
-
+  public _ready$ = new BehaviorSubject(this._ready);
   public addSyncCall$ = new Subject(); // do we need to sync with server
   private _changes = new Subject();
 
 
-  private _localPouchOptions = {
-    revs_limit: 5,
-    auto_compaction: true
-  };
-
 
   constructor() {
-    
-
     //subscriptions
     this.addSyncCall$.pipe(
       throttleTime(5000),
@@ -49,38 +30,32 @@ class DataService {
       })
   }
 
-  // access
 
-  async getDoc(id: string, attachments = false, opts = {}): Promise<any> {
-    try {
-      const doc = await this._pouch.get(id, { ...{ attachments: attachments }, ...opts });
-      return doc;
+  // access
+  async getDoc(id: string): Promise<any> {
+    try{
+      if(!this.checkDbIsSynced())return null;
+      console.log(id, this.checkDbIsSynced(), this.docTabel);
+      const res =   await nSQL(this.docTabel).query('select').where(['id', '===', id]).exec();
+      if(res[0])return res[0]
+      return null;
     }
-    catch (e) {
-      console.log(e.red);
-;      return null;
+    catch(e) {
+      console.log(e);
+      return null;
     }
+    
   }
 
-  async getDocList(ids: string[], attachments = false, opts = {}): Promise<any> {
+
+  async getDocList(ids: string[]): Promise<any> {
     try {
-      const options = {
-        docs: ids.map(value => {return {id: value}}),
-        attachments
+      let docs:any[] = [];
+      for(let i = 0; i < ids.length; i++) {
+        const res = await nSQL(this.docTabel).query('select').where(['id', '===', ids[i]]).exec();
+        docs.push(res);
       }
-      console.log('GetDocList:: ', options)
-      const result = await this._pouch.bulkGet({ ...options, ...opts });
-      return result.results.map((res: any) => {
-          if(res.docs.length ===  0) return false;
-          if(res.docs[0].error) {
-            console.log(res.docs[0].error);
-            return false
-          }
-          if(res.docs[0].ok){
-            return res.docs[0].ok;
-          }
-          return false;
-        }).filter((doc:any) => doc);
+      return docs;
     }
     catch (e) {
       console.log('Get Doc Error: ', ids, e);
@@ -88,113 +63,90 @@ class DataService {
     }
   }
 
-
-  async getImage(id, name) {
-    const img = this._pouch.getAttachment(id, name);
-    return img;
+  async queryByProperty(field:string, operator:string, value: any): Promise<any> {
+    const res = await nSQL(this.docTabel).query('select').where([field, operator, value]).exec();
+    console.log(res);
+    return res;
   }
 
-  async findDocsByProperty(value, prop: string): Promise<any> {
-    try {
-
-      const query = { [prop]: { $eq: value } };
-      console.log('Query: ', query);
-
-
-      const docs = await this._pouch.find({
-        selector: {
-          [prop]: { $eq: value }
-        }
-      });
-
-      return docs.docs;
-    }
-    catch (e) {
-      console.log('Error finding docs by property: ', e, value, prop);
-      return [];
-    }
+  async findDocsByProperty(value: any, prop: string): Promise<any> {
+    console.log(value, prop);
   }
-
 
   async getAllDocs() {
-    const res = await this._pouch.allDocs({ include_docs: true });
-    const docs = res.rows.map(row => row.doc);
-    return docs;
+    const res =   await nSQL(this.docTabel).query('select').exec();
+    console.log(res);
+    return res;
   }
 
-  async getAllByProjectAndType(projectid, type, attachments = false) {
-    const projectChildId = getProjectChildId(projectid);
-    const res = await this._pouch.allDocs({
-      include_docs: true,
-      attachments: attachments,
-      startkey: projectChildId + DIV + type + DIV,
-      endkey: projectChildId + DIV + type + DIV + 'z'
-    });
-    const docs = res.rows.map(row => row.doc);
-    return docs;
+
+
+  async getAllByProjectAndType(projectid, type):Promise<any> {
+
+    console.log(projectid, type)
+    const like = getProjectChildId(projectid)+DIV+type+DIV+'%'
+    console.log(like);
+    const res = await nSQL(this.docTabel).query('select').where(['id', 'LIKE', like]).exec();
+    console.log(res);
+    return res;
   }
 
 
   // modify
 
-  async save(doc, collection: string = '', old = null, attachment: any = null, syncRemote = true): Promise<any> {
+  async save(doc:any, props:{project?: ProjectItem, 
+    collection?: string, remoteSync?:boolean} = {}): Promise<any> {
     // if its a design doc, or query, skip it
-    if (doc._id != null && doc._id.startsWith('_')) {
-      return false;
-    }
-    let oldDoc = {};
-
-    if (doc._id && old == null) {
-      oldDoc = await this._pouch.get(doc._id);
-    }
-
-    console.log('Checking if no changes made: ', oldDoc);
-    if (isEqual(oldDoc, doc)) {
-      console.log('No changes, skip saving');
-      return false; // we have no need to save, maybe here we need something else, like a message
-    }
-
-    let res;
     try {
-      doc.updated = Date.now();
-
-      if (doc._id == null) {
-        throw new Error("Save function can't be used to save new doc, use saveinproject")
+      if(props === undefined)props = {};
+      if( props.remoteSync === undefined) props.remoteSync = true;
+      
+      if(!doc.id) {
+        if(!props.project)props.project = this.getDefaultProject();
+        if(!props.collection) throw new Error('Saving new Doc requires collection');
+        // @ts-ignore:  we made this check at the begining
+        doc.id = generateCollectionId(props.project.id, props.collection);
+        doc.created = Date.now();
+        doc.updated = Date.now();
       }
+      if(!doc.updated) throw new Error('Doc should have updated field');
+      doc.updated++;
+      
 
-      res = await this._pouch.put({ ...oldDoc, ...doc });
+      const res = await nSQL(this.docTabel).query('upsert', doc).exec();
+      console.log(res);
 
-      //see if we have an attachment
-      if (attachment) {
-        //TODO:: use attachment.size to restrict big files
-        res = await this._pouch.putAttachment(doc._id, 'file', res.rev, attachment, attachment.type);
-      }
-
-      if (syncRemote)
+      if (props.remoteSync)
         this.addSyncCall$.next();
 
-      console.log('Saved doc: ', res);
-      if (res.ok)
-        return res;
-      else
-        return false;
+      if(res[0])return res[0]
+      return null;
+  
     }
-    catch (e) {
-      console.log('Save Pouch Error: ', e);
-      return false;
+    catch(e) {
+      console.log(e);
+      return null;
     }
   }
 
-  getDefaultProject() {
-    const uuid = 'u-' + authService.userid;
+  getDefaultProject(): ProjectItem {
+    const uuid = 'u.' + authService.userid;
     return {
-      _id: generateProjectUUID(uuid),
+      id: generateProjectUUID(uuid),
+      name: 'default',
+      access:[],
+      type: 'pi',
+      updated: 0, //Date.now(),
       [env.ACCESS_META_KEY]: genrateMetaData(authService.userid), 
     }
   }
 
-  async saveNewProject(doc, channel: string|null = null, syncRemote = true): Promise<any> {
-    doc._id = generateProjectUUID(undefined, authService.userid);
+
+  async saveNewProject(project:ProjectItem, channel: string): Promise<any> {
+    //make new channels, we need internet let server make it
+
+    return false;
+    /*doc._id = generateProjectUUID(undefined, authService.userid);
 
     if(!channel)
       doc[env.ACCESS_META_KEY] = genrateMetaData(authService.userid); 
@@ -207,124 +159,36 @@ class DataService {
       if(syncRemote) this.addSyncCall$.next();
 
       return res;
-  }
+    
+    }
     catch(e){
       console.log('Error saving new project: '.red, e);
       return false;
     }
 
+    */
   }
 
 
-  public async saveInProject(doc,
-    project: ProjectItem = new ProjectItem(),
-    collection: string = '',
-    oldDoc = null,
-    attachment: any = null,
-    syncRemote = true,
-    forceSave = false): Promise<any> {
-    console.log('Save in project::: ', doc, project, syncRemote);
-    // if its a design doc, or query, skip it
-    if (doc._id != null && doc._id.startsWith('_')) {
-      return false;
-    }
 
-    log.trace('Saving Doc: ', doc, project, collection, oldDoc);
+  public async remove(id: string, remoteSync:boolean = true) {
 
-    // see if we need to compare changes and only save if there are any
-    // lets see if there are actual changes
-    // Here we can also load an old doc, see if it exists
-    if (!oldDoc && doc._id) {
-      try {
-        //see if we have old doc.
-        oldDoc = await this._pouch.get(doc._id);
-      }
-      catch (e) {
-
-      }
-    }
-
-    if (oldDoc != null) {
-      if (isEqual(oldDoc, doc)) {
-        return false; // we have no need to save, maybe here we need something else, like a message
-      }
-
-      if(forceSave){
-        if(oldDoc != null)
-        {
-          // @ts-ignore: null check
-          doc._rev = oldDoc._rev;
-
-        }
-          
-      }
-    }
-
-    //make sure access is same as project
-    doc[env.ACCESS_META_KEY] = project[env.ACCESS_META_KEY];
-
-    let res;
+    return false;
     try {
-      doc.updated = Date.now();
-
-      if (doc._id == null) {
-        if(!project._id) throw new Error('Project needs id, cannot save project children');
-        doc._id = generateProjectChildId(project._id, collection);
-      }
-
-      res = await this._pouch.put(doc);
-
-      //see if we have an attachment
-      if (attachment) {
-        //TODO:: use attachment.size to restrict big files
-        res = await this._pouch.putAttachment(doc._id, 'file', res.rev, attachment, attachment.type);
-      }
-
-      if (syncRemote)
-        this.addSyncCall$.next();
-
-      log.trace('Saved doc: ', res.green);
-
-      if (res.ok)
-        return res;
-      else
-        return false;
+      const res =   await nSQL(this.docTabel).query('delete')
+        .where(['id','==', id]).exec();
+      console.log(res);
+      return res;
     }
-    catch (e) {
-      log.error('Save Pouch Error: '.red, e);
-      return false;
+    catch(e) {
+      console.log(e);
+      return null;
     }
   }
 
+  public async removeProject() {
 
-  public async remove(id, syncRemote = true) {
-    try {
-      if (typeof id !== 'string') {
-        if (id) {
-          if (id._id)
-            id = id._id;
-        }
-      }
-      const doc = await this._pouch.get(id);
-      doc._deleted = true;
-      doc.updated = Date.now();
-      const res = await this._pouch.put(doc);
-
-      if (syncRemote)
-        this.addSyncCall$.next();
-
-      if (res.ok)
-        return res;
-      else
-        return false;
-    }
-    catch (e) {
-      console.log('Remove Pouch Error:: '.red, e);
-      return false;
-    }
-  }
-
-  public async removeProject(project: ProjectItem, syncRemote = true) {
+    /*
     try {
       //load all project children and remove them
       //TODO, on server side, if notice project deleted, make sure all server children are also deleted
@@ -347,6 +211,7 @@ class DataService {
     catch (e) {
       console.log('Remove Project Error: ', e);
     }
+    */ return false;
   }
 
 
@@ -364,14 +229,14 @@ class DataService {
   subscribeDocChanges(id: string, debounce: number = 0): Observable<any> {
     return this._changes.asObservable().pipe(
       debounceTime(debounce),
-      filter((doc: any) => doc._id === id)
+      filter((doc: any) => doc.id === id)
     );
   }
 
   subscribeProjectsChanges(debounce: number = 0): Observable<any> {
     return this._changes.asObservable().pipe(
       debounceTime(debounce),
-      filter((doc: any) => doc._id.startsWith(PROJECT_SERVICE + '|' + PROJECT_INDEX_SERVICE + '|'))
+      filter((doc: any) => doc.id.startsWith(PROJECT_SERVICE + '|' + PROJECT_INDEX_SERVICE + '|'))
     );
   }
 
@@ -383,7 +248,7 @@ class DataService {
     const projectChildId = getProjectChildId(projectid);
     return this._changes.asObservable().pipe(
       debounceTime(debounce),
-      filter((doc: any) => doc._id.startsWith(projectChildId + '|' + type + '|'))
+      filter((doc: any) => doc.id.startsWith(projectChildId + '|' + type + '|'))
     );
   }
 
@@ -395,141 +260,103 @@ class DataService {
   }
   public set ready(value: boolean) {
     this._ready = value;
-    this.pouchReady$.next(value);
+    if(value) // only send if true, this way we can have one time listeners
+      this._ready$.next(value);
+  }
+
+  private checkDbIsSynced():boolean {
+    return this._dbName === nSQL().selectedDB;
   }
 
 
+  public async init(authid: string , syncRemote = true) {
+    console.log('Init DB')
 
-  public async init(authid: string , syncRemote = false, mergeOldData = false) {
-    console.log('InitPouch')
-    //see if we already are loading this
     if(authid === this.authId) return;
     this.authId = authid;
     //TODO: check if we need to destory the previous pouch
     try {
-      await this.initPouch(env.APP_ID + authid, syncRemote, mergeOldData);
+      //await waitMS(500);
+      await this._initDb('db_' + authid)
+
       if (syncRemote)
         this.addSyncCall$.next();
       
+      await waitMS(500); //just make sure db did its stuff
+      console.log('Finished db init: ', authid, this.authId);
+      if(authid !== this.authId)return;
+
+      this.ready = true;
       return true;
     }
     catch(e) {
-      console.log(e);
+      console.log(colors.red(e));
       return false;
     }
   }
 
-  public async clearPouchData() {
-    //TODO: clear old data
-  }
-
-  public addIndex (fields:string[], indexName:string = '') {
-    if(indexName === ''){
-      this._pouch.createIndex({
-        index: {fields: fields}
-      }); 
-    }
-    else {
-      this._pouch.createIndex({
-        index: {
-            fields: fields,
-            ddoc: indexName}
-      }); 
-    }
-        
+  public getReady() {
+    return this._ready$;
   }
 
 
+// still need listen to changes, and add some indexs for different types
  
-
-  private async initPouch(pouchName: string, syncRemote: boolean = false, mergeOldData: boolean = false) {
-    this.ready = false;
-    log.info('initDB name: ', pouchName);
-
-    let oldDocs;
-    if (mergeOldData && this._pouch) {
-      oldDocs = await this.getAllDocs();
+  private async _initDb(dbName: string) {
+    console.log(colors.blue('Init _DB: '), dbName);
+    if(this._dbName === dbName) return;
+    try {
+      //unsubscribe from listeners of old db
+      nSQL(this.docTabel).off('change', (res) => {
+        console.log(res);
+      })
     }
+    catch(e){
 
-    this._pouch = await new PouchDB(pouchName, this._localPouchOptions);
-
-    // this index can be used by everyone
-    this.addIndex(['type'], 'typeIndex');
-
-    this._pouch.info().then(async info => {
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Pouch info: ', info);
-    
-      // create our event subject
-      this._pouch.changes({ live: true, since: 'now', include_docs: true })
-      .on('change', change => {
-        log.info('Pouch on change ', change);
-        this._changes.next(change.doc);
+    }
+    try {
+      this._dbName = dbName;
+      await nSQL().createDatabase({
+        id: dbName,
+        mode: "PERM", 
+        tables: [ // tables can be created as part of createDatabase or created later with create table queries
+            {
+                name: this.docTabel,
+                model: {
+                    "id:string": {pk: true},
+                    "type:string": {},
+                    "access:string": {},
+                    "todoTags:string[]": {}, //todos table only
+                    "*:any": {}
+                },
+                indexes: {
+                  'type:string': {},
+                  'date:int': {},
+                  'todoTags:string[]': {}
+                }
+            }
+        ],
+        version: 1,
+      })
+      nSQL().useDatabase(dbName);
+      nSQL(this.docTabel).on("change", (e) => {
+        console.log(colors.blue("Change"), e)
+        if(e.oldRow) console.log(e.oldRow);
+        this._changes.next(e.result);
       });
 
-      if (mergeOldData && oldDocs) {
-        oldDocs.forEach(d => {
-          this.save(d);
-        });
-      }
-      
-      await waitMS(1000);
-      this.ready = true;
 
-      if (syncRemote) {
-        this.addSyncCall$.next();
-      }
-      return true;
-    });
-
-    window['PouchDB'] = this._pouch;
-
-    
-
-  }
-
-
-
-  private async _syncRemote() {
-    console.log('REMOTE SYNC: ', env.COUCH_SERVER);
-
-    if(this._pouch_syc)
-      this._pouch_syc.cancel();
-    
-    const token = authService.getToken() || '';
-    console.log(token);
-    const all = await this.getAllDocs();
-    console.log('ALL DOCS::: ', all);
-    console.log("Getting ready....... ", this._pouch, token);
-    const remoteDB = new PouchDB(env.COUCH_SERVER,
-      { headers: { 'x-access-token': token } });
-
-    const opts = {
-      live: false,
-      retry: false
-    };
-
-    try{
-      this._pouch_syc = this._pouch.sync(remoteDB, opts)
-      .on('change', function (change) {
-        console.log('========= Remote Sync: ', change);
-      }).on('error', function (err) {
-        console.log('========= Remote Error: ', err);
-        // yo, we got an error! (maybe the user went offline?)
-      }).on('======== Complete', function () {
-        console.log('Remote Sync Completed ');
-      }).on('========= Paused', function (info) {
-        console.log('Remote Sync PAUSED: ');
-        // replication was paused, usually because of a lost connection
-      }).on('active', function () {
-        console.log('========== Remote Sync ACTIVE: ');
-      });
+      return;
     }
     catch(e) {
-      console.log(e)
+      console.log(e);
     }
     
   }
 
+  private async _syncRemote() {
+
+  }
 
 }
 

@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { Doc, ProjectItem } from '../../../modules/data/models';
+import { ProjectItem } from '../../../modules/data/models';
 import { Habit, habitStage } from '../models';
-import { habitsState, getInitHabitsState,  HabitsService, habitsService } from '../habits.service';
-
+import { habitsState, getInitHabitsState,  HabitsService } from '../habits.service';
+import _ from 'lodash';
 
 export interface habitDataFunctions {
   save: {(doc: Habit)},
@@ -31,10 +31,12 @@ export function useHabitsCollectionFacade(project: ProjectItem):
 
   useEffect(() => {
     console.log('habitS HOOK - UseEffect NEW SERVICE------------------------------');
+    if(_.isEqual(habitsService.current.getProject(), project)) 
+        return;
     habitsService.current.init(project)
 
     return habitsService.current.unsubscribe;
-  }, [project._id])
+  }, [project])
 
   useEffect(() => {
     const subscriptions: Subscription[] = [
@@ -44,7 +46,7 @@ export function useHabitsCollectionFacade(project: ProjectItem):
       })
     ];
     return () => { subscriptions.map(it => it.unsubscribe()) };
-  },[project._id]);
+  },[project]);
 
 
   return [state, dataFunctions];

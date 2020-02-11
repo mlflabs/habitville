@@ -1,5 +1,4 @@
-import React, {  } from 'react';
-
+import React from 'react';
 import {
   IonIcon,
   IonHeader,
@@ -55,13 +54,6 @@ const LoginPage  = () => {
         history,
         location);
   }
-
-  
-  const navigate = (url:string) => {
-    history.push(url);
-  }
-
-
 
 
 

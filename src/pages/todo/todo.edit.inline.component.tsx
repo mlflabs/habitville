@@ -10,16 +10,16 @@ const getDefaultState = (todo:Todo) =>  {
   return {
   todo: todo,
   showDeleteWarrning: false,
-  text: mergeText(todo.title, todo.note)
+  text: mergeText(todo.name, todo.note)
 }}
 
-const mergeText = (title: string|undefined, note: string|undefined): string => {
-  if(!title) title= '';
+const mergeText = (name: string|undefined, note: string|undefined): string => {
+  if(!name) name= '';
   if(!note) 
     note = '';
   else
     note = '\n'+note;
-  return title + note;
+  return name + note;
 }
 
 
@@ -40,14 +40,14 @@ const TodoEditInlineComponent = ({todo, tags, dataFunctions}:
     var match = /\r|\n/.exec(text);
     console.log('Title Chagne: ', text, match)
     if(match){
-      const title = text.substring(0, match.index);
+      const name = text.substring(0, match.index);
       const note = text.substring(match.index+1);
-      const newDoc = {...state.todo, ...{title: title, note: note}}
+      const newDoc = {...state.todo, ...{name: name, note: note}}
       const newState = {...state, ...{todo: newDoc, text: text}};
       setState(newState);
     }
     else {
-      const newDoc = {...state.todo, ...{title: text, note: ''}}
+      const newDoc = {...state.todo, ...{name: text, note: ''}}
       const newState = {...state, ...{todo: newDoc, text: text}};
       setState(newState);
     }
@@ -70,8 +70,8 @@ const TodoEditInlineComponent = ({todo, tags, dataFunctions}:
   const remove = () => {
     hideRemoveWarrning();
     console.log('REMVE ACTION STATE::::::: ', state);
-    if(state.todo._id)
-      dataFunctions.remove(state.todo._id);
+    if(state.todo.id)
+      dataFunctions.remove(state.todo.id);
   }
 
   const printTag = (tag: string) => {

@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useReducer } from 'react';
-import { PartyProject } from '../models';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonBadge, IonList, IonLabel, IonItem, IonAvatar, IonNote, IonButton } from '@ionic/react';
-import { useHistory } from '../../../../node_modules/@types/react-router';
+import React, { useEffect, useReducer } from 'react';
+import { IonList, IonLabel, IonItem, IonAvatar, IonButton } from '@ionic/react';
 import { Msg } from '../../messages/models';
 import { dataService } from '../../data/dataService';
 import { waitMS } from '../../data/utilsData';
@@ -89,7 +87,7 @@ const PartyInvitesListComponent = () => {
   return(
     <IonList>
       {state.msgs.map(msg => (
-        <IonItem key={msg._id}> 
+        <IonItem key={msg.id}> 
           <IonItem>
             <IonAvatar slot="start">
               <img  />

@@ -27,7 +27,7 @@ export function printCleanNote(text: string) {
   return t;
 }
 
-export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string = '_id'): Array<any> {
+export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string = 'id'): Array<any> {
   let i = getIndexById(item[idKey], ary, idKey);
   if (i === -1) {
     i = ary.length;
@@ -37,8 +37,8 @@ export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string 
           ...ary.slice(i + 1)];
 }
 
-export function saveIntoDocList(item: Object, ary: Array<any> = [], idKey: string = '_id'): Array<any> {
-  if(item['_deleted']){
+export function saveIntoDocList(item: Object, ary: Array<any> = [], idKey: string = 'id'): Array<any> {
+  if(item['deleted']){
     return ary.filter(d => d[idKey] !== item[idKey])
   }
   let i = getIndexById(item[idKey], ary, idKey);
@@ -50,7 +50,7 @@ export function saveIntoDocList(item: Object, ary: Array<any> = [], idKey: strin
           ...ary.slice(i + 1)];
 }
 
-export function getIndexById(id: string, ary: any, idKey: string = '_id'): number {
+export function getIndexById(id: string, ary: any, idKey: string = 'id'): number {
   for (let i = 0; i < ary.length; i++) {
     if (id === ary[i][idKey]) {
       return i;
@@ -59,7 +59,7 @@ export function getIndexById(id: string, ary: any, idKey: string = '_id'): numbe
   return -1;
 }
 
-export function findById(id:any, ary: any[], idKey: string = "_id"): any {
+export function findById(id:any, ary: any[], idKey: string = "id"): any {
 for (let i = 0; i < ary.length; i++) {
     if (id === ary[i][idKey]) {
       return ary[i];
@@ -68,7 +68,7 @@ for (let i = 0; i < ary.length; i++) {
   return null;
 }
 
-export function removeFromArrayById(id: any, ary:Array<any>, idKey = '_id') {
+export function removeFromArrayById(id: any, ary:Array<any>, idKey = 'id') {
   return ary.filter(o => o[idKey] !== id);
 }
 
