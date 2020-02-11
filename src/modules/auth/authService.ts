@@ -1,5 +1,5 @@
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import * as moment from 'moment';
 import { isEqual } from 'lodash';
 import anylogger from 'anylogger';
@@ -64,13 +64,13 @@ export const isGuest = (user:User) => {
   return user.username === GUEST;
 }
 
-export function getGuestUser():User {
-  return getUser({ username: 'Guest' });
+export function getGuestUser(username:string = 'Guest'):User {
+  return getUser({ username });
 }
 
 
 export class AuthService {
-  private _user:User = getGuestUser();
+  private _user:User = getGuestUser('null');
   //private _authReady = false;
   //public authReady$ = new BehaviorSubject(this._authReady);
   //private _isAuthenticated = false;
@@ -80,7 +80,7 @@ export class AuthService {
   
   public authStatus$ = new BehaviorSubject(this._authStatus);
   
-  public username$ = new BehaviorSubject(this._user.username);
+  public username$ = new Subject<string>();
 
   constructor() {
     this.loadAuth();
@@ -94,7 +94,7 @@ export class AuthService {
 
   async updateUser(user: User, forceLogout = false) {
     // log.info('Userupdate: ', user, forceLogout, this._authStatus);
-    if(!isGuest(user)) {
+    if(!isGuest(user) || this._user.username ==='null') {
 
       if(this._authStatus !== AuthStatus.User) {
         this.setAuthStatus(AuthStatus.User);

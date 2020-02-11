@@ -298,6 +298,7 @@ export class GamifyService {
     await waitMS(500);
 
     try {
+      console.log('Gamify ID: ' + this.getGamifyDocId());
       const s = await dataService.getDoc(this.getGamifyDocId());
       console.log('--- gamify doc loaded: ', id, s);
       if(s) return s;

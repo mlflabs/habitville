@@ -56,7 +56,6 @@ export class HabitsService {
     if (this._project && this._project.id === project.id) return;
 
     this._project = project;
-    await waitMS(500);
     this._docs = await dataService.getAllByProjectAndType(project.id, TYPE_HABBIT);
     console.log("Init Docs: ", this._docs);
     this.filterhabits();

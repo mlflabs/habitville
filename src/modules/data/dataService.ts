@@ -1,3 +1,5 @@
+import PouchDB from 'pouchdb';
+import PouchDBFind from 'pouchdb-find';
 import { nSQL } from "@nano-sql/core";
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, debounceTime, filter, throttleTime } from 'rxjs/operators';
@@ -11,8 +13,8 @@ import { authService } from '../auth/authService';
 
 
 class DataService {
-  private _dbName = '';
-  private docTabel = 'docs';
+  private _pouch: any;
+  private _pouch_syc: any;
   private authId:string = '';
   private _ready = false;
   public _ready$ = new BehaviorSubject(this._ready);
@@ -248,7 +250,7 @@ class DataService {
     const projectChildId = getProjectChildId(projectid);
     return this._changes.asObservable().pipe(
       debounceTime(debounce),
-      filter((doc: any) => doc.id.startsWith(projectChildId + '|' + type + '|'))
+      filter((doc: any) => doc.id.startsWith(projectChildId + DIV + type + DIV))
     );
   }
 
@@ -277,22 +279,23 @@ class DataService {
     //TODO: check if we need to destory the previous pouch
     try {
       //await waitMS(500);
-      await this._initDb('db_' + authid)
-
-      if (syncRemote)
-        this.addSyncCall$.next();
-      
-      await waitMS(500); //just make sure db did its stuff
-      console.log('Finished db init: ', authid, this.authId);
-      if(authid !== this.authId)return;
-
-      this.ready = true;
-      return true;
+      this._initDb('db_' + authid, authid, syncRemote)
     }
     catch(e) {
       console.log(colors.red(e));
       return false;
     }
+  }
+
+  private async post_init(authid:string, syncRemote = true) {
+    if (syncRemote)
+      this.addSyncCall$.next();
+
+  
+    if(authid !== this.authId)return;
+
+    this.ready = true;
+    return true;
   }
 
   public getReady() {
@@ -302,20 +305,26 @@ class DataService {
 
 // still need listen to changes, and add some indexs for different types
  
-  private async _initDb(dbName: string) {
+  private async _initDb(dbName: string, authid:string, syncRemote) {
     console.log(colors.blue('Init _DB: '), dbName);
     if(this._dbName === dbName) return;
-    try {
-      //unsubscribe from listeners of old db
-      nSQL(this.docTabel).off('change', (res) => {
-        console.log(res);
-      })
-    }
-    catch(e){
 
-    }
     try {
       this._dbName = dbName;
+      nSQL().useDatabase(dbName).on('ready', () => {
+        console.log('Database Ready: ', dbName);
+        nSQL().useDatabase(dbName);
+        nSQL(this.docTabel).on("change", (e) => {
+          console.log(colors.blue("Change"), e)
+          if(e.oldRow) console.log(e.oldRow);
+          this._changes.next(e.result);
+        });
+
+        //continue to next function after database is ready
+        this.post_init(authid, syncRemote);
+
+        nSQL().useDatabase(dbName).off('ready',()=>{console.log('Unsubscribed from off')});
+      });
       await nSQL().createDatabase({
         id: dbName,
         mode: "PERM", 
@@ -338,15 +347,6 @@ class DataService {
         ],
         version: 1,
       })
-      nSQL().useDatabase(dbName);
-      nSQL(this.docTabel).on("change", (e) => {
-        console.log(colors.blue("Change"), e)
-        if(e.oldRow) console.log(e.oldRow);
-        this._changes.next(e.result);
-      });
-
-
-      return;
     }
     catch(e) {
       console.log(e);
