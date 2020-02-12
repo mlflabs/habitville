@@ -6,7 +6,7 @@ export const DIV = '.';
 export const DOUBLE_DIV = '..';
 
 export class Doc {
-  public id: string|undefined = undefined;
+  public _id: string|undefined = undefined;
   public deleted?: boolean;
   public created?: number = Date.now();
   public updated?: number = Date.now();

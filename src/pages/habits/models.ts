@@ -44,7 +44,7 @@ export interface HabitProgress {
 }
 
 export class Habit extends Doc {
-  title: string = 'New habit';
+  name: string = 'New habit';
   note?: string;
   stage: habitStage = habitStage.current;
   difficulty:habitDifficulty = habitDifficulty.medium;
