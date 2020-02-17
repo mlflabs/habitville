@@ -8,15 +8,15 @@ import {
   IonIcon,
   IonModal} from '@ionic/react';
 
-import { dataService } from '../../modules/data/dataService';
 import { add } from '../../../node_modules/ionicons/icons';
 import { useHabitsCollectionFacade } from './hooks/habits.hook';
 import { Habit } from './models';
 import HabitListItemComponent from './Habit.listitem.component';
 import HabitAddComponent from './Habit.add.component';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
-import { habitsService } from './habits.service';
 import { DataFunctions } from '../todo/hooks/todos.hook';
+import { authService } from '../../modules/auth/authService';
+import { getDefaultProject } from '../../modules/data/utilsData';
 
 
 export interface habitPageState {
@@ -41,7 +41,8 @@ export function getAction(todo:'showModal', data = {}){
 
 
 const HabitsPage: React.FC = () => {
-  const [habitsState, dataFunc] = useHabitsCollectionFacade(dataService.getDefaultProject());
+  console.log(getDefaultProject(authService.userid));
+  const [habitsState, dataFunc] = useHabitsCollectionFacade(getDefaultProject(authService.userid));
   const [state, dispatch] = useReducer(reducer, {
     showModal:false,
     modalHabit: null,
@@ -63,10 +64,10 @@ const HabitsPage: React.FC = () => {
     console.log('habit: ', habit)
     dispatch(getAction('showModal', {showModal: false, habit: null}));
     if(action === 'save' && habit != null){
-      habitsService.save(habit);
+      dataFunc.save(habit);
     }
     else if(action === 'remove' && habit != null && habit.id){
-      habitsService.remove(habit.id);
+      dataFunc.remove(habit.id);
     }
   }
 

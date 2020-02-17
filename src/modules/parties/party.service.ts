@@ -1,14 +1,15 @@
 import { Subscription, BehaviorSubject } from "rxjs";
-import { PartyProject } from "./models";
+import { PartyProject, TYPE_PARTY } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
-import { authService } from '../auth/authService';
+import { AuthService, authService } from '../auth/authService';
 import { loadingService } from "../loading/loadingService";
 import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
-import { waitMS } from '../data/utilsData';
-import { saveIntoDocList } from '../../utils';
-import { Msg } from "../messages/models";
+import { waitMS, getChannelFromProjectId } from '../data/utilsData';
+import { saveIntoArray, saveIntoDocList } from '../../utils';
+import { Msg, TYPE_MSG } from "../messages/models";
+import { sunny } from 'ionicons/icons';
 
 export interface PartyState {
   docs: PartyProject[],
@@ -30,8 +31,14 @@ export class PartyService {
     this.unsubscribe();
 
 
-
-    const docs = await  dataService.findDocsByProperty('party', 'type');
+    const sub1 = dataService.subscribeChanges().subscribe(doc => {
+      console.log(doc);
+      if(doc.type === 'party'){
+        const docs = saveIntoDocList(doc, this._state.docs);
+        this.state = {...this._state, ...{docs}};
+      }
+    });
+    const docs = await dataService.queryByProperty('type', 'equals', 'party', TYPE_PARTY);
     this.state = {...this._state , ...{docs}};
 
 
@@ -46,10 +53,10 @@ export class PartyService {
   */
   public async addUser(id:string, party: PartyProject) {
     try {
+      console.log('PARTY:::: ', party)
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/sendAddMemberRequest',
                       { token: authService.getToken(), 
-                        projectid: party.id,
-                        channel: party.channel,
+                        channelid: getChannelFromProjectId(party.id),
                         id: id,
                         rights: '0121' //see all, edit own items 
                       }), 
@@ -65,7 +72,6 @@ export class PartyService {
       waitMS(3000);
 
       dataService.addSyncCall$.next();
-
     }
     catch (e) {
       console.log(e);
@@ -81,52 +87,17 @@ export class PartyService {
 
   //make new party ajax
   private async _createParty(partyProject: PartyProject) {
-    loadingService.showLoading('Creating party, please wait');
-    const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/addNewChannel',
-                      {token: authService.getToken(), name: partyProject.name}, {} ),  false) ;
-    console.log(res);
+    console.log('Saving party Project::: ', partyProject);
+    loadingService.showLoading('Creating party, please wait, ' +
+                'internet connection required');
+    const res = await dataService.saveNewProject(partyProject, TYPE_PARTY);
+
     if(!res.success){
-      loadingService.hideLoading();
       return toastService.printServerErrors(res);
     }
+        
+    loadingService.hideLoading();
 
-    if(!res.data || !res.data.channel)
-      return toastService.showMessage('Not able to create party, please try again.')
-
-    const channel = res.data.channel;
-    partyProject.channel = channel;
-
-    //reload token
-    let gotNewRightsToken = false;
-    let tokenres;
-    while(!gotNewRightsToken){
-      tokenres = await authService.renewToken();
-      console.log('Token Res::::::: ', tokenres);
-      console.log(authService.getUser());
-
-      const user = authService.getUser();
-      if(user.channels[channel]){
-        gotNewRightsToken = true;
-      }
-      else {
-        await waitMS(2000);
-      }
-    }
-    
-
-    if(!tokenres){
-      return toastService.showMessage('Not able to create party, please try again.')
-    }
-
-    if(!partyProject.members) partyProject.members = [];
-    partyProject.members.push({id: authService.getUser().id, 
-          rights: '1000',
-          username: authService.getUser().username});
-    partyProject.creator = authService.getUser().id;
-    
-    //now we can create our party
-    await waitMS(500);
-    dataService.saveNewProject(partyProject, channel)
   }
 
 
@@ -149,7 +120,7 @@ export class PartyService {
       dataService.addSyncCall$.next();
 
       msg.replied = {accepted: true, date: Date.now()};
-      dataService.save(msg);
+      dataService.save(msg, TYPE_MSG);
     }
     catch (e) {
       console.log(e);
@@ -162,7 +133,7 @@ export class PartyService {
 
   public async rejectPartyInviation(msg:Msg) {
     const newMsg = {...msg, ...{replied:{accepted: false, date: Date.now()}}}
-    dataService.save(newMsg);
+    dataService.save(newMsg, TYPE_MSG);
   }
 
 

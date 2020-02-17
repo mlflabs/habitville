@@ -4,8 +4,8 @@ import HabitListItemComponent from './Habit.listitem.component';
 import { useHabitsCollectionFacade } from './hooks/habits.hook';
 import { ProjectItem } from '../../modules/data/models';
 import { Habit } from './models';
-import HabitAddComponent from './Habit.add.component';
 import { add } from '../../../node_modules/ionicons/icons';
+import HabitAddComponent from './Habit.add.component';
 
 
 export interface habitPageState {

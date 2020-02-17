@@ -20,7 +20,7 @@ export function useAppStatus(): [AppStatus] {
   useEffect(() => {
     console.log('App Stats Effect::');
     const subscriptions: Subscription[] = [
-      dataService.getReady().subscribe(ready => {
+      dataService.getReadySub().subscribe(ready => {
         console.log('DataService READY', ready, dataService.ready);
         if(ready === appStatus.dataReady) return;
           setStatusFunction();

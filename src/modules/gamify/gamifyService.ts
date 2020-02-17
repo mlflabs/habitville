@@ -8,8 +8,9 @@ import { calculateLevelExperience, calculateDoneTodoGold, calculateDoneTodoExper
 import { throttleTime } from '../../../node_modules/rxjs/operators';
 import { isEqual } from 'lodash';
 import { getInitGamifyRewards } from '../../pages/habits/utilsHabits';
-import { generateCollectionId, genrateMetaData } from '../data/utilsData';
+import { generateCollectionId, genrateMetaData, TYPE_SETTINGS, getDefaultProject } from '../data/utilsData';
 import { env } from '../../env';
+import { authService } from '../auth/authService';
 
 
 export const HABIT_REWARDS_GOLD_BASE = 5;
@@ -63,7 +64,7 @@ export class GamifyService {
     console.log('-------------Gamify INIT', userid);
     this.unsubscribe();
     this._userId = userid;
-    const dataSub = dataService.getReady().subscribe(async (ready) => {
+    const dataSub = dataService.getReadySub().subscribe(async (ready) => {
       if(!ready) return;
 
       const doc = await this.loadInitDocs(userid);
@@ -265,7 +266,7 @@ export class GamifyService {
   
   private async _save() {
     try{
-      const doc = await dataService.getDoc(this.getGamifyDocId());
+      const doc = await dataService.getDoc(this.getGamifyDocId(), TYPE_SETTINGS);
 
       if(!doc){
         console.log("Couldn't load gamify doc: ", this.getGamifyDocId());
@@ -279,8 +280,8 @@ export class GamifyService {
 
       console.log('Saving gamify state::: ', equal, initEqual);
       if(!equal && !initEqual && doc.userid ===  this._userId) {
-        console.log("Saving: ".blue, {...doc, ...{state: this._state}})
-        dataService.save({...doc, ...{state: this._state}});
+        console.log("Saving: ", {...doc, ...{state: this._state}})
+        dataService.save({...doc, ...{state: this._state}}, TYPE_SETTINGS);
       }
     }
     catch(e) {
@@ -290,16 +291,15 @@ export class GamifyService {
   }
 
   private getGamifyDocId(): string {
-    const defaultProject = dataService.getDefaultProject();
-    return generateCollectionId(defaultProject.id, 'gamify', '');
+    const defaultProject = getDefaultProject(authService.userid);
+    const id =  generateCollectionId(defaultProject.id, 'gamify', '');
+    return id.substring(0, id.length-1);
   }
 
   private async loadInitDocs(id: string): Promise<any> {
-    await waitMS(500);
-
     try {
       console.log('Gamify ID: ' + this.getGamifyDocId());
-      const s = await dataService.getDoc(this.getGamifyDocId());
+      const s = await dataService.getDoc(this.getGamifyDocId(), TYPE_SETTINGS);
       console.log('--- gamify doc loaded: ', id, s);
       if(s) return s;
       console.log('Saving gamify new doc');   
@@ -308,12 +308,12 @@ export class GamifyService {
         const res = await dataService.save({
           id: this.getGamifyDocId(),
           state: getInitGamifyState(),
-          type: 'gamify',
+          type: TYPE_SETTINGS,
           [env.ACCESS_META_KEY]: genrateMetaData(id),
           userid: id,
           created: ts,
           updated: ts
-        })
+        }, TYPE_SETTINGS)
       return res;
       }
     }

@@ -10,10 +10,9 @@ export interface PartyMember {
 
 
 export class PartyProject extends ProjectItem {
-  type: string = 'party'
+  type: string = TYPE_PARTY
   creator: string = '';
-  channel: string = '';
-
+  dirty: number = 0;
   members: PartyMember[]  = []
 
   constructor(values: Object = {}) {

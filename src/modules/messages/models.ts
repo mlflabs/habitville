@@ -1,5 +1,7 @@
 
 
+export const TYPE_MSG = 'msg';
+
 export interface Msg {
   id:string,
   to:string, 

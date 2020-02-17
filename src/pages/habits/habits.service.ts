@@ -5,9 +5,7 @@ import { dataService } from '../../modules/data/dataService';
 import { saveIntoArray, waitMS } from '../../modules/data/utilsData';
 import { ProjectItem } from '../../modules/data/models';
 import { gamifyService } from '../../modules/gamify/gamifyService';
-import { first } from '../../../node_modules/rxjs/operators';
 import _ from 'lodash';
-import { DataFunctions } from '../todo/hooks/todos.hook';
 
 export interface habitsState {
   selected: Habit | null,
@@ -39,7 +37,7 @@ export class HabitsService {
   private _subscription: Array<Subscription> = [];
 
   public init(project: ProjectItem) {
-    const dataSub = dataService.getReady().subscribe(async (ready) => {
+    const dataSub = dataService.getReadySub().subscribe(async (ready) => {
       if (!ready) return;
       const equals = _.isEqual(project, this._project);
       if (equals) return;
@@ -52,11 +50,11 @@ export class HabitsService {
   }
 
   async _init(project: ProjectItem) {
-    console.log("Init: ", project, TYPE_HABBIT);
+    console.log("################################# Init: ", project, TYPE_HABBIT);
     if (this._project && this._project.id === project.id) return;
-
+    console.log('Saving....', this._project, project);
     this._project = project;
-    this._docs = await dataService.getAllByProjectAndType(project.id, TYPE_HABBIT);
+    this._docs = await dataService.getAllByProject(project.id, TYPE_HABBIT);
     console.log("Init Docs: ", this._docs);
     this.filterhabits();
 
@@ -67,9 +65,10 @@ export class HabitsService {
         console.log("habit Service Subscription: ", doc);
         if (doc.deleted)
           this._docs = this._docs.filter(d => d.id !== doc.id);
-        else
+        else {
+          console.log('Updating doc: ', doc);
           this._docs = saveIntoArray(doc, this._docs);
-
+        }
         this.filterhabits();
         //TODO: need to optimize this, maybe start using the view query, see bottom of file
       });
@@ -117,11 +116,11 @@ export class HabitsService {
       doc = Object.assign(gamifyService.calculateNewHabitRewards(doc));
     }
 
-    dataService.save({ ...{ done: false }, ...doc }, { project: this._project, collection: TYPE_HABBIT });
+    dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { project: this._project });
   }
 
   public remove(id: string) {
-    dataService.remove(id, true);
+    dataService.remove(id, TYPE_HABBIT);
   }
 
   public select(doc: Habit) {
@@ -145,7 +144,3 @@ export class HabitsService {
   }
 
 }
-
-
-
-export const habitsService = new HabitsService();

@@ -4,7 +4,6 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { dataService } from '../../modules/data/dataService';
 import { saveIntoArray, waitMS } from '../../modules/data/utilsData';
 import { ProjectItem } from '../../modules/data/models';
-import { todoMiddleware } from './todo.middleware';
 import _ from 'lodash';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 
@@ -50,10 +49,12 @@ export class TodoService {
   public init(project: ProjectItem, tag: string) {
     //first unsubscribe
     this.unsubscribe();
-    const dataSub = dataService.getReady().subscribe(ready => {
+    const dataSub = dataService.getReadySub().subscribe( async (ready) => {
       if(!ready) return;
       
       this._init(project, tag);
+
+      await waitMS(1000);
       dataSub.unsubscribe();
     });
   }
@@ -75,7 +76,7 @@ export class TodoService {
     // console.log("Init Docs: ", this._docs);
     //this.filterTodos();
     this.reloadTodos();
-    todoMiddleware.init();
+    //todoMiddleware.init();
 
     //manage changes
 
@@ -107,7 +108,7 @@ export class TodoService {
 
   private async getBaseParent(todo:Todo){
     if(todo.parent){
-      const parent = await dataService.getDoc(todo.parent);
+      const parent = await dataService.getDoc(todo.parent, TYPE_TODO);
       if(!parent) {
         return null;
       }
@@ -125,38 +126,28 @@ export class TodoService {
   }
 
   private async reloadTodos() {
-
-    
-    const key = ((this.state.showSubTodos)? '':'2') +
-                ((this.state.doneTodos)? 1 : 0) + 
-                this.state.selectedTag;
-    console.log('KEY: ', key);
-    const docs = await dataService.queryByProperty('todoTags', 'INCLUDES', key );
-    this.state = {...this._state, ...{docs: docs}};
+    console.log('State: ', this.state);
+    const docs = await dataService.queryByProperty('tags', 'equals', 
+      this.state.selectedTag, TYPE_TODO);
+    console.log('DOCS::: ', docs);
+    this.filterAndSaveTodos(docs);
   }
 
   private filterAndSaveTodos(docs: Todo[]):Todo[] {
-    const filtered = docs.filter(doc => this.filterFunction(doc));
+    const filtered = docs.filter(doc => this.filterDoneParentFunction(doc));
     this.state = {...this.state, ...{docs: filtered}};
     return filtered;
   }
 
-  private filterFunction(doc:Todo) {
+  private filterDoneParentFunction(doc:Todo) {
+      console.log('Filter1: ', doc.done !== this._state.doneTodos)
       if (doc.done !== this._state.doneTodos) return false;
       if (doc.parent && !this.state.showSubTodos) return false;
-      if(this._state.selectedTag === 'all') return true;
-      if(!doc.tags) return false;
-
-      for(let i = 0; i < doc.tags.length; i++){
-        if(doc.tags[i] === this._state.selectedTag)
-          return true;
-      }
-      return false;
-    
+      return true;
   }
 
 
-
+ 
   public get state(): TodoState {
     return this._state;
   }
@@ -168,7 +159,7 @@ export class TodoService {
 
   public async addSubTodoToParent (todoId: string, parentId: string) {
     try {
-      const parentTodo: Todo = await dataService.getDoc(parentId);
+      const parentTodo: Todo = await dataService.getDoc(parentId, TYPE_TODO);
       if (parentTodo) {
         if(!parentTodo.subTodos) parentTodo.subTodos = [];
         parentTodo.subTodos = _.concat(parentTodo.subTodos, todoId);
@@ -182,7 +173,7 @@ export class TodoService {
 
   public async removeSubTodoFromParent (todoId: string, parentId) {
     try {
-      const parentTodo: Todo = await dataService.getDoc(parentId);
+      const parentTodo: Todo = await dataService.getDoc(parentId, TYPE_TODO);
       if (parentTodo) {
         if(!parentTodo.subTodos) parentTodo.subTodos = [];
         parentTodo.subTodos = _.filter(parentTodo.subTodos, t=>t!== todoId);
@@ -209,7 +200,7 @@ export class TodoService {
       }
       doc = gamifyService.calculateNewTodo(doc);
     }
-    const res = await dataService.save({...{done: false}, ...doc}, {project: this._project});
+    const res = await dataService.save({...{done: false}, ...doc}, TYPE_TODO, {project: this._project});
     if(parentId && doc.id) {
       this.addSubTodoToParent(doc.id, parentId)
     }
@@ -221,7 +212,7 @@ export class TodoService {
   public async remove(id: string) {
     //see if this doc has parent
     try {
-      const todo: Todo = await dataService.getDoc(id);
+      const todo: Todo = await dataService.getDoc(id, TYPE_TODO);
       if (todo) {
         if(todo.parent) {
           this.removeSubTodoFromParent(id, todo.parent);
@@ -231,7 +222,7 @@ export class TodoService {
     catch(e) {
       console.log(e);
     }
-    dataService.remove(id, true);
+    dataService.remove(id, TYPE_TODO);
   }
 
   public select(doc:Todo | null) {
@@ -258,7 +249,7 @@ export class TodoService {
   }
 
   public async loadTodoList (list:string[]): Promise<Todo[]> {
-    const todos = await dataService.getDocList(list);
+    const todos = await dataService.getBulk(list, TYPE_TODO);
     return todos;
   }
 

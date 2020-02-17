@@ -1,5 +1,3 @@
-const nanoid = require('nanoid');
-
 
 export const capitalize = (s: string) => {
   if (typeof s !== 'string') return ''

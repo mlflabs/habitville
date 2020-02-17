@@ -107,10 +107,6 @@ const HabitAddComponent = ({habit, dismissFunc}:
     dismissFunc(state.doc, 'remove');
   }
 
-  const checkForm = () => {
-    
-  }
-
 
 
   const print = () => {
@@ -130,10 +126,10 @@ const HabitAddComponent = ({habit, dismissFunc}:
           <IonItem>
               <IonLabel position="floating">Name</IonLabel>
               <IonInput 
-                  name="title"
+                  name="name"
                   placeholder="Read book, Go running ..." 
                   onIonChange={handleChange}
-                  value={state.doc.title} />
+                  value={state.doc.name} />
           </IonItem>
           <IonItem>
               <IonLabel position="floating">Note</IonLabel>
@@ -232,4 +228,3 @@ const HabitAddComponent = ({habit, dismissFunc}:
 };
 
 export default HabitAddComponent;
-

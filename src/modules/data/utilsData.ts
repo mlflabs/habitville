@@ -1,6 +1,20 @@
-import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR } from './models';
+import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR, ProjectItem } from './models';
 import shortid from 'shortid';
+import { env } from '../../env';
 
+export const TYPE_SETTINGS = 'set';
+
+export function getDefaultProject(userid): ProjectItem {
+  const uuid = 'u' + env.APP_ID + userid;
+  return {
+    id: generateProjectUUID(uuid, ''),
+    name: 'default',
+    access:[],
+    type: TYPE_SETTINGS,
+    updated: 0, //Date.now(),
+    [env.ACCESS_META_KEY]: genrateMetaData(userid), 
+  }
+}
 
 export function generateUUID():string {
   let id;
@@ -15,13 +29,17 @@ export function generateUUID():string {
 }
 
 export function getProjectChildId(id:string|undefined): string {
-  if(id === undefined) throw new Error('Id passed can not be undefined');
+  if(id === undefined) throw new Error('Id can not be undefined');
   let length = PROJECT_INDEX_SERVICE.length + DIV.length;
   return id.substring(0, id.length-length);
 }
 
-export function generateProjectUUID(id = generateUUID(), prefix = '', sufix = ''):string {
-  return prefix + id +  DIV + PROJECT_INDEX_SERVICE;
+export function getChannelFromProjectId(id: string|undefined):string {
+  return getProjectChildId(id);
+}
+
+export function generateProjectUUID(id = generateUUID(), app = env.APP_ID):string {
+  return app + id +  DIV + PROJECT_INDEX_SERVICE;
 }
 
 export function generateProjectChildId(projectId: string, type: string, id = generateUUID()):string {
@@ -53,7 +71,7 @@ export function saveIntoArray(item: Object, ary: Array<any> = [], idKey: string 
 }
 
 export function genrateMetaData(userid:string):string[]{
-    return [ 'u|'+ userid,]; 
+    return [ 'u'+ env.APP_ID + userid,]; 
 }
 
 

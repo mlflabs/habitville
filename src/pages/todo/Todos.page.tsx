@@ -14,20 +14,20 @@ import './todos.page.css';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
 import { useParams } from 'react-router-dom';
 import { capitalize } from '../../utils';
-
-
-
-
+import { getDefaultProject } from '../../modules/data/utilsData';
+import { authService } from '../../modules/auth/authService';
 
 const TodosPage  = () => {
 
-  const project = dataService.getDefaultProject();
+  const project = getDefaultProject(authService.userid);
 
   const { tag } = useParams();
   const selectedTag = tag || 'tasks';
+  console.log('TAG::: ', selectedTag);
   const [state, dataFunc] = useTodosCollectionFacade(project, selectedTag)
   const { docs, selectedTodo, tags } = state;
 
+  console.log(docs);
   // dataFunc.selectTag(tag? tag: 'all')
 
   const printTitle = ():string => {

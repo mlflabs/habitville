@@ -23,7 +23,10 @@ export function useHabitsCollectionFacade(project: ProjectItem):
   
           
   const dataFunctions = {
-    save: (doc: Habit) => habitsService.current.save(doc),
+    save: (doc: Habit) => {
+      console.log('@@@@@@@@@@@@@@@@@@@@@ Habit Hook Save: ', habitsService.current, doc)
+      habitsService.current.save(doc)
+    },
     remove: (id) => habitsService.current.remove(id), //TODO: allow user to choose, sync or not to sync
     select: (doc: Habit) => habitsService.current.select(doc),
     changeStageFilter: (stage: habitStage) => habitsService.current.changeStageFilter(stage),

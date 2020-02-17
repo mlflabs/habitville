@@ -6,7 +6,7 @@ export const TYPE_TODO = 'todo';
 export class Todo extends Doc {
   name?: string;
   note?: string;
-
+  type: string = TYPE_TODO;
 
   done: boolean;
   date: number|null;
@@ -16,7 +16,7 @@ export class Todo extends Doc {
   _new?: boolean; // for saving new docs, temp solution
     //sub tasks
   parent: string | null;
-  subTodos: string[] | null;
+  subTodos: string[];
   showSubTodos: boolean;
   showDone: boolean;
 
@@ -29,7 +29,7 @@ export class Todo extends Doc {
     this.date = null;
     this.tags = [];
     this.parent = null;
-    this.subTodos = null;
+    this.subTodos = [];
 
     this.showSubTodos = false;
     this.showDone = false;

@@ -12,8 +12,15 @@ export interface ajaxResponse {
 }
 
 
-export const getAjaxMessage = (success:boolean, data:any, status:number = 0, errors: errorMessage[] = []): ajaxResponse => {
+export const getAjaxMessage = (success:boolean, data:any, 
+    status:number = 0, errors: errorMessage[] = []): ajaxResponse => {
   return {success, data, status, errors}
+}
+
+export const getAjaxErrorMessage = (errorMessage: string, 
+  location='system', status:number = 404 ) => {
+    return getAjaxMessage(false, null, status, 
+      [{location, msg:errorMessage}])
 }
 
 export interface errorMessage {
@@ -49,7 +56,7 @@ export const post = async (req: postRequest, showLoading = true, loadingMessage=
   try {
     if(showLoading)
       loadingService.showLoading(loadingMessage);
-
+    console.log(req);
     const res = await axios.post(req.url, req.form, req.options);
 
     loadingService.hideLoading();
@@ -57,7 +64,7 @@ export const post = async (req: postRequest, showLoading = true, loadingMessage=
     return getAjaxMessage(true, res.data, 200);
   }
   catch(err) {
-    loadingService.hideLoading();;
+    loadingService.hideLoading();
     //console.log(err.response);
     const response = getNested(err, 'response');
     if(!response || !response.status) {

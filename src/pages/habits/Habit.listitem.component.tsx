@@ -71,7 +71,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   }
 
   const updatehabit = (index: number, progress:{date:string, value:number}) => {
-    console.log('Update Progress::: ', index, progress);
+    console.log(' %%%%%%%%%%%%%%%%%%%%%%%%%%  Update Progress::: ', index, progress);
     let newProgress: HabitProgress = {date: progress.date, value: (progress.value === 0)? 1: 0 }
 
     const i = getIndexById(newProgress.date, doc.progress, 'date')
@@ -81,7 +81,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
     const progresslist = saveIntoArray(newProgress, doc.progress, 'date');
     const newDoc = gamifyService.calculateHabitProgressRewards(
                     calculateCurrentStreak({...doc, ...{progress: progresslist}}), newProgress);
-
+    console.log('NEW PROGRESSSSSSS:::::::::::::::::::::::;', newDoc);
     dataFunctions.save(newDoc);
 
   }
@@ -91,7 +91,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
         <IonCard>
           <IonCardHeader>
             {/*<IonCardSubtitle>Card Subtitle</IonCardSubtitle>*/}
-            <IonCardTitle>{doc.title}</IonCardTitle>
+            <IonCardTitle>{doc.name}</IonCardTitle>
             <IonBadge class="habitBadge" color="success">{doc.currentStreak}</IonBadge>
             <IonBadge class="habitBadge" color="tertiary">{doc.bestStreak}</IonBadge>
           </IonCardHeader>

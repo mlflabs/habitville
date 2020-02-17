@@ -1,5 +1,6 @@
 import { Subscription, BehaviorSubject, Subject } from "rxjs";
 import { dataService } from "../data/dataService";
+import { TYPE_MSG } from "./models";
 
 export interface Message {
   from: string,
@@ -37,7 +38,7 @@ export class MessageService {
 
 
   public async getGlobalPartyMessages() {
-    const msgs = await dataService.findDocsByProperty('party', 'messageType');
+    const msgs = await dataService.queryByProperty('messageType', 'equals', 'messageType', TYPE_MSG );
 
     console.log(msgs);
     return msgs;

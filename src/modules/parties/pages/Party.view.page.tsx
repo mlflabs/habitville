@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useReducer, useRef } from 'react';
 import { IonPage, IonContent, IonButton, IonModal } from '@ionic/react';
 import HeaderWithProgress from '../../../components/HeaderWithProgress';
-import { PartyProject } from '../models';
+import { PartyProject, TYPE_PARTY } from '../models';
 import { useParams, useHistory } from 'react-router-dom';
 import { dataService } from '../../data/dataService';
-import { Habit } from '../../../pages/habits/models';
-import HabitAddComponent from '../../../pages/habits/Habit.add.component';
-import { useHabitsCollectionFacade } from '../../../pages/habits/hooks/habits.hook';
 import { HabitsService } from '../../../pages/habits/habits.service';
 import HabitListComponent from '../../../pages/habits/Habit.list.component';
 import { waitMS } from '../../../utils';
@@ -26,10 +23,10 @@ const getInitState = {
 
 const loadParty = async (id:string, state, setState, history) => {
   console.log('Loading party');
-  const dataSub = dataService.getReady().subscribe(async (ready) => {
+  const dataSub = dataService.getReadySub().subscribe(async (ready) => {
     if(!ready) return;
     console.log('==============================Load party, ', id);
-    const party = await dataService.getDoc(id);
+    const party = await dataService.getDoc(id, TYPE_PARTY);
     console.log(party)
     if(!party){
       dataSub.unsubscribe();

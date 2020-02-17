@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useReducer } from 'react';
 import { IonLabel, IonRow, IonCol, 
-        IonIcon, IonGrid, IonBadge, IonButton } from '@ionic/react';
+        IonIcon, IonGrid, IonButton } from '@ionic/react';
 import { Todo } from './models';
-
+import _ from 'lodash';
 import { radioButtonOff, radioButtonOn, sunny, star, heart, basket, construct, arrowDownCircle, arrowForwardCircle, checkmark } from '../../../node_modules/ionicons/icons';
 import { printCleanNote, getAction } from '../../utils';
 import './todo.component.css'
@@ -27,6 +27,7 @@ const reducer = (state, action): TodoState => {
     case 'updateTodo':
       return {...state, ...{todo:action.data}};
     case 'subtodos':
+      console.log('Action DATA: ', action);
       return {...state, ...{todo: action.data.todo, subTodos: action.data.subTodos}}
     default:
       return state;
@@ -61,7 +62,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
     console.log("UseEffect TODOS-------- "+ todo.name, todo);
     //load our subtodos
     dispatch(getAction('fullupdate', {todo: todo, dispatch, dataFunctions}));
-  }, [todo])
+  }, [todo, dataFunctions])
 
 
 
@@ -80,9 +81,8 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
     dataFunctions.save(newDoc);
   }
 
-  const showSubTodosHandler = (show: boolean) => {
-    console.log("showSubtasks::: ", show, state.todo);
-    const newDoc = {...state.todo, ...{showSubTodos: show}};
+  const showSubTodosHandler = () => {
+    const newDoc = {...state.todo, ...{showSubTodos: !state.todo.showSubTodos}};
     dispatch(getAction('updateTodo', newDoc));
     dataFunctions.save(newDoc);
   }
@@ -117,6 +117,49 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
       return (<IonIcon  icon={checkmark} key={tag} color="medium" />);
   }
 
+  const printTagEdit = (tag: string) => {
+    const color = (_.includes(state.todo.tags,tag))? 'primary': 'light';
+    if(tag === 'today')
+      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} 
+                  fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+                  <IonIcon  icon={sunny} />
+              </IonButton>);
+    if(tag === 'important')
+      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+                  <IonIcon  icon={star} />
+              </IonButton>); 
+    if(tag === 'tasks')
+    return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+                <IonIcon  icon={checkmark} />
+            </IonButton>);
+    if(tag === 'wish')
+      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+                <IonIcon  icon={heart} />
+            </IonButton>); 
+    if(tag === 'buy')
+      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+              <IonIcon  icon={basket} />
+          </IonButton>);
+    if(tag === 'projects')
+      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
+              <IonIcon  icon={construct} />
+          </IonButton>);
+  }
+
+
+  const handleTagChange = (tag: string) => {
+    if(!state.todo.tags) state.todo.tags = [];
+
+    const res = _.find(state.todo.tags, t=>t===tag);
+    let newtags;
+    if(_.isUndefined(res)){
+      newtags = _.concat(state.todo.tags, tag);
+    }
+    else {
+      newtags = _.filter(state.todo.tags, t=>t!==tag);
+    }
+    dataFunctions.save(Object.assign(state.todo, {tags: newtags}));
+  }
 
   
   const printSubtodos = () => {
@@ -124,6 +167,7 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
     if(!state.todo.showSubTodos) return <></>;
 
   const amILast = (list: Todo[], me: Todo): boolean => {
+    console.log('amILast');
     if(list.length === 0) return true;
 
     if(list[list.length-1].id === me.id) return true;
@@ -132,31 +176,58 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
   }
 
     return (
+      <>
+      <IonRow>
+        <IonCol>
+          <div className="todoEditInlineIconScrollParent">
+            { tags.map(tag => printTagEdit(tag)) }
+          </div>
+        </IonCol>
+      </IonRow>
       <IonRow class="todoRow">
-        <IonCol  size="auto"><div className="bufferColumnParent" ><div className="bufferColumn" /></div></IonCol>
+        <IonCol  size="auto">
+          <div className="bufferColumnParent" >
+            <div className="bufferColumn" />
+          </div>
+        </IonCol>
         <IonCol>
           <div>
-                <IonButton  color={(state.todo.showDone)? 'light' : 'success'}
-                            class="todoHeaderButtons" 
-                            onClick={() => filterHandler(false)}
-                            fill="clear">Active</IonButton>
-                <IonButton  color={(!state.todo.showDone)? 'light' : 'success'}
-                            class="todoHeaderButtons" 
-                            onClick={() => filterHandler(true)}
-                            fill="clear">Done</IonButton>
-                <IonButton  color={(showSubAddSubtask)? 'primary': 'light'}
-                            class="todoHeaderButtons showAddSubtask" 
-                            onClick={() => setShowSubAddSubtask(!showSubAddSubtask)}
-                            fill="clear">Add Subtask</IonButton>
+            {(state.todo.showDone)? (
+              <IonButton  color={'success'}
+                class="todoHeaderButtons" 
+                onClick={() => filterHandler(false)}
+                fill="clear">Switch to Active</IonButton>
+            ) : (
+              <IonButton  color={'success'}
+                class="todoHeaderButtons" 
+                onClick={() => filterHandler(true)}
+                fill="clear">Switch to Done</IonButton>
+            )}
+            {(selectedTodo && selectedTodo.id === state.todo.id)? (
+              <IonButton  color={'success'}
+                class="todoHeaderButtons" 
+                onClick={() => handleSelectTodo(state.todo)}
+                fill="clear">Hide Edit</IonButton>
+            ) : (
+              <IonButton  color={'success'}
+                class="todoHeaderButtons" 
+                onClick={() => handleSelectTodo(state.todo)}
+                fill="clear">Edit</IonButton>
+            )}
+            {/*
+            {(!showSubAddSubtask)? (
+              <IonButton  color={'primary'}
+                class="todoHeaderButtons" 
+                onClick={() => setShowSubAddSubtask(!showSubAddSubtask)}
+                fill="clear">Show Add Subtask</IonButton>
+            ) : (
+              <IonButton  color={'success'}
+                class="todoHeaderButtons" 
+                onClick={() => setShowSubAddSubtask(!showSubAddSubtask)}
+                fill="clear">Hide Add SubTasks</IonButton>
+            )}
+            */}
           </div>
-          
-          {(showSubAddSubtask)? (
-            <TodoNewComp  parentId={state.todo.id} 
-              projectId={projectId} 
-              saveFunc={dataFunctions.save} />
-          ) : (<></>)}
-        
-
           {state.subTodos.filter(todo => {
             if(!todo.showDone) todo.showDone = false;
             return todo.done === state.todo.showDone
@@ -172,6 +243,18 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
           ))}
         </IonCol>
       </IonRow>
+      <IonRow>
+        <IonCol size="auto">
+          <div className="bufferColumnParent" >
+            <div className="bufferAddTaskColumn" />
+          </div></IonCol>
+        <IonCol>
+            <TodoNewComp  parentId={state.todo.id} 
+              projectId={projectId} 
+              saveFunc={dataFunctions.save} />
+        </IonCol>
+      </IonRow>
+    </>
     )
   }
 
@@ -190,15 +273,16 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
                                 icon={radioButtonOff} onClick={doneHandler} />
                   )}
               </IonCol>
-              <IonCol class="todoTitleColumn" onClick={() => handleSelectTodo(todo)}  >
+              <IonCol class="todoTitleColumn" onClick={() => showSubTodosHandler()}  >
                         <IonLabel  class="todoTitle" >
                           {state.todo.name}
-                          {(state.todo.subTodos && state.subTodos.length> 0)? (
+                          {/*
+                          {(state.todo.subTodos && state.subTodos.length > 0)? (
                             <IonBadge class="todoBadgeSubtodos" color="secondary">
                                 {state.subTodos.length}
                             </IonBadge>
                           ) : (<></>)}
-                          
+                        */}
                         </IonLabel>
                         {state.todo.note? (
                           <div className="todoNote">
@@ -220,14 +304,14 @@ const TodoListItemComp = ({todo, tags, projectId, selectedTodo, lastChild,  data
                   {state.todo.showSubTodos? (
                     <IonIcon  color="primary"
                               style={{fontSize:'32px', paddingRight:"10px"}}
-                              icon={arrowDownCircle}
-                              onClick={() => showSubTodosHandler(false)} />
+                              onClick={() => showSubTodosHandler()}
+                              icon={arrowDownCircle} />
 
                   ) : (
                     <IonIcon  color="primary"
                               style={{fontSize:'32px', paddingRight:"10px"}}
-                              icon={arrowForwardCircle}
-                              onClick={() => showSubTodosHandler(true)} />
+                              onClick={() => showSubTodosHandler()}
+                              icon={arrowForwardCircle} />
                   )}
                  
               </IonCol>

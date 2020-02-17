@@ -1,3 +1,4 @@
+
 import { Doc } from '../../modules/data/models'
 import { GamifyRewards } from './utilsHabits';
 
@@ -46,6 +47,7 @@ export interface HabitProgress {
 export class Habit extends Doc {
   name: string = 'New habit';
   note?: string;
+  type:string = TYPE_HABBIT;
   stage: habitStage = habitStage.current;
   difficulty:habitDifficulty = habitDifficulty.medium;
   //regularity

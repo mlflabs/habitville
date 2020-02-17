@@ -6,11 +6,12 @@ export const DIV = '.';
 export const DOUBLE_DIV = '..';
 
 export class Doc {
-  public _id: string|undefined = undefined;
+  public id: string|undefined = undefined;
   public deleted?: boolean;
   public created?: number = Date.now();
   public updated?: number = Date.now();
   public type: string = 'doc';
+  public dirty?: number = 0;
 
   constructor(values: Object = {}) {
       Object.assign(this, values);
