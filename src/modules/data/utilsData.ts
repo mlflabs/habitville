@@ -33,8 +33,7 @@ export function generateUUID():string {
 }
 
 export function isThisUserProject(id:string|undefined, userid): boolean {
-  //if(id === undefined) return false;
-  return (id === generateUserChannelId(userid));
+  return (getChannelFromProjectId(id) === generateUserChannelId(userid));
 }
 
 export function getProjectChildId(id:string|undefined): string {

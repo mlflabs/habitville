@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabButton, IonCardContent, IonGrid, IonRow, IonCol, IonNote, IonBadge } from '@ionic/react';
-import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS } from '../../colors';
+import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabButton, IonCardContent, IonGrid, IonRow, IonCol, IonNote, IonBadge, IonLabel } from '@ionic/react';
+import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS, COLOR_DANGER } from '../../colors';
 import { radioButtonOff, checkmarkCircleOutline, cog } from '../../../node_modules/ionicons/icons';
 import moment from 'moment';
 import { Habit, MOMENT_DATE_FORMAT, HabitProgress } from './models';
@@ -22,13 +22,21 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   }, [habit])
 
 
-  const printDate = (index:number) => {
+  const printDate = (index:number, active = false) => {
     const day =  moment().subtract(index, 'day');
+    if(active)
+    {
+      return (
+        <IonLabel
+          color="primary"
+        >
+        {day.format('DD')} <br /> {day.format('dd')}
+        </IonLabel>)
+    }
     return (
       <>
       {day.format('DD')} <br /> {day.format('dd')}
-      </>
-    )
+      </>)
   }
 
   const printGoal = () => {
@@ -56,18 +64,30 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
 
 
 
-  const printDayIcon = (index: number) => {
+  const printDayIcon = (index: number, active=false) => {
     const day = moment().subtract(index, 'day');
     let progress = doc.progress.find(obj => day.format(MOMENT_DATE_FORMAT) === obj.date);
     if(!progress)
       progress = {date: day.format(MOMENT_DATE_FORMAT), value: 0};
 
-    // @ts-ignore: undefined, but we are forsing assignment just before this
-    return (<IonIcon  onClick={() => updatehabit(index, progress)}
+    
+    if(active){
+      //TODO: find a way to caluclate if buffer can be used for the ones not done
+      // @ts-ignore: undefined, but we are forsing assignment just before this
+      return (<IonIcon  onClick={() => updatehabit(index, progress)}
                       size="large" 
                       key={index}
                       color={ progress.value > 0? COLOR_SUCCESS:  COLOR_DARK} 
                       icon={progress.value > 0? checkmarkCircleOutline : radioButtonOff} />)
+    }
+    // @ts-ignore: undefined, but we are forsing assignment just before this
+    return (<IonIcon  
+    size="large" 
+    key={index}
+    color={ progress.value > 0? COLOR_SUCCESS:  COLOR_DANGER} 
+    icon={progress.value > 0? checkmarkCircleOutline : radioButtonOff} />)
+
+    
   }
 
   const updatehabit = (index: number, progress:{date:string, value:number}) => {
@@ -104,7 +124,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
                 <IonCol>{printDate(3)}</IonCol>
                 <IonCol>{printDate(2)}</IonCol>
                 <IonCol>{printDate(1)}</IonCol>
-                <IonCol>{printDate(0)}</IonCol>
+                <IonCol>{printDate(0, true)}</IonCol>
               </IonRow>
               <IonRow class="datecell">
                 <IonCol>{printDayIcon(6)}</IonCol>
@@ -113,7 +133,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
                 <IonCol>{printDayIcon(3)}</IonCol>
                 <IonCol>{printDayIcon(2)}</IonCol>
                 <IonCol>{printDayIcon(1)}</IonCol>
-                <IonCol>{printDayIcon(0)}</IonCol>
+                <IonCol>{printDayIcon(0, true)}</IonCol>
               </IonRow>
             </IonGrid>
           </IonItem>

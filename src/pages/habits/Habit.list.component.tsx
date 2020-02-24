@@ -28,7 +28,7 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
     setModalState({showModal: false, modalhabit: new Habit()});
   }
 
-  const habitDismissFunc = (habit: Habit|null, action:'save'|'remove'|'none') => {
+  const addHabitDismissFunction = (habit: Habit|null, action:'save'|'remove'|'none') => {
     console.log('habit: ', habit)
     setModalState({showModal: false, modalhabit: new Habit()});
     if(action === 'save' && habit != null){
@@ -64,7 +64,7 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
         {modalState.showModal? (
           <IonModal isOpen={modalState.showModal} onDidDismiss={() => hidehabitModal()}>
           <HabitAddComponent habit={modalState.modalhabit} 
-                              dismissFunc = {habitDismissFunc}  />
+                              dismissFunc = {addHabitDismissFunction}  />
           </IonModal>
         ) : (
           <></>
