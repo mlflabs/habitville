@@ -10,7 +10,7 @@ export enum AppStatus {
 }
 
 // username, authenticated, login, logout, renewToken
-export function useAppStatus(): [AppStatus] {
+export function useAppStatus(): [{status:AppStatus, dataReady:boolean, username:string}] {
 
   const [appStatus, setAppStatus] = useState({status: AppStatus.loading, dataReady: false, username: GUEST});
 
@@ -66,5 +66,5 @@ export function useAppStatus(): [AppStatus] {
     }
   };
 
-  return [ appStatus.status ];
+  return [ appStatus ];
 }

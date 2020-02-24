@@ -5,37 +5,49 @@ import {
   IonList,
   IonItem,
   IonButton} from '@ionic/react';
-
 import TodoNewComp from './todo.new.component';
 import TodoListItemComp from './Todo.listitem.component';
-import { dataService } from '../../modules/data/dataService';
 import { useTodosCollectionFacade } from './hooks/todos.hook';
 import './todos.page.css';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { capitalize } from '../../utils';
 import { getDefaultProject } from '../../modules/data/utilsData';
 import { authService } from '../../modules/auth/authService';
+import ulog from 'ulog';
+
+const log = ulog('todo');
+
 
 const TodosPage  = () => {
 
   const project = getDefaultProject(authService.userid);
+  const location = useLocation();
+  
 
-  const { tag } = useParams();
-  const selectedTag = tag || 'tasks';
-  console.log('TAG::: ', selectedTag);
-  const [state, dataFunc] = useTodosCollectionFacade(project, selectedTag)
-  const { docs, selectedTodo, tags } = state;
+  let list, tag;
+  const params = useParams();
+  log.info(params, location);
+  if(location.pathname.startsWith('/todos/tag/')){
+   tag = params['tag']
+  }
+  else {
+    list = params['list']
+  }
+
+  
+  console.log('LIST::: ', list);
+  const [state, dataFunc] = useTodosCollectionFacade(project.id, list, tag)
+  const { docs, selectedTodo, tagDocs } = state;
 
   console.log(docs);
   // dataFunc.selectTag(tag? tag: 'all')
 
   const printTitle = ():string => {
-    if(tag){
-      return 'Todos: ' + capitalize(tag);
+    if(state.list){
+      return 'Todos: ' + capitalize(state.list.name);
     }
     return 'Todos';
-    
   }
 
 
@@ -45,7 +57,9 @@ const TodosPage  = () => {
       <IonContent id="todoContent">
         
         <IonItem>  
-          <TodoNewComp parentId ={undefined} 
+          <TodoNewComp 
+                       list = {state.list}
+                       tag = {undefined}
                        projectId={project.id||''} 
                        saveFunc={dataFunc.save} />
         </IonItem>
@@ -58,22 +72,13 @@ const TodosPage  = () => {
                       class="todoHeaderButtons" 
                       onClick={() => {dataFunc.changeDoneFilter(true)}}
                       fill="clear">Finished</IonButton>
-          <IonButton  color={(!state.showSubTodos)? 'light':'tertiary'} 
-                      class="todoHeaderButtons" 
-                      onClick={() => {dataFunc.changeShowSubTodosFilter(true)}}
-                      fill="clear">Show Children</IonButton>
-          <IonButton  color={(state.showSubTodos)? 'light':'tertiary'} 
-                      class="todoHeaderButtons" 
-                      onClick={() => {dataFunc.changeShowSubTodosFilter(false)}}
-                      fill="clear">Only Parents</IonButton>
         </div>
         <IonList>
             {docs.map(todo => (
               <TodoListItemComp   todo={todo} 
-                                  tags={tags}
+                                  tagDocs={tagDocs}
                                   lastChild = {false}
-                                  selectedTodo={selectedTodo}
-                                  projectId = {project.id}
+                                  selectedTodo={selectedTodo}                                 
                                   dataFunctions={dataFunc}
                                   key={todo.id} />
             ))}

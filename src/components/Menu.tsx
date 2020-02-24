@@ -7,23 +7,23 @@ import {
   IonMenuToggle,
   IonGrid,
   IonCol,
-  IonRow,
-  IonButton
+  IonRow
 } from '@ionic/react';
 import React from 'react';
 import { withRouter, useLocation } from 'react-router-dom';
 import MenuHeaderWithProgress from './MenuHeaderWithProgress';
 import { useMenuHookFacade } from '../modules/menu/hooks/menu.hook';
 import './menu.css';
+import ulog from 'ulog'
 
+const log = ulog('menu')
 
 const Menu = () => {
 
   const [state,] = useMenuHookFacade();
   const location = useLocation();
-
   const path = location.pathname;
-
+  log.warn(path);
   return (
     <IonMenu key="ionmenu_left" contentId="main" type="overlay">
       <MenuHeaderWithProgress />
@@ -32,11 +32,11 @@ const Menu = () => {
         {state.appPages.map((appPage, index) => {
           return (
             <>
-              <IonRow key={appPage.title.replace(' ', '')+appPage.url}>
+              <IonRow key={appPage.title.replace(' ', '')+appPage.url + index}>
                 <IonCol class="leftMenuCol">
                 <IonMenuToggle  autoHide={false}>
                   <IonItem
-                        color={(path.startsWith(appPage.url)? 'light' : '')}   
+                        color={(path === appPage.url? 'light' : '')}   
                         routerLink={appPage.url} routerDirection="none">
                     <IonIcon slot="start" icon={appPage.icon} />
                     <IonLabel>{appPage.title}</IonLabel>
@@ -44,30 +44,9 @@ const Menu = () => {
                 </IonMenuToggle>
                 </IonCol>
               </IonRow>
-              {(appPage.subPages.length > 0)? (
-                <>
-                  {appPage.subPages.map((subPage, index2) => {
-                    return (
-                      <IonRow key={appPage.title.replace(' ', '')+appPage.url+ '_' + subPage.url}>
-                        <IonCol class="leftSubMenuCol">
-                        <IonMenuToggle autoHide={false}>
-                          <IonButton  fill="clear"  
-                                      color={(path.startsWith(subPage.url)? 'success' : '')}   
-                                      class="menuButton"
-                                      routerLink={subPage.url} 
-                                      routerDirection="none">
-                            <IonIcon slot="start" icon={subPage.icon} />
-                            <IonLabel>{subPage.title}</IonLabel>
-                          </IonButton>
-                        </IonMenuToggle>
-                        </IonCol>
-                      </IonRow>
-                    )
-                  })}
-                </>
-              ) : (
-                <div key={appPage.title + "_empty"} />
-              )}
+              {appPage.lastComponent? (
+                appPage.lastComponent
+              ) : (<></>)}
             </>
         )})}
         </IonGrid>

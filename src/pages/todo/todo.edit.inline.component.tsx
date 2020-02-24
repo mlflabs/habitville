@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Todo } from './models';
+import { Todo, TodoTag } from './models';
 import { DataFunctions } from './hooks/todos.hook';
 import _ from 'lodash';
+import ulog from 'ulog';
 import { IonLabel, IonTextarea, IonButton, IonIcon, IonAlert } from '@ionic/react';
 import './todo.edit.component.css';
 import { sunny, star, heart, trash, basket, construct, close, checkmark } from '../../../node_modules/ionicons/icons';
+import AnimatedIcon from '../../components/animatedIcon';
 
-const getDefaultState = (todo:Todo) =>  {
+
+const log = ulog('todo');
+
+const getDefaultState = (todo:Todo, tagDocs:TodoTag[]) =>  {
   return {
   todo: todo,
+  tagDocs,
   showDeleteWarrning: false,
   text: mergeText(todo.name, todo.note)
 }}
@@ -24,15 +30,16 @@ const mergeText = (name: string|undefined, note: string|undefined): string => {
 
 
 
-const TodoEditInlineComponent = ({todo, tags, dataFunctions}: 
-        {todo:Todo,  tags:string[], dataFunctions: DataFunctions}) => {
-  console.log("Edit Todo Render::: ", todo);
+const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}: 
+        {todo:Todo,  tagDocs:TodoTag[], dataFunctions: DataFunctions}) => {
+  log.warn("Edit Todo Render::: ", todo, tagDocs, tagDocs);
 
-  const [state, setState] = useState(getDefaultState(todo));
+  const [state, setState] = useState(getDefaultState(todo, tagDocs));
 
   useEffect(() => {
-    setState(getDefaultState(todo));
-  }, [todo])
+    log.error('USE EFFECT::::: ', todo, tagDocs);
+    setState(getDefaultState(todo, tagDocs));
+  }, [todo, tagDocs])
 
   const handleTitleChange = (e) => {
     const text = e.detail.value;
@@ -74,45 +81,35 @@ const TodoEditInlineComponent = ({todo, tags, dataFunctions}:
       dataFunctions.remove(state.todo.id);
   }
 
-  const printTag = (tag: string) => {
-    const color = (_.includes(state.todo.tags,tag))? 'success': 'light';
-    if(tag === 'today')
-      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-                  <IonIcon  icon={sunny} />
-              </IonButton>);
-    if(tag === 'important')
-      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-                  <IonIcon  icon={star} />
-              </IonButton>); 
-    if(tag === 'tasks')
-    return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-                <IonIcon  icon={checkmark} />
-            </IonButton>);
-    if(tag === 'wish')
-      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-                <IonIcon  icon={heart} />
-            </IonButton>); 
-    if(tag === 'buy')
-      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-              <IonIcon  icon={basket} />
-          </IonButton>);
-    if(tag === 'projects')
-      return (<IonButton class="todoEditInlineIconScrollChild" size="small" key={tag} fill="clear" color={color} onClick={() => handleTagChange(tag)}>
-              <IonIcon  icon={construct} />
-          </IonButton>);
+  const printTag = (tag: TodoTag) => {
+    log.warn('Print TAg:::: ', tag, tagDocs,  state);
+    let color;
+    if(_.includes(state.todo.tags,tag.fullname)){
+      color = 'success';
+    }
+    else {
+      color = 'light';
+    }
+    return  <IonButton 
+                fill="clear"
+                size="default" 
+                color={color} 
+                key={tag.name + 'editicon'}  
+                onClick={() => handleTagChange(tag)}>
+              <IonIcon  src={"/assets/icons/"+tag.icon} /></IonButton>
   }
 
 
-  const handleTagChange = (tag: string) => {
+  const handleTagChange = (tag: TodoTag) => {
+    log.error(tag, tagDocs);
     if(!state.todo.tags) state.todo.tags = [];
-
-    const res = _.find(state.todo.tags, t=>t===tag);
+    const res = state.todo.tags.find(t=>t===tag.fullname);
     let newtags;
-    if(_.isUndefined(res)){
-      newtags = _.concat(state.todo.tags, tag);
+    if(res === undefined){
+      newtags = _.concat(state.todo.tags, tag.fullname);
     }
     else {
-      newtags = _.filter(state.todo.tags, t=>t!==tag);
+      newtags = _.filter(state.todo.tags, t=>t!==tag.fullname);
     }
     dataFunctions.save(Object.assign(state.todo, {tags: newtags}));
   }
@@ -123,8 +120,8 @@ const TodoEditInlineComponent = ({todo, tags, dataFunctions}:
     <div className="">
         
         
-        <div className="todoEditInlineIconScrollParent">
-          { tags.map(tag => printTag(tag)) }
+        <div key="todoEditInlineIconScrollParent" className="todoEditInlineIconScrollParent">
+          { tagDocs.map(tag => printTag(tag)) }
         </div>
         <IonTextarea 
             placeholder="Enter todo title and note here"

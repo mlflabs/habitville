@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IonList, IonModal, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonFab, IonFabButton, IonIcon } from '@ionic/react';
+import { IonList, IonModal, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonFab, IonFabButton, IonIcon, IonCardSubtitle, IonButton } from '@ionic/react';
 import HabitListItemComponent from './Habit.listitem.component';
 import { useHabitsCollectionFacade } from './hooks/habits.hook';
 import { ProjectItem } from '../../modules/data/models';
@@ -8,10 +8,11 @@ import { add } from '../../../node_modules/ionicons/icons';
 import HabitAddComponent from './Habit.add.component';
 
 
-export interface habitPageState {
+export interface habitListState {
   showModal: boolean,
   modalhabit: Habit
 }
+
 
 
 const HabitListComponent = ({project}:{project: ProjectItem}) => {
@@ -42,7 +43,12 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Habits</IonCardTitle>
+        <IonCardTitle>Challenges
+
+        <IonButton  color={'success'}
+                    onClick={() => addhabit()}
+                    fill="clear">Add New Challenge</IonButton>
+        </IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
         <IonList>

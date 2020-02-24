@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import {
   IonPage,
   IonContent,
@@ -14,7 +14,6 @@ import { Habit } from './models';
 import HabitListItemComponent from './Habit.listitem.component';
 import HabitAddComponent from './Habit.add.component';
 import HeaderWithProgress from '../../components/HeaderWithProgress';
-import { DataFunctions } from '../todo/hooks/todos.hook';
 import { authService } from '../../modules/auth/authService';
 import { getDefaultProject } from '../../modules/data/utilsData';
 

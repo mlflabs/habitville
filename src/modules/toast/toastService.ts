@@ -28,6 +28,10 @@ export class ToastService {
     })
   }
 
+  printSimpleError (msg:string, duration = 2000) {
+    toast( msg, {type: ToastType.error, autoClose: duration})
+  }
+
   //TODO: for now only prints the first error
   printServerErrors (res:ajaxResponse) {
     const errors = res.errors || [];

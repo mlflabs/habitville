@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { Todo, TYPE_TODO } from './models';
+import { Todo, TYPE_TODO, TodoList, getDefaultTodoList, TodoTag } from './models';
 import {IonInput} from '@ionic/react';
 import { generateCollectionId } from '../../modules/data/utilsData';
+import ulog from 'ulog'
 
-const TodoNewComp = ({parentId = undefined, saveFunc, projectId}:
-  {parentId: string|undefined, projectId: string|undefined, saveFunc: Function}) => {
+
+const log = ulog('todo');
+
+
+const TodoNewComp = ({list, tag,  saveFunc, projectId}:
+  {list:TodoList|undefined, tag:TodoTag|undefined, projectId: string, saveFunc: Function}) => {
 
   const [state, setState] = useState({title:''});
-
+  
   //TODOS: testing....
   const setNewTitle = (e) => {
     setState({title: e.detail.value});
@@ -22,10 +27,30 @@ const TodoNewComp = ({parentId = undefined, saveFunc, projectId}:
 
 
   const save = async () => {
+      let fullname;
+      if(!list){
+        fullname = getDefaultTodoList('tasks', projectId).fullname;
+      }
+      else {
+        fullname = list.fullname;
+      }
+      
+
+      log.warn('SAVING TODO::: ', projectId, list);
       const id = generateCollectionId(projectId, TYPE_TODO)
-      const newDoc = new Todo({id, name: state.title, parent: parentId, _new: true});
-      console.log('NEW TODO::::::::::::::: ', newDoc)
-      await saveFunc(newDoc, parentId);
+      const newDoc = new Todo({
+        id, 
+        name: state.title, 
+        list: fullname,
+        _new: true});
+
+      if(tag){
+        log.warn('Saving a tag made manually ', tag);
+        newDoc.tags.push(tag.fullname);
+      }
+       
+      log.warn('NEW TODO::::::::::::::: ', newDoc)
+      await saveFunc(newDoc);
   };
 
 

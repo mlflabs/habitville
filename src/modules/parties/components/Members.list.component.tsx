@@ -1,47 +1,82 @@
-import React, { useState } from 'react';
-import { PartyProject } from '../models';
-import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton } from '@ionic/react';
+import React, { useReducer } from 'react';
+import { PartyProject, PartyMember } from '../models';
+import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel } from '@ionic/react';
 import { partyService } from '../party.service';
-
+import  ulog from 'ulog';
+import { authService } from '../../auth/authService';
+import { canEditProject } from '../../data/utilsData';
+const log = ulog('memberlist');
 
 export interface MembersState {
   showAddModal: boolean,
+  members: PartyMember[],
 }
 
 
-const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
-  const [state, setState] = useState<MembersState>({showAddModal: false})
+const reducer = (state, action): MembersState => {
+  switch(action.type) {
+    case 'showAddMemberModal':
+      return {...state, ...{showAddModal: true}};
+    case 'hideAddMemberModal':
+      return {...state, ...{showAddModal: false}};
 
+    default:
+      log.error('Action type is not a match');
+      return state;
+  }
+}
+
+const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
+  const [state, _dispatch] = useReducer(reducer, {
+    showAddModal: false,
+    members: [],
+  })
+
+  const dispatch = (type: 'showAddMemberModal'|
+                          'hideAddMemberModal', 
+                    data:any = {}) => {
+    _dispatch({type, data});
+  }
 
   const addMember = () => {
-    setState({...state, ...{showAddModal: true}});
+    dispatch("showAddMemberModal");
+    
   }
 
   const hideAddUser = () => {
-    setState({...state, ...{showAddModal: false}});
+    dispatch('hideAddMemberModal');
+  }
+
+  const canEditThisProject = () => {
+    const self = project.members.find(m => m.id === authService.userid);
+    if(!self) return false;
+    return canEditProject(self.rights);
   }
 
   return (
     <IonCard>
       <IonCardHeader>
         <IonCardTitle>Members</IonCardTitle>
-        {state.showAddModal? (
-          <IonItem>
-            
-          </IonItem>
-        ) : (
-          <></>
-        )}
       </IonCardHeader>
       <IonCardContent>
         <IonList>
-         
+            {project.members.map(member => (
+              <IonItem  button 
+                        key={member.id}
+                        onClick={() => {}}>
+              <IonLabel>
+                {member.username}
+              </IonLabel>
+            </IonItem>
+            ))}
         </IonList>
         
       </IonCardContent>
-      <IonFooter>
-        <IonButton onClick={()=>addMember()} fill="clear">Add Member</IonButton>
-      </IonFooter>
+      {canEditThisProject()? (
+        <IonFooter>
+          <IonButton onClick={()=>addMember()} fill="clear">Add Member</IonButton>
+        </IonFooter>
+      ) : ( <></>)}
       <IonAlert 
         isOpen={state.showAddModal}
         onDidDismiss={() => hideAddUser()}

@@ -8,9 +8,9 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem,
 
 
 const PartyEditComponent = ({party, dismissFunc}:
-    {party: PartyProject, dismissFunc:{(party: PartyProject|null, action: 'save'| 'remove' | 'none')}}) => {
+    {party: PartyProject| null, dismissFunc:{(party: PartyProject|null, action: 'save'| 'remove' | 'none')}}) => {
 
-  const [state, setState] = useState({party})
+  const [state, setState] = useState({party: party||new PartyProject()})
 
 
   const handleChange = (e) => {

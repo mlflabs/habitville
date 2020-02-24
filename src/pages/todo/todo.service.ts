@@ -1,30 +1,37 @@
 
-import { Todo, TYPE_TODO } from './models';
+import { Todo, TYPE_TODO, TodoList, TYPE_TODO_LIST, TodoTag, TYPE_TODO_TAG, getDefaultTodoList, getDefaultTodoTag } from './models';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { dataService } from '../../modules/data/dataService';
-import { saveIntoArray, waitMS } from '../../modules/data/utilsData';
-import { ProjectItem } from '../../modules/data/models';
+import { waitMS, getProjectChildId } from '../../modules/data/utilsData';
 import _ from 'lodash';
 import { gamifyService } from '../../modules/gamify/gamifyService';
+import ulog from 'ulog';
+import { toastService } from '../../modules/toast/toastService';
+import sun from '../../icons/sun.json'
+import star from '../../icons/star.json'
+
+const log = ulog('todo');
+
 
 export interface TodoState {
   selectedTodo: Todo|null,
-  selectedTag: string,
+  list: TodoList|undefined,
+  tag: TodoTag|undefined,
   docs: Todo[],
-  tags: string[],
+  tagDocs: TodoTag[],
   doneTodos: boolean,
-  showSubTodos: boolean,
 }
+
+
 
 export const getInitTodoState = (): TodoState => {
   return {
     selectedTodo:null,
-    selectedTag: 'all',
+    list: undefined,
+    tag: undefined,
     docs: [],
-    tags: ['today', 'tasks', 'important', 'wish', 'buy', 'projects', 'all'],
+    tagDocs: [],
     doneTodos: false,
-
-    showSubTodos: false,
   }
 }
 
@@ -32,105 +39,82 @@ export const getInitTodoState = (): TodoState => {
 export class TodoService {
   
   // @ts-ignore: it will be initialized in init
-  private _project: ProjectItem;
-
+  private _projectid: string;
   private _state: TodoState = getInitTodoState();
-  
   public state$ = new BehaviorSubject(this._state);
-
-  // private _docs: Todo[] = [];
-  
-  // public docs$ = new BehaviorSubject(this._docs);
-
   private _subscription: Array<Subscription> = [];
 
-
-
-  public init(project: ProjectItem, tag: string) {
+  public init(projectid: string, list:string|undefined, tag:string|undefined) {
+    log.warn(projectid, list, tag);
     //first unsubscribe
     this.unsubscribe();
     const dataSub = dataService.getReadySub().subscribe( async (ready) => {
       if(!ready) return;
       
-      this._init(project, tag);
+      this._init(projectid, list, tag);
 
       await waitMS(1000);
       dataSub.unsubscribe();
     });
   }
 
-  async _init(project: ProjectItem, tag: string) {
+  async _init(projectid: string, listName: string|undefined, tagName: string|undefined) {
     console.log('-------------------------------------------');
-    console.log("Init: ", project, TYPE_TODO);
-    if(this._project && this._project.id === project.id && 
-      this._state.selectedTag === tag) return;
+    console.log("Init: ", projectid, TYPE_TODO);
 
-    const showChildren = (tag === 'today' || tag === 'important')? true : false;
+    if(this._projectid  === projectid && 
+        this._state.list?.fullname === listName && 
+        this._state.tag?.fullname === tagName) return;
 
-    this._state = {...this.state, ...{ selectedTag: tag, showSubTodos: showChildren}};
+    let list, tag
+    if(!listName && !tagName){
+      list = getDefaultTodoList('default', projectid)     
+    }
+    if(listName)
+      list = getDefaultTodoList(listName, projectid)    
+    if(tagName)
+      tag = getDefaultTodoTag(tagName, projectid);
 
-    await waitMS(500);
-    console.log('Loadng new project::: ');
-    this._project = project;
 
-    // console.log("Init Docs: ", this._docs);
-    //this.filterTodos();
+
+    this._state = {...this.state, ...{
+      tag, 
+      list,
+      tagDocs: this.getTags(projectid)}};
+    
+      log.warn(this._state);
+    
+    this._projectid = projectid;
+    
+    log.info(this.state);
+
     this.reloadTodos();
-    //todoMiddleware.init();
 
-    //manage changes
-
-    const sub = dataService.subscribeProjectCollectionChanges(project.id,TYPE_TODO)
+    const sub = dataService.subscribeProjectCollectionChanges(projectid,TYPE_TODO)
       .subscribe((doc: Todo) => {
-        console.log("TodoService subscription: ", doc); 
+        log.log("TodoService subscription: ", doc); 
         this.reloadTodos();
-        //testing just reload the whole thing
-        //this.reloadBaseParent(doc);
       });
     this._subscription.push(sub);
 
   }
 
-  private async reloadBaseParent(todo:Todo){
-    console.log("Loading base parent");
-    const baseParent = await this.getBaseParent(todo);
-    console.log("Base Parent::: ", baseParent);
-    if(!baseParent) return this.reloadTodos();
-
-    if(baseParent.deleted){
-      this.filterAndSaveTodos(this.state.docs.filter(d => d.id !== todo.id));
+  async reloadTodos() {
+    log.info('RELOADING TODOS::: ', this.state)
+      let docs;
+    if(this.state.list){
+        log.info('Todo Query by List')
+        docs = await dataService.queryByProperty(
+          'list', 'equals', this.state.list.fullname, TYPE_TODO);
     }
-    else {
-      this.filterAndSaveTodos(saveIntoArray(baseParent, this.state.docs));
+     else if(this.state.tag){
+        log.info('Todo Query by Tags')
+        docs = await dataService.queryByProperty(
+          'tags', 'equals', this.state.tag.fullname, TYPE_TODO);
     }
-    
-  }
 
-  private async getBaseParent(todo:Todo){
-    if(todo.parent){
-      const parent = await dataService.getDoc(todo.parent, TYPE_TODO);
-      if(!parent) {
-        return null;
-      }
-
-      if(parent.parent){
-        return this.getBaseParent(parent);
-      }
-      else {
-        return parent;
-      }
-    }
-    else {
-      return todo;
-    }
-  }
-
-  private async reloadTodos() {
-    console.log('State: ', this.state);
-    const docs = await dataService.queryByProperty('tags', 'equals', 
-      this.state.selectedTag, TYPE_TODO);
-    console.log('DOCS::: ', docs);
     this.filterAndSaveTodos(docs);
+   
   }
 
   private filterAndSaveTodos(docs: Todo[]):Todo[] {
@@ -142,7 +126,6 @@ export class TodoService {
   private filterDoneParentFunction(doc:Todo) {
       console.log('Filter1: ', doc.done !== this._state.doneTodos)
       if (doc.done !== this._state.doneTodos) return false;
-      if (doc.parent && !this.state.showSubTodos) return false;
       return true;
   }
 
@@ -187,26 +170,62 @@ export class TodoService {
 
 
   public async save(doc:Todo, parentId: string|null = null) {
-    console.log("------- Save: ", doc, this._project, TYPE_TODO);
+    console.log("------- Save: ", doc, this._projectid, TYPE_TODO);
     //see if its new
     if(doc._new) {
       delete(doc._new);
       doc.tags = [];
-      if(this.state.selectedTag !== 'all'){
-        doc.tags.push(this.state.selectedTag); 
+      if(this.state.list)
+        doc.list = this.state.list.fullname;
+      else
+        doc.list = getProjectChildId(this._projectid)+'default'
+      if(!doc.tags){
+        doc.tags = [];
       }
-      else {
-        doc.tags.push('tasks');
-      }
+      if(this.state.tag)
+        doc.tags.push(this.state.tag.fullname)
+     
+        
+
       doc = gamifyService.calculateNewTodo(doc);
     }
-    const res = await dataService.save({...{done: false}, ...doc}, TYPE_TODO, {project: this._project});
+    const res = await dataService.save({...{done: false}, ...doc}, TYPE_TODO, {projectid: this._projectid});
     if(parentId && doc.id) {
       this.addSubTodoToParent(doc.id, parentId)
     }
     console.log(res);
     return res;
 
+  }
+
+  public async saveList(doc:TodoList) {
+    log.info('Save New TodoList: ', doc);
+    if(doc._new) {
+      //make sure its not a duplicate
+      const res = await dataService.getDoc(doc.id, TYPE_TODO_LIST);
+      if(res){
+        //error, its a duplicate
+        toastService.printSimpleError('List Already Exists');
+        return;
+      }
+      delete doc._new;;
+      const saveRes = await dataService.save(doc, TYPE_TODO_LIST);
+      log.info(saveRes);
+      return saveRes;
+    }
+  }
+
+  public async deleteList(list:TodoList) {
+    //get all docs that are in this list
+    log.warn(list);
+    const docs = await dataService.queryByProperty('list', 'equals', list.fullname,TYPE_TODO);
+    log.warn(docs);
+    //delete all items
+    for(let i = 0; i < docs.length; i ++){
+      dataService.remove(docs[i].id, TYPE_TODO);
+    }
+    if(list.id)
+      dataService.remove(list.id, TYPE_TODO_LIST);
   }
 
   public async remove(id: string) {
@@ -236,23 +255,37 @@ export class TodoService {
 
   }
 
-  public changeShowSubtodosFilter(show: boolean) {
-    if(show === this._state.showSubTodos) return;
-    this._state = {...this._state, ...{ showSubTodos: show} };
+  public getTags(projectid):TodoTag[] {
+    const today =  {
+        type: TYPE_TODO_TAG,
+        id:'',
+        name: 'today',
+        fullname: getProjectChildId(projectid) + 'today',
+        icon: 'sun.svg',
+        animatedIcon: sun,
+      };
+    today.fullname = getProjectChildId(projectid) + 'today';
+    const important ={
+        id:'',
+        type: TYPE_TODO_TAG,
+        name: 'important',
+        fullname: getProjectChildId(projectid) + 'important',
+        icon: 'star.svg',
+        animatedIcon: star,
+      };
+    today.fullname = getProjectChildId(projectid) + 'today';
+    //console.log(today, important);
+    const tags =  [today, important];
+    console.log(tags);
+    return tags;
+  }
+
+
+  public selectList(list:TodoList) {
+    if(list === this._state.list) return;
+    this._state = {...this._state, ...{ list } };
     this.reloadTodos();
   }
-
-  public selectTag(tag:string) {
-    if(tag === this._state.selectedTag) return;
-    this._state = {...this._state, ...{ selectedTag: tag} };
-    this.reloadTodos();
-  }
-
-  public async loadTodoList (list:string[]): Promise<Todo[]> {
-    const todos = await dataService.getBulk(list, TYPE_TODO);
-    return todos;
-  }
-
 
   public unsubscribe() {
     if(!this) return;

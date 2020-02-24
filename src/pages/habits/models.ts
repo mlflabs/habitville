@@ -66,5 +66,6 @@ export class Habit extends Doc {
     super()
     Object.assign(this, values);
   }
-
 }
+
+

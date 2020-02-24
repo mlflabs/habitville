@@ -9,6 +9,7 @@ import HabitListComponent from '../../../pages/habits/Habit.list.component';
 import { waitMS } from '../../../utils';
 import PartyMembersListComponent from '../components/Members.list.component';
 import { first } from '../../../../node_modules/rxjs/operators';
+import ChallengeListComponent from '../components/Challenge.list.component';
 
 
 
@@ -72,7 +73,7 @@ const PartyViewPage = () => {
       {state.party.id? (
         <>
           <PartyMembersListComponent  project={state.party} />
-          <HabitListComponent project={state.party} />
+          <ChallengeListComponent project={state.party} />
         </>
       ):(<></>)}
 

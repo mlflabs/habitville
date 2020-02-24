@@ -1,20 +1,24 @@
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { map, debounceTime, filter, throttleTime } from 'rxjs/operators';
-import {  getProjectChildId,  generateCollectionId, TYPE_SETTINGS, waitMS } from './utilsData';
+import { getProjectChildId, generateCollectionId, 
+  TYPE_SETTINGS, waitMS, getChannelFromProjectId } from './utilsData';
 
 import { ProjectItem, DIV } from './models';
 import _ from 'lodash';
 import DexieAdapter, { DatabaseScheme } from './adapters/dexie';
 import { TYPE_HABBIT } from '../../pages/habits/models';
-import { TYPE_TODO } from '../../pages/todo/models';
+import { TYPE_TODO, TYPE_TODO_LIST, TYPE_TODO_TAG } from '../../pages/todo/models';
 import { TYPE_PARTY } from '../parties/models';
 import { TYPE_MSG } from '../messages/models';
 import { env } from '../../env';
 import { authService } from '../auth/authService';
 import localStorageService from '../localStorage/localStorageService';
 import { syncData } from './sync';
-import { loadingService } from '../loading/loadingService';
-import { post, getPostRequest, getAjaxErrorMessage } from '../ajax/ajax';
+import { post, getPostRequest } from '../ajax/ajax';
+import ulog from 'ulog';
+import { logoWebComponent } from 'ionicons/icons';
+
+const log = ulog('dataService');
 
 export interface DataChangeEvent {
   doc: any,
@@ -23,7 +27,7 @@ export interface DataChangeEvent {
 
 const databaseScheme: DatabaseScheme =  {
   name: 'guest_dx',
-  version: 4,
+  version: 11,
   tables: [
     {
       name: TYPE_SETTINGS,
@@ -31,11 +35,19 @@ const databaseScheme: DatabaseScheme =  {
     },
     {
       name: TYPE_PARTY,
-      columns: 'id, dirty, party, type'
+      columns: 'id, dirty, party, type, secondaryType'
     },
     {
       name: TYPE_TODO,
-      columns: 'id, done, deleted, parent, *tags, dirty'
+      columns: 'id, done, deleted, list, *tags, dirty'
+    },
+    {
+      name: TYPE_TODO_LIST,
+      columns: 'id, dirty, folder, secondaryType, fullname'
+    },
+    {
+      name: TYPE_TODO_TAG,
+      columns: 'id, dirty'
     },
     {
       name: TYPE_HABBIT,
@@ -62,12 +74,18 @@ class DataService {
     this.addSyncCall$.pipe(
       throttleTime(5000),
     ).subscribe(() => {
+        console.log('******************** SYNCING *************************')
         this._syncRemote();
       })
   }
 
   // access
-  async getDoc(id: string,  collection: string): Promise<any> {
+  async getDoc(id: string|undefined,  collection: string): Promise<any> {
+    if(id === undefined){
+      log.error('Id was undefined ', id, collection);
+      throw new Error('Doc Id cannot be undefined, check logic.');
+    }
+      
     console.log('Get Doc: ', id, collection);
     return await this.db.getDoc(id, collection);
   }
@@ -95,10 +113,11 @@ class DataService {
   }
 
 
-  async save(doc:any, collection: string, props:{project?: ProjectItem, 
+  async save(doc:any, collection: string, props:{projectid?: string, 
     oldDoc?: any,remoteSync?:boolean} = {}): Promise<any> {  
-    
+      console.log('SAVING DOC *******************', doc, props, collection);
       if(!props) props = {remoteSync: true};
+      if(props.remoteSync === undefined) props.remoteSync = true;
     
       try {
         let oldDoc = {};
@@ -113,9 +132,9 @@ class DataService {
         }
     
         if(!doc.id) {
-          if(!props.project) throw new Error('Saving new doc requires valid props.project')
+          if(!props.projectid) throw new Error('Saving new doc requires valid props.project')
             // @ts-ignore:  we made this check at the begining
-          doc.id = generateCollectionId(props.project.id, collection);
+          doc.id = generateCollectionId(props.projectid, collection);
           doc.created = Date.now();
           // doc.updated = Date.now();
         }
@@ -125,6 +144,7 @@ class DataService {
 
         const res = await this.db.save(doc, collection);
 
+        console.log('******* Are we syncing it with SERVER:::: ', props, props.remoteSync);
         if (props.remoteSync)
           this.addSyncCall$.next();
 
@@ -136,7 +156,7 @@ class DataService {
           return false;
         }
       catch (e) {
-        console.log('Save Pouch Error: ', e);
+        console.log('DEXIE error: ', e);
         return false;
       }
   }
@@ -177,16 +197,41 @@ class DataService {
 
 
 
+
+  async saveSystemDoc(doc: any, project:ProjectItem, collection: string): Promise<any> {
+    
+    //set id
+    const doc2 = {}
+    if(!doc.type) 
+      throw new Error('Saving system doc requires doc to have type property');
+    if(doc.secondaryType)
+      doc2['secondaryType'] = doc.secondaryType;
+
+    const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/addNewSystemDoc',
+                      {...{ token: authService.getToken(), 
+                        doctype: doc.type,
+                        channelid: getChannelFromProjectId(project.id),
+                        doc: doc }, ...doc2}, {} ), false) ;
+    console.log(res);
+    if(!res.success)
+      return res;
+
+    return await this.db.save(res.data.doc, collection, false);
+  }
+
+
+
+
   public async remove(id: string, collection: string, remoteSync:boolean = true) {
     try {
-      const doc = this.getDoc(id, collection);
+      const doc = await this.getDoc(id, collection);
       if(!doc) return false;
-      const res =  this.db.save({...doc, ...{deleted: true}});
+      log.warn('Deleting doc: ',id);
+      log.warn(doc);
+      const res =  this.db.save({...doc, ...{deleted: true}}, collection);
       console.log(res);
       if (remoteSync)
         this.addSyncCall$.next();
-
-
       return res;
     }
     catch(e) {
@@ -244,6 +289,22 @@ class DataService {
   }
 
 
+  subscribeByPropertyChange(
+    property: string,
+    value: any,
+    debounce: number = 0): Observable<any> {
+    return this.db.changes$.asObservable().pipe(
+      debounceTime(debounce),
+      
+      filter((change: DataChangeEvent) => { 
+        console.log('%%%%%%%%CHANGE LOG PROPERTY%%%%%%%%%%', change)
+        // eslint-disable-next-line eqeqeq
+        console.log('TESTING::: ',change.doc[property], value )
+        return (change.doc[property] == value);
+      }),
+      map((change: DataChangeEvent) => change.doc)
+    ); 
+  }
 
   subscribeProjectCollectionChanges(projectid: string|undefined,
     type: string,
@@ -255,7 +316,7 @@ class DataService {
       debounceTime(debounce),
       
       filter((change: DataChangeEvent) => { 
-        console.log('%%%%%%%%%%%%%%%%%%%%%',change, projectChildId + DIV  + type + DIV)
+        console.log('%%%%%%%%CHANGE LOG%%%%%%%%%%',change, projectChildId + DIV  + type + DIV)
         return change.doc.id.startsWith(projectChildId + DIV + type + DIV);
       }),
       map((change: DataChangeEvent) => change.doc)

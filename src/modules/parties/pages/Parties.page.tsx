@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import {
   IonPage,
   IonContent,
@@ -21,19 +21,26 @@ import PartyListItemComponent from '../components/Party.listitem.component';
 import { useHistory } from 'react-router-dom';
 import PartyInvitesListComponent from '../components/Party.invites.component';
 
-export interface state {
+export interface PartiesState {
   userId: string,
   showModal: boolean,
-  party: PartyProject
-  partyList: PartyProject[],
+  party: PartyProject|null
+  docs: PartyProject[],
 }
-
-export const getDefaultState = () => {
-  return {
-    userId: '',
-    showModal: false,
-    party: new PartyProject(),
-    partyList: [],
+const reducer = (state, action:{type:string, data:any}): PartiesState => {
+  console.log(action, state);
+  switch(action.type) {
+    case 'dismissEdit':
+      return {...state, ...{showModal: false, party: null}}
+    case 'edit':
+      return {...state, ...{showModal: true, party: action.data}}
+    case 'docs':
+      return {...state, ...{docs:action.data}};
+    case 'userid': 
+      return {...state, ...{userId: action.data}};
+    default:
+      console.log('ERROR, INCORRECT ACTION TYPE ', action);
+      return state;
   }
 }
 
@@ -41,17 +48,30 @@ export const getDefaultState = () => {
 
 const PartiesPage = () => {
   const history = useHistory();
-  const [state, setState] = useState<state>(getDefaultState())
+  const [state, _dispatch] = useReducer(reducer, {
+    userId: '',
+    showModal: false,
+    party: new PartyProject(),
+    docs: [],
+  })
+
+  const dispatch = (type: 'userid'|
+                          'dismissEdit'|
+                          'edit'|
+                          'docs', data:any = null) => {
+      _dispatch({type, data});                      
+  }
+
   console.log('Parties Page:: ', state);
 
   useEffect(() => {
     const subs = [
       authService.username$.subscribe(username => {
-        setState({...state, ...{userId: authService.userid}})
+        dispatch('userid', authService.userid);
       }),
 
       partyService.state$.subscribe(changes => {
-        setState({...state, ...{partyList: changes.docs, userId: authService.userid}});
+        dispatch('docs', changes.docs);
       }),
 
     ]
@@ -60,19 +80,20 @@ const PartiesPage = () => {
         if(sub) sub.unsubscribe();
       });
     };
+    // eslint-disable-next-line
   }, [])
 
   const editParty = (party:PartyProject = new PartyProject()) => {
     console.log('Add party:  ', party);
-    setState({...state, ...{showModal: true, party}});
+    dispatch('edit', party);
   }
 
 
   const modalDismissFunc = (party: PartyProject|null, action:'save'|'remove'|'none') => {
     console.log('PARTY: ', party)
-    setState({...state, ...{showModal: false, party: new PartyProject()}});
+    dispatch('dismissEdit')
     if(action === 'save' && party != null){
-      partyService.save(party)
+      partyService.saveParty(party)
     }
     else if(action === 'remove' && party != null && party.id){
       //dataFunc.remove(habit._id);
@@ -80,7 +101,7 @@ const PartiesPage = () => {
   }
 
   const hideModal = () => {
-    setState({...state, ...{showModal: false, party: new PartyProject()}});
+    dispatch('dismissEdit');
   }
 
   return (
@@ -117,7 +138,7 @@ const PartiesPage = () => {
           </IonCardContent>
         </IonCard>
       <IonList>
-        {state.partyList.map(party => (
+        {state.docs.map(party => (
           <PartyListItemComponent partyProject={party} 
                                   history={history}
                                   key={party.id}

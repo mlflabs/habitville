@@ -1,5 +1,5 @@
 import { Subscription, BehaviorSubject } from "rxjs";
-import { PartyProject, TYPE_PARTY } from "./models";
+import { PartyProject, TYPE_PARTY, Challenge } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
 import { AuthService, authService } from '../auth/authService';
@@ -33,12 +33,14 @@ export class PartyService {
 
     const sub1 = dataService.subscribeChanges().subscribe(doc => {
       console.log(doc);
-      if(doc.type === 'party'){
+      if(doc.type === 'party' && doc.secondaryType === 'project'){
+        console.log('Updating Party Project: ', doc);
         const docs = saveIntoDocList(doc, this._state.docs);
         this.state = {...this._state, ...{docs}};
+        console.log('Updating Party Project: ', doc, this._state);
       }
     });
-    const docs = await dataService.queryByProperty('type', 'equals', 'party', TYPE_PARTY);
+    const docs = await dataService.queryByProperty('secondaryType', 'equals', 'project', TYPE_PARTY);
     this.state = {...this._state , ...{docs}};
 
 
@@ -79,7 +81,7 @@ export class PartyService {
     
   }
 
-  public save(partyProject: PartyProject){
+  public saveParty(partyProject: PartyProject){
     if (!partyProject.id) {
       this._createParty(partyProject);
     }
@@ -98,6 +100,24 @@ export class PartyService {
         
     loadingService.hideLoading();
 
+  }
+
+  public saveChallenge(challenge:Challenge, party:PartyProject){
+    if(!challenge.id) {
+      this._createChallenge(challenge, party);
+    }
+  }
+
+  private async _createChallenge(challenge:Challenge, partyProject: PartyProject) {
+    console.log('Saving System Doc::: ', partyProject);
+    loadingService.showLoading('Adding Challenge, please wait, ' +
+                'internet connection required');
+    const res = await dataService.saveSystemDoc(challenge,partyProject, TYPE_PARTY);
+    console.log(res);
+    if(!res.success){
+      return toastService.printServerErrors(res);
+    }
+    loadingService.hideLoading();
   }
 
 

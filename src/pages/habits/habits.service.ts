@@ -2,10 +2,11 @@
 import { Habit, habitStage, TYPE_HABBIT } from './models';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { dataService } from '../../modules/data/dataService';
-import { saveIntoArray, waitMS } from '../../modules/data/utilsData';
+import { saveIntoArray, waitMS, isThisUserProject } from '../../modules/data/utilsData';
 import { ProjectItem } from '../../modules/data/models';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import _ from 'lodash';
+import { authService } from '../../modules/auth/authService';
 
 export interface habitsState {
   selected: Habit | null,
@@ -96,7 +97,7 @@ export class HabitsService {
   public set state(value: habitsState) {
     this._state = value;
     this.state$.next(this._state);
-  }
+}
 
   public get docs(): Habit[] {
     return this._docs;
@@ -113,10 +114,17 @@ export class HabitsService {
 
     //check if its new, no id, its noew
     if (!doc.id) {
-      doc = Object.assign(gamifyService.calculateNewHabitRewards(doc));
+      if(isThisUserProject(this._project.id, authService.getUser().id)){
+        console.log('Savingl new personal challenge');
+        doc = Object.assign(gamifyService.calculateNewHabitRewards(doc));
+        return dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { projectid: this._project.id });
+      }
+      else {
+        console.log('Saving party challenge')
+      }
     }
-
-    dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { project: this._project });
+    else
+      dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { projectid: this._project.id });
   }
 
   public remove(id: string) {

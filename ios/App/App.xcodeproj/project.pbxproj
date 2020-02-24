@@ -7,14 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		27F4201523FA9AFB006304CC /* Capacitor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201423FA9AFB006304CC /* Capacitor.framework */; };
-		27F4201623FA9AFB006304CC /* Capacitor.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201423FA9AFB006304CC /* Capacitor.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		27F4201A23FA9B06006304CC /* Cordova.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201823FA9B06006304CC /* Cordova.framework */; };
-		27F4201B23FA9B06006304CC /* Cordova.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201823FA9B06006304CC /* Cordova.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		27F4201C23FA9B06006304CC /* CordovaPlugins.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201923FA9B06006304CC /* CordovaPlugins.framework */; };
-		27F4201D23FA9B06006304CC /* CordovaPlugins.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27F4201923FA9B06006304CC /* CordovaPlugins.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		27F4201E23FA9B06006304CC /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
-		27F4201F23FA9B06006304CC /* Pods_App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
@@ -25,27 +17,7 @@
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		27F4201723FA9AFB006304CC /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				27F4201F23FA9B06006304CC /* Pods_App.framework in Embed Frameworks */,
-				27F4201D23FA9B06006304CC /* CordovaPlugins.framework in Embed Frameworks */,
-				27F4201623FA9AFB006304CC /* Capacitor.framework in Embed Frameworks */,
-				27F4201B23FA9B06006304CC /* Cordova.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		27F4201423FA9AFB006304CC /* Capacitor.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Capacitor.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		27F4201823FA9B06006304CC /* Cordova.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Cordova.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		27F4201923FA9B06006304CC /* CordovaPlugins.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CordovaPlugins.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,11 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27F4201E23FA9B06006304CC /* Pods_App.framework in Frameworks */,
-				27F4201C23FA9B06006304CC /* CordovaPlugins.framework in Frameworks */,
-				27F4201A23FA9B06006304CC /* Cordova.framework in Frameworks */,
 				A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */,
-				27F4201523FA9AFB006304CC /* Capacitor.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,9 +47,6 @@
 		27E2DDA53C4D2A4D1A88CE4A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				27F4201823FA9B06006304CC /* Cordova.framework */,
-				27F4201923FA9B06006304CC /* CordovaPlugins.framework */,
-				27F4201423FA9AFB006304CC /* Capacitor.framework */,
 				AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */,
 			);
 			name = Frameworks;
@@ -141,7 +106,6 @@
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
 				9592DBEFFC6D2A0C8D5DEB22 /* [CP] Embed Pods Frameworks */,
-				27F4201723FA9AFB006304CC /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -381,12 +345,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = BL8D5F73NP;
+				DEVELOPMENT_TEAM = UHDXR67FL8;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mlflabs.habitville;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mlflabs.habitville3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG USE_PUSH";
 				SWIFT_VERSION = 4.2;
@@ -400,11 +364,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = BL8D5F73NP;
+				DEVELOPMENT_TEAM = UHDXR67FL8;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.mlflabs.habitville;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mlflabs.habitville3;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = USE_PUSH;
 				SWIFT_VERSION = 4.2;

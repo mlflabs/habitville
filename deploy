@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+ionic build --release --prod
+cp -R ./build/* ../mlflabsStatic/habitville
+cd ../mlflabsStatic
+git add .
+git commit -m "updated habitville client"
+git push origin

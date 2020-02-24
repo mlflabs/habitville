@@ -40,7 +40,7 @@ export const syncData = async (props:{  data:any[],
       token: props.token,
       checkpoint: props.checkpoint,
       data,
-    }));
+    }),false,'');
 
     if(res) {
       //first save channel checkpoints

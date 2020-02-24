@@ -23,7 +23,7 @@ export const Routes = () => {
   
 
   
-  if(appStatus === AppStatus.auth && location.pathname.startsWith('/auth/')){
+  if(appStatus.status === AppStatus.auth && location.pathname.startsWith('/auth/')){
     if(location.state){
       const newpath = location.state['prev'] || '/';
       history.push(newpath);
@@ -32,16 +32,17 @@ export const Routes = () => {
   }
 
   const getRoutes = () => {
-    switch(appStatus){
+    switch(appStatus.status){
       case AppStatus.auth:
         return (
           <IonSplitPane when="sm" contentId="main">
-            <Menu key="menu" />
+            <Menu key="menu"/>
             <IonRouterOutlet id="main">
                 <Route path="/home" component={Home} exact={true} />           
                 <Route exact path="/auth/user" component={UserPage} />
                 <Route path="/todos" component={TodosPage} exact={true} />
-                <Route path="/todos/:tag" component={TodosPage} exact={true} />
+                <Route path="/todos/:list" component={TodosPage} exact={true} />
+                <Route path="/todos/tag/:tag" component={TodosPage} exact={true} />
                 <Route path="/habits" component={HabitsPage} exact={true} />
                 <Route path="/parties" component={PartiesPage} exact={true} />
                 <Route path="/parties/:id" component={PartyViewPage} exact={true} />

@@ -100,7 +100,9 @@ export default class DexieAdapter {
         field, operator, value, collection);
     switch(operator) {
       case 'equals':
-        return await this.db[collection].where(field).equals(value).toArray();
+        const docs = await this.db[collection].where(field).equals(value).toArray();
+        console.log(docs, collection, field, operator, value);
+        return docs;
       case 'startsWith':
         return await this.db[collection].where(field).startsWith(value).toArray();
       case 'notEqual':
