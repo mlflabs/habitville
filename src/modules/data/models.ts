@@ -14,7 +14,7 @@ export class Doc {
   public updated?: number = Date.now();
   public type: string = 'doc';
   public dirty?: number = 0;
-
+  public rev = 1;
   constructor(values: Object = {}) {
       Object.assign(this, values);
   }

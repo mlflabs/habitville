@@ -8,8 +8,6 @@ import { authService } from '../../modules/auth/authService';
 import { IonList, IonItem, IonLabel, IonItemDivider, IonItemGroup, IonItemSliding, IonItemOptions, IonItemOption, IonAlert, IonIcon } from '@ionic/react';
 import { useLocation } from 'react-router';
 import { todoService } from './todo.service';
-import Lottie from 'react-lottie';
-import sun from '../../icons/sun.json';
 import TodoMenuItemButtonComponet from './todo.menu.item';
 
 const log = ulog('todo');
@@ -72,7 +70,7 @@ const TodoMenuListComponent = ({projectid}: {projectid:string}) => {
 
 
   useEffect(() => {
-    const subTodoList = dataService.subscribeProjectCollectionChanges(
+    const subTodoList = dataService.subscribeProjectTypeChanges(
       projectid, TYPE_TODO_LIST ).subscribe(change => {
         log.info('Menu Change: ', change);
         dispatch('setTodoList', change);

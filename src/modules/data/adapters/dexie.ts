@@ -13,6 +13,7 @@ export interface DatabaseScheme {
 export interface TableScheme {
   name: string,
   columns: string,
+  sync: boolean,
 }
 
 

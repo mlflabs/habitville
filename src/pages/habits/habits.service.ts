@@ -61,7 +61,7 @@ export class HabitsService {
 
     //manage changes
 
-    const sub = dataService.subscribeProjectCollectionChanges(project.id, TYPE_HABBIT)
+    const sub = dataService.subscribeProjectTypeChanges(project.id, TYPE_HABBIT)
       .subscribe(doc => {
         console.log("habit Service Subscription: ", doc);
         if (doc.deleted)

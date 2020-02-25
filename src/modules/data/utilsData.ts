@@ -12,6 +12,7 @@ export function getDefaultProject(userid): ProjectItem {
   const uuid = 'u' + env.APP_ID + userid;
   return {
     id: generateProjectUUID(uuid, ''),
+    rev: 1,
     name: 'default',
     access:[],
     type: TYPE_SETTINGS,

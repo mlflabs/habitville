@@ -126,7 +126,7 @@ export class PartyService {
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/acceptChannelInvitation',
                       { token: authService.getToken(), msgId: msg.id,}, {} ), 
-                      true, 'Accept Request sent, waiting for reply.');
+                      true, 'Accept Reply sent, waiting for reply.');
       console.log(res);
 
       if(!res.success){
@@ -145,13 +145,41 @@ export class PartyService {
     catch (e) {
       console.log(e);
     }
+  }
 
+  public async acceptFriendInvitation(msg:Msg){
+    //lets send a request
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/social/acceptFriendInvitation',
+                      { token: authService.getToken(), msgId: msg.id,}, {} ), 
+                      true, 'Accept Reply sent, waiting for reply.');
+      console.log(res);
 
+      if(!res.success){
+        return toastService.printServerErrors(res);
+      }
 
-   
+      toastService.showMessage('Friend acceptance reply sent. Please wait for app update.', 
+        ToastType.success);
+
+      await waitMS(2000);
+
+      dataService.addSyncCall$.next();
+
+      msg.replied = {accepted: true, date: Date.now()};
+      dataService.save(msg, TYPE_MSG);
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 
   public async rejectPartyInviation(msg:Msg) {
+    const newMsg = {...msg, ...{replied:{accepted: false, date: Date.now()}}}
+    dataService.save(newMsg, TYPE_MSG);
+  }
+
+  public async rejectFriendInviation(msg:Msg) {
     const newMsg = {...msg, ...{replied:{accepted: false, date: Date.now()}}}
     dataService.save(newMsg, TYPE_MSG);
   }

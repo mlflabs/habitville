@@ -90,7 +90,7 @@ export class TodoService {
 
     this.reloadTodos();
 
-    const sub = dataService.subscribeProjectCollectionChanges(projectid,TYPE_TODO)
+    const sub = dataService.subscribeProjectTypeChanges(projectid,TYPE_TODO)
       .subscribe((doc: Todo) => {
         log.log("TodoService subscription: ", doc); 
         this.reloadTodos();
@@ -256,27 +256,9 @@ export class TodoService {
   }
 
   public getTags(projectid):TodoTag[] {
-    const today =  {
-        type: TYPE_TODO_TAG,
-        id:'',
-        name: 'today',
-        fullname: getProjectChildId(projectid) + 'today',
-        icon: 'sun.svg',
-        animatedIcon: sun,
-      };
-    today.fullname = getProjectChildId(projectid) + 'today';
-    const important ={
-        id:'',
-        type: TYPE_TODO_TAG,
-        name: 'important',
-        fullname: getProjectChildId(projectid) + 'important',
-        icon: 'star.svg',
-        animatedIcon: star,
-      };
-    today.fullname = getProjectChildId(projectid) + 'today';
-    //console.log(today, important);
-    const tags =  [today, important];
-    console.log(tags);
+    const tags =  [
+      getDefaultTodoTag('today', projectid), 
+      getDefaultTodoTag('important', projectid)];
     return tags;
   }
 

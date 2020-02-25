@@ -19,7 +19,6 @@ import PartyEditComponent from '../components/Party.edit.component';
 import { partyService } from '../party.service';
 import PartyListItemComponent from '../components/Party.listitem.component';
 import { useHistory } from 'react-router-dom';
-import PartyInvitesListComponent from '../components/Party.invites.component';
 
 export interface PartiesState {
   userId: string,
@@ -145,7 +144,6 @@ const PartiesPage = () => {
                                   showEditModalFunction={editParty} />
         ))}  
       </IonList>
-      <PartyInvitesListComponent />
       <IonItem>
         <IonLabel>To join a party, you can give part leader your id: {state.userId} </IonLabel>
       </IonItem>

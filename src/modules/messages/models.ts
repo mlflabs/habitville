@@ -7,6 +7,7 @@ export interface Msg {
   to:string, 
   from:string, 
   type:string, 
+  messageType: string,
   message:string, 
   data: any
   replied?: {accepted: boolean, date:number},

@@ -16,46 +16,58 @@ import localStorageService from '../localStorage/localStorageService';
 import { syncData } from './sync';
 import { post, getPostRequest } from '../ajax/ajax';
 import ulog from 'ulog';
-import { logoWebComponent } from 'ionicons/icons';
+import { TYPE_SOCIAL } from '../social/models';
 
 const log = ulog('dataService');
 
 export interface DataChangeEvent {
   doc: any,
-  old?: any
+  old?: any,
 }
 
 const databaseScheme: DatabaseScheme =  {
   name: 'guest_dx',
-  version: 11,
+  version: 17,
   tables: [
     {
       name: TYPE_SETTINGS,
-      columns: 'id, dirty'
+      columns: 'id, dirty',
+      sync: true
     },
     {
       name: TYPE_PARTY,
-      columns: 'id, dirty, party, type, secondaryType'
+      columns: 'id, dirty, party, type, secondaryType',
+      sync: true
     },
     {
       name: TYPE_TODO,
-      columns: 'id, done, deleted, list, *tags, dirty'
+      columns: 'id, done, deleted, list, *tags, dirty',
+      sync: true
     },
     {
       name: TYPE_TODO_LIST,
-      columns: 'id, dirty, folder, secondaryType, fullname'
+      columns: 'id, dirty, folder, secondaryType, fullname',
+      sync: true
     },
     {
       name: TYPE_TODO_TAG,
-      columns: 'id, dirty'
+      columns: 'id, dirty',
+      sync: true
     },
     {
       name: TYPE_HABBIT,
-      columns: 'id, dirty'
+      columns: 'id, dirty',
+      sync: true
     },
     {
       name: TYPE_MSG,
-      columns: 'id, messageType, parent, dirty'
+      columns: 'id, messageType, dirty',
+      sync: true
+    },
+    {
+      name: TYPE_SOCIAL,
+      columns: 'id, name, dirty, secondaryType',
+      sync: true
     },
   ]
 }
@@ -112,6 +124,10 @@ class DataService {
     return await this.db.getProjectItems(getProjectChildId(projectid) + DIV, collection);
   }
 
+  async getAllByChannel(channel, collection): Promise<any> {
+    return await this.db.getProjectItems(channel + DIV, collection);
+  }
+
 
   async save(doc:any, collection: string, props:{projectid?: string, 
     oldDoc?: any,remoteSync?:boolean} = {}): Promise<any> {  
@@ -141,7 +157,8 @@ class DataService {
         //doc.updated = Date.now();
         doc.dirty = true;
         //res = await this._pouch.put({ ...oldDoc, ...doc });
-
+        if(!doc.rev)doc.rev = 1;
+        doc.rev ++;
         const res = await this.db.save(doc, collection);
 
         console.log('******* Are we syncing it with SERVER:::: ', props, props.remoteSync);
@@ -306,7 +323,7 @@ class DataService {
     ); 
   }
 
-  subscribeProjectCollectionChanges(projectid: string|undefined,
+  subscribeProjectTypeChanges(projectid: string|undefined,
     type: string,
     debounce: number = 0): Observable<any> {
     if(projectid === undefined) 
@@ -323,7 +340,20 @@ class DataService {
     ); 
   }
 
-
+  //project id and channel only difference is the suffic at end of proejctid
+  subscribeChannelTypeChanges(channel: string|undefined,
+    type: string,
+    debounce: number = 0): Observable<any> {
+    if(channel === undefined) 
+      throw new Error('Channel can not be undefined, can not subscribe to id') ;
+    return this.db.changes$.asObservable().pipe(
+      debounceTime(debounce),
+      filter((change: DataChangeEvent) => { 
+        return change.doc.id.startsWith(channel + DIV + type + DIV);
+      }),
+      map((change: DataChangeEvent) => change.doc)
+    ); 
+  }
 
   // internal
   public get ready() {
@@ -370,6 +400,10 @@ class DataService {
     let docs: any[] = [];
     for(let i = 0; i < databaseScheme.tables.length; i++) {
       console.log('Loading changes from: ', databaseScheme.tables[i].name);
+      if(!databaseScheme.tables[i].sync){
+        console.log('Skipping table');
+        continue;
+      }
       const res = await this.db.queryByProperty('dirty', 'equals', 1, databaseScheme.tables[i].name);
       console.log(databaseScheme.tables[i].name, res);
       docs.push(...res);

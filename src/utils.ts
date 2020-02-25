@@ -1,7 +1,25 @@
+import moment from 'moment';
+
 
 export const capitalize = (s: string) => {
   if (typeof s !== 'string') return ''
   return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+export const printDateRelative = (timestamp: number) => {
+  try {
+    const m = moment(timestamp);
+
+    if(moment().diff(m, 'd') < 3){
+      return m.fromNow();
+    }
+    else {
+      return m.format('DD-MM-YYYY');
+    }
+  }
+  catch(e){
+    console.log(e);
+  }
 }
 
 export function getNested(obj: any, ...args: string[]) {
