@@ -4,7 +4,7 @@ import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem,
 import { partyService } from '../party.service';
 import  ulog from 'ulog';
 import { authService } from '../../auth/authService';
-import { canEditProject } from '../../data/utilsData';
+import { canEditProjectByRights } from '../../data/utilsData';
 const log = ulog('memberlist');
 
 export interface MembersState {
@@ -50,7 +50,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
   const canEditThisProject = () => {
     const self = project.members.find(m => m.id === authService.userid);
     if(!self) return false;
-    return canEditProject(self.rights);
+    return canEditProjectByRights(self.rights);
   }
 
   return (
@@ -74,7 +74,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
       </IonCardContent>
       {canEditThisProject()? (
         <IonFooter>
-          <IonButton onClick={()=>addMember()} fill="clear">Add Member</IonButton>
+          <IonButton onClick={()=>addMember()} fill="clear">Invite</IonButton>
         </IonFooter>
       ) : ( <></>)}
       <IonAlert 

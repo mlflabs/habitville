@@ -2,12 +2,12 @@ import { Doc, ProjectItem } from "../data/models";
 
 export const TYPE_PARTY = 'party';
 
-export enum ChallengeStage {
-  'finished',
-  'current',
-  'future',
-  'waiting',
-  'resting',
+export enum ChallengeState {
+  finished = 'finished',
+  current = 'current',
+  future = 'future',
+  waiting = 'waiting',
+  resting = 'resting',
 }
 
 export enum ChallengeDifficulty {
@@ -24,6 +24,28 @@ export interface PartyMember {
   id: string,
   username: string,
   rights: string
+}
+
+export interface ChallengeRewards {
+  score: number,
+  item?: any,
+}
+
+export interface ChallengeAction {
+  date: string,
+  value: number, 
+  reward: ChallengeRewards,
+}
+export interface ChallengeMember {
+  id: string,
+  username: string,
+  score: number,
+  joinDate: number,
+  actions: { [key:string]: ChallengeAction },
+  lastCalculatedDate?: string,
+  currentStreak?: number,
+  biggestStreak?: number,
+  skippedDays?: number,
 }
 
 
@@ -51,15 +73,15 @@ export class Challenge extends Doc {
   type:string = TYPE_PARTY;
   access: string = ''
   secondaryType: string = 'challenge'
-  stage: ChallengeStage = ChallengeStage.waiting;
+  state: ChallengeState = ChallengeState.waiting;
   difficulty:ChallengeDifficulty = ChallengeDifficulty.medium;
   //regularity
   regularityInterval:ChallengeIntervals = ChallengeIntervals.day;
-  regularityValue: number = 1;
-  regularityEachDayGoal?: number = 1;
+  regularityIntervalGoal: number = 1;
+  regularityEachDayGoal: number = 1;
 
   //members
-  members: PartyMember[]  = []
+  members: ChallengeMember[]  = []
 
   constructor(values: Object = {}) {
     super()

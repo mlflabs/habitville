@@ -1,5 +1,5 @@
 import { Habit, MOMENT_DATE_FORMAT, habitIntervals } from './models';
-import moment, { Moment, months } from 'moment';
+import moment, { Moment } from 'moment';
 import { FIRST_DAY_OF_WEEK } from '../../env';
 import { clamp } from '../../utils';
 

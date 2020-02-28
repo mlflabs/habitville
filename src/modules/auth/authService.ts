@@ -94,6 +94,7 @@ export class AuthService {
 
   async updateUser(user: User, forceLogout = false) {
     // log.info('Userupdate: ', user, forceLogout, this._authStatus);
+    log.info('Update User:: ', user);
     if(!isGuest(user) || this._user.username ==='null') {
 
       if(this._authStatus !== AuthStatus.User) {
@@ -197,7 +198,7 @@ export class AuthService {
     console.log(res);
     if(res.success){
       await this.updateUser({...this._user, ...{token: res.data.token, 
-                                channels: res.data.channels,
+                                [env.ACCESS_META_KEY]: res.data[env.SERVER_ACCESS_META_KEY],
                                 token_expiery: res.data.expires}})
       //console.log('Token updated: ', res.data.token);
       console.log('NEW USER:: ', this._user);

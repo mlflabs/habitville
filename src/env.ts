@@ -22,6 +22,7 @@ export const env = {...{
   APP_ID: 'hv',
   //myenvoy settings
   ACCESS_META_KEY: 'access',
+  SERVER_ACCESS_META_KEY: 'ch',
   
 
   //Auth

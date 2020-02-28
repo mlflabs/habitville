@@ -1,5 +1,5 @@
 import { Subscription, BehaviorSubject } from "rxjs";
-import { PartyProject, TYPE_PARTY, Challenge } from "./models";
+import { PartyProject, TYPE_PARTY, Challenge, ChallengeState } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
 import { AuthService, authService } from '../auth/authService';
@@ -182,6 +182,83 @@ export class PartyService {
   public async rejectFriendInviation(msg:Msg) {
     const newMsg = {...msg, ...{replied:{accepted: false, date: Date.now()}}}
     dataService.save(newMsg, TYPE_MSG);
+  }
+
+  public async changeChallengeState(challengeid: string|undefined, state:ChallengeState){
+    if(!challengeid) throw new Error('Challengeid cannot be undefined');
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/changeChallengeState',
+                      { token: authService.getToken(), 
+                        challengeid, state}, {} ), 
+                      true, 'Saving challenge, please wait.');
+      console.log(res);
+
+      if(!res.success){
+        return toastService.printServerErrors(res);
+      }
+
+      await dataService.saveFromServer(res.data.doc, TYPE_PARTY);
+
+      toastService.showMessage('Challenge saved.', 
+        ToastType.success);
+
+      await waitMS(2000);
+      dataService.addSyncCall$.next();
+      await waitMS(2000);
+      dataService.addSyncCall$.next();
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }
+
+  public async submitChallengeProgress(challengeid: string|undefined, progress:number){
+    if(!challengeid) throw new Error('Challengeid cannot be undefined');
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/submitChallengeProgress',
+                      { token: authService.getToken(), 
+                        challengeid, progress}, {} ), 
+                      true, 'Saving challenge, please wait.');
+      console.log(res);
+
+      if(!res.success){
+        return toastService.printServerErrors(res);
+      }
+
+      toastService.showMessage('Challenge action submitted, please wait for update', 
+        ToastType.success);
+      await waitMS(2000);
+      dataService.addSyncCall$.next();
+      await waitMS(2000);
+      dataService.addSyncCall$.next();
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }
+
+  public async acceptChallenge(challenge:Challenge){
+    //lets send a request
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/acceptChallenge',
+                      { token: authService.getToken(), challengeid: challenge.id}, {} ), 
+                      true, 'Accept Reply sent, waiting for reply.');
+      console.log(res);
+
+      if(!res.success){
+        return toastService.printServerErrors(res);
+      }
+
+      toastService.showMessage('Challenge acceptance request sent. Please wait for update.', 
+        ToastType.success);
+
+      await waitMS(2000);
+
+      dataService.addSyncCall$.next();
+    }
+    catch (e) {
+      console.log(e);
+    }
   }
 
 

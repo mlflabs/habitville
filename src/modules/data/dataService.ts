@@ -128,6 +128,11 @@ class DataService {
     return await this.db.getProjectItems(channel + DIV, collection);
   }
 
+  //save without making it diryt
+  async saveFromServer(doc:any, type:string) {
+    await this.db.save(doc, type, false);
+  }
+
 
   async save(doc:any, collection: string, props:{projectid?: string, 
     oldDoc?: any,remoteSync?:boolean} = {}): Promise<any> {  

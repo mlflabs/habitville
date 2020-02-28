@@ -67,12 +67,12 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
 
   const printRegularityLabel = () => {
 
-    const times = (state.doc.regularityValue > 1)? ' times a ': ' time a ';
+    const times = (state.doc.regularityIntervalGoal > 1)? ' times a ': ' time a ';
     if(state.doc.regularityInterval === 'day'){
       return 'I will repeat this task every day.'
     }
     
-    return 'I will repeat this task ' + state.doc.regularityValue + times + state.doc.regularityInterval
+    return 'I will repeat this task ' + state.doc.regularityIntervalGoal + times + state.doc.regularityInterval
   }
 
   const handleDifficultyChange = (e) => {
@@ -162,7 +162,7 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
                     min={state.regularity.min}
                     max={state.regularity.max}
                     debounce={100}
-                    value={state.doc.regularityValue}
+                    value={state.doc.regularityIntervalGoal}
                     onIonChange={handlerRegularityValue}
                     color="secondary" >
                 <IonLabel slot="start">{state.regularity.min}</IonLabel>

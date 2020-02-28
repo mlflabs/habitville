@@ -8,7 +8,7 @@ import ChallengeAddComponent from './Challenge.add.component';
 import { add } from 'ionicons/icons';
 import { dataService } from '../../data/dataService';
 import { partyService } from '../party.service';
-import { getProjectChildId, canEditProject } from '../../data/utilsData';
+import { getProjectChildId, canEditProjectByRights } from '../../data/utilsData';
 import { saveIntoArray } from '../../../utils';
 import  ulog from 'ulog';
 import { authService } from '../../auth/authService';
@@ -104,7 +104,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   const canEditThisProject = () => {
     const self = project.members.find(m => m.id === authService.userid);
     if(!self) return false;
-    return canEditProject(self.rights);
+    return canEditProjectByRights(self.rights);
   }
 
   return (

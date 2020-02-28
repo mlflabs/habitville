@@ -1,13 +1,19 @@
 import React, { useEffect, useReducer } from 'react';
-import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonBadge, IonFooter, IonButton } from '@ionic/react';
-import { Challenge, ChallengeStage } from '../models';
-import { ProjectItem } from '../../data/models';
+import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonNote, IonFooter, IonButton, IonLabel } from '@ionic/react';
+import { Challenge, ChallengeState } from '../models';
+import ulog from 'ulog';
+import { partyService } from '../party.service';
+import { authService } from '../../auth/authService';
+import ChallengeMembersItem from './Challenge.members.item.component';
+import { canEditProject } from '../../data/utilsData';
 
-export interface ChallengeState {
+const log = ulog('clubs');
+
+export interface ChallengeLocalState {
   challenge: Challenge,
 }
 
-const reducer = (state, action): ChallengeState => {
+const reducer = (state, action): ChallengeLocalState => {
   switch(action.type) {
     case 'challenge':
       return {...state, ...{challenge:action.data}}
@@ -19,7 +25,7 @@ const reducer = (state, action): ChallengeState => {
 }
 
 
-const ChallengeListItemComponent = ({challenge}:
+const ChallengeListItemComponent = ({challenge, showEditModalFunction}:
   {challenge:Challenge, showEditModalFunction:{(challenge: Challenge)}}) => {
 
   const [state, _dispatch] = useReducer(reducer, {
@@ -34,47 +40,105 @@ const ChallengeListItemComponent = ({challenge}:
     dispatch('challenge', challenge);
   }, [challenge])
 
+  const joined = challenge.members.find(m => m.id === authService.userid);
 
-  const printAcceptChallenge = () => {
-    //which state, and if already joined
-    if(challenge.stage !== ChallengeStage.waiting) return;
-    //const self = challenge.mem 
+  log.info('Challenge Item: ', state);
+
+  const printTitle = () => {
+    if(state.challenge.state === ChallengeState.waiting){
+      return <IonCardTitle>{state.challenge.name} - Join if you dare</IonCardTitle>
+    }
+    else if(state.challenge.state === ChallengeState.current){
+      return <IonCardTitle>{state.challenge.name} - In progress</IonCardTitle>
+    }
+    else if(state.challenge.state === ChallengeState.finished) {
+      return <IonCardTitle>{state.challenge.name} - Finished</IonCardTitle>
+    }
+    else if(state.challenge.state === ChallengeState.future) {
+      return <IonCardTitle>{state.challenge.name} - Preivew of future challenge</IonCardTitle>
+    }
+    return <IonCardTitle>{state.challenge.name}</IonCardTitle>
   }
-  const acceptChallenge = () => {
-
-  }
-
-  const printAddProgress = () => {
-    return (
-      <IonButton onClick={()=>acceptChallenge()} fill="clear">Accept Challenge</IonButton>
-    )
-  }
-  const addProgress = () => {
-
-  }
+  
 
 
-  const printGoal = () => {
+
+  const printInfo = () => {
     if(state.challenge.regularityInterval === 'day'){
       return (
         <IonItem>
-              <IonNote>
-                Remember, you promised that you will repeat 
-                this habit <strong>every day</strong>.
-              </IonNote>
+          <IonLabel>
+            <h2>{state.challenge.note}</h2>
+            <IonNote>
+              Challenge goal, for <strong>every day</strong>.
+            </IonNote>
+          </IonLabel>
         </IonItem>
       )
     }
     
     return (
       <IonItem>
-        <IonNote>
-          Remember you promised that you will repeat this habit 
-          <strong> {state.challenge.regularityValue} times {state.challenge.regularityInterval}</strong>
-        </IonNote>
+        <IonLabel>
+          <h2>{state.challenge.note}</h2>
+          <IonNote>
+            Challenge goal is for 
+            <strong> {state.challenge.regularityIntervalGoal} times {state.challenge.regularityInterval}</strong>
+          </IonNote>
+        </IonLabel>
       </IonItem>
     )
   }
+
+  const challengeSubmitForToday = () => {
+
+    return false;
+  }
+
+  const printActionButtons = () => {
+    if(state.challenge.state === ChallengeState.waiting && joined === undefined){
+      return <IonButton size="small" onClick={() => partyService.acceptChallenge(state.challenge)} >
+            Accept Challenge</IonButton>
+    }
+    else if(state.challenge.state === ChallengeState.current){
+      if(challengeSubmitForToday()) return;
+      return <IonButton size="small" 
+        onClick={() => partyService.submitChallengeProgress(state.challenge.id, 1)} >
+            Done</IonButton>
+    }
+    else if(state.challenge.state === ChallengeState.finished) {
+
+    }
+    else if(state.challenge.state === ChallengeState.future) {
+
+    }
+
+  }
+
+  const printAdminActionButtons = () => {
+    if(!canEditProject(state.challenge.id, authService.getUser())) return;
+    if(state.challenge.state === ChallengeState.waiting){
+      return <>
+              <IonButton size="small" 
+                onClick={() => partyService.changeChallengeState(state.challenge.id, ChallengeState.current)} >
+                Start Challenge</IonButton>
+              <IonButton size="small" 
+                onClick={() => partyService.changeChallengeState(state.challenge.id, ChallengeState.waiting)} >
+                Freeze For Future Use</IonButton>
+            </>
+    }
+    else if(state.challenge.state === ChallengeState.current){
+
+    }
+    else if(state.challenge.state === ChallengeState.finished) {
+
+    }
+    else if(state.challenge.state === ChallengeState.future) {
+
+    }
+
+  }
+
 
 
 
@@ -83,15 +147,15 @@ const ChallengeListItemComponent = ({challenge}:
         <IonCard>
           <IonCardHeader>
             {/*<IonCardSubtitle>Card Subtitle</IonCardSubtitle>*/}
-            <IonCardTitle>{state.challenge.name}</IonCardTitle>
+            {printTitle()}
           </IonCardHeader>
           <IonCardContent>
-            {printGoal()}
+            <ChallengeMembersItem challenge={state.challenge} />
+            {printInfo()}
           </IonCardContent>
           <IonFooter>
-            {printAcceptChallenge()}
-            {printAddProgress()}
-            
+            {printActionButtons()}
+            {printAdminActionButtons()}
           </IonFooter>
          {/* 
           <IonFab horizontal="end" vertical="bottom" edge>

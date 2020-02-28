@@ -1,4 +1,4 @@
-import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR, ProjectItem } from './models';
+import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR, ProjectItem, Doc } from './models';
 import shortid from 'shortid';
 import { env } from '../../env';
 
@@ -35,6 +35,11 @@ export function generateUUID():string {
 
 export function isThisUserProject(id:string|undefined, userid): boolean {
   return (getChannelFromProjectId(id) === generateUserChannelId(userid));
+}
+
+export function getChannelNameFromId(id:string|undefined) {
+  if(id === undefined) throw new Error('Id cannot be undefined');
+  return id.split(DIV)[0];
 }
 
 export function getProjectChildId(id:string|undefined): string {
@@ -116,25 +121,44 @@ export const extractChannelNameFromDocId = (id) => {
     3.  (Project children edit) 0 -can't edit, 1 can edit/make own, 2 can edit all 
 */
 
-export const canEditProject = (rights: string): boolean => {
+export const getDocumentRights = (id: string|undefined, user):string|undefined => {
+  console.log(id, user);
+  const channel = getChannelNameFromId(id);
+  return user[env.ACCESS_META_KEY][channel];
+}
+
+export const canEditProject = (id, user): boolean => {
+  const rights = getDocumentRights(id, user);
+  if(!rights) return false;
+  return canEditProjectByRights(rights);
+} 
+
+export const canEditProjectByRights = (rights: string): boolean => {
   if(rights.substring(0,1) === '1') return true;
   if(rights.substring(1,2) === '2') return true;
   return false;
 }
 
-export const canEditOwnedItem = (rights: string): boolean => {
+
+export const canEditDoc= (doc:Doc, user): boolean => {
+  const rights = getDocumentRights(doc.id, user);
+  if(!rights) return false;
+  return canEditItemByRights(rights, doc.creator === user.id);
+} 
+
+export const canEditOwnedItemByRights = (rights: string): boolean => {
   if(rights.substring(0,1) === '1') return true;
   if(rights.substring(3,4) === '1') return true;
   if(rights.substring(3,4) === '2') return true;
   return false;
 }
 
-export const canEditOthersItem = (rights: string): boolean => {
+export const canEditOthersItemByRights = (rights: string): boolean => {
   if(rights.substring(0,1) === '1') return true;
   if(rights.substring(3,4) === '2') return true;
   return false;
 }
 
-export const canEditItem = (rights: string, myItem:boolean): boolean => {
-  return (myItem)? canEditOwnedItem(rights) : canEditOthersItem(rights);
+export const canEditItemByRights = (rights: string, myItem:boolean): boolean => {
+  return (myItem)? canEditOwnedItemByRights(rights) : canEditOthersItemByRights(rights);
 }

@@ -12,6 +12,7 @@ export class Doc {
   public deleted?: boolean;
   public created?: number = Date.now();
   public updated?: number = Date.now();
+  public creator?: string;
   public type: string = 'doc';
   public dirty?: number = 0;
   public rev = 1;
