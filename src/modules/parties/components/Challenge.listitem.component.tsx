@@ -103,7 +103,7 @@ const ChallengeListItemComponent = ({challenge, showEditModalFunction}:
     else if(state.challenge.state === ChallengeState.current){
       if(challengeSubmitForToday()) return;
       return <IonButton size="small" 
-        onClick={() => partyService.submitChallengeProgress(state.challenge.id, 1)} >
+        onClick={() => partyService.submitChallengeActions(state.challenge.id, 1)} >
             Done</IonButton>
     }
     else if(state.challenge.state === ChallengeState.finished) {

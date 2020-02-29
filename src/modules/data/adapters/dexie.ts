@@ -3,6 +3,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { DataChangeEvent } from '../dataService';
 import { Subscription } from 'rxjs';
 import { env } from '../../../env';
+import ulog from 'ulog';
+
+const log = ulog('dexie');
 
 export interface DatabaseScheme {
   name: string,
@@ -142,6 +145,7 @@ export default class DexieAdapter {
     if(res) {
       //this.changes$.next({doc});
       docs.forEach(doc => {
+        log.error('Sync Changes::: ', doc);
         this.changes$.next({doc});
       })
       return true

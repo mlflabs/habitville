@@ -207,7 +207,7 @@ class DataService {
       console.log(authService.getUser(), channel);
 
       const user = authService.getUser();
-      if(user.channels[channel]){
+      if(user[env.ACCESS_META_KEY][channel]){
         gotNewRightsToken = true;
       }
       else {
@@ -232,7 +232,7 @@ class DataService {
     const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/addNewSystemDoc',
                       {...{ token: authService.getToken(), 
                         doctype: doc.type,
-                        channelid: getChannelFromProjectId(project.id),
+                        channelname: getChannelFromProjectId(project.id),
                         doc: doc }, ...doc2}, {} ), false) ;
     console.log(res);
     if(!res.success)
@@ -296,7 +296,7 @@ class DataService {
 
   subscribeChanges(debounce = 0): Observable<any> {
     return this.db.changes$.asObservable().pipe(
-      debounceTime(debounce),
+      //debounceTime(debounce),
       map((change:DataChangeEvent) => change.doc )
     );
   }
@@ -304,7 +304,7 @@ class DataService {
 
   subscribeDocChanges(id: string, debounce: number = 0): Observable<any> {
     return this.db.changes$.asObservable().pipe(
-      debounceTime(debounce),
+      //debounceTime(debounce),
       filter((change: DataChangeEvent) => change.doc.id === id),
       map((change: DataChangeEvent) => change.doc)
     );
@@ -316,13 +316,13 @@ class DataService {
     value: any,
     debounce: number = 0): Observable<any> {
     return this.db.changes$.asObservable().pipe(
-      debounceTime(debounce),
+      //debounceTime(debounce),
       
       filter((change: DataChangeEvent) => { 
         console.log('%%%%%%%%CHANGE LOG PROPERTY%%%%%%%%%%', change)
         // eslint-disable-next-line eqeqeq
         console.log('TESTING::: ',change.doc[property], value )
-        return (change.doc[property] == value);
+        return (change.doc[property] === value);
       }),
       map((change: DataChangeEvent) => change.doc)
     ); 
@@ -335,7 +335,7 @@ class DataService {
       throw new Error('Project id, can not be undefined, can not subscribe to id') ;
     const projectChildId = getProjectChildId(projectid);
     return this.db.changes$.asObservable().pipe(
-      debounceTime(debounce),
+      //debounceTime(debounce),
       
       filter((change: DataChangeEvent) => { 
         console.log('%%%%%%%%CHANGE LOG%%%%%%%%%%',change, projectChildId + DIV  + type + DIV)
@@ -352,7 +352,7 @@ class DataService {
     if(channel === undefined) 
       throw new Error('Channel can not be undefined, can not subscribe to id') ;
     return this.db.changes$.asObservable().pipe(
-      debounceTime(debounce),
+      //debounceTime(debounce),
       filter((change: DataChangeEvent) => { 
         return change.doc.id.startsWith(channel + DIV + type + DIV);
       }),

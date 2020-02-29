@@ -34,7 +34,7 @@ export interface User {
   email: string|null;
   token: string|null;
   token_expiery: number|null;
-  channels: any[];
+  access: any[];
 }
 
 
@@ -47,7 +47,7 @@ export const getUser = (values: any):User => {
       email: null,
       token: null,
       token_expiery: null,
-      channels: []
+      access: []
     }
 
   return {
@@ -56,7 +56,7 @@ export const getUser = (values: any):User => {
     email: values.email||null,
     token: values.token||null,
     token_expiery: values.token_expiery||values.expires||null,
-    channels: values.channels|| []
+    access: values.access || []
   }
 }
 
@@ -106,8 +106,9 @@ export class AuthService {
         await localStorageService.setObject(AUTH_USER_KEY, user)
         this.username$.next(user.username);
       }
-
+      console.log('Testing if we need to save user object');
       if(!isEqual(this._user, user)) {
+        log.info('New user object, save it', user);
         this._user = user;
         await localStorageService.setObject(AUTH_USER_KEY, user)
       }

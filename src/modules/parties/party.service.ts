@@ -2,14 +2,17 @@ import { Subscription, BehaviorSubject } from "rxjs";
 import { PartyProject, TYPE_PARTY, Challenge, ChallengeState } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
-import { AuthService, authService } from '../auth/authService';
 import { loadingService } from "../loading/loadingService";
 import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
 import { waitMS, getChannelFromProjectId } from '../data/utilsData';
-import { saveIntoArray, saveIntoDocList } from '../../utils';
 import { Msg, TYPE_MSG } from "../messages/models";
-import { sunny } from 'ionicons/icons';
+import moment from "moment";
+import { saveIntoDocList } from "../../utils";
+import ulog from 'ulog';
+import { authService } from "../auth/authService";
+
+const log = ulog('parties');
 
 export interface PartyState {
   docs: PartyProject[],
@@ -32,14 +35,18 @@ export class PartyService {
 
 
     const sub1 = dataService.subscribeChanges().subscribe(doc => {
-      console.log(doc);
+      log.info(doc);
       if(doc.type === 'party' && doc.secondaryType === 'project'){
         console.log('Updating Party Project: ', doc);
         const docs = saveIntoDocList(doc, this._state.docs);
         this.state = {...this._state, ...{docs}};
         console.log('Updating Party Project: ', doc, this._state);
       }
+      else {
+        log.info('Didnt pass test, ', doc.type, doc.secondaryType);
+      }
     });
+    this._subscription.push(sub1);
     const docs = await dataService.queryByProperty('secondaryType', 'equals', 'project', TYPE_PARTY);
     this.state = {...this._state , ...{docs}};
 
@@ -212,12 +219,13 @@ export class PartyService {
     }
   }
 
-  public async submitChallengeProgress(challengeid: string|undefined, progress:number){
+  public async submitChallengeActions(challengeid: string|undefined, value:number){
     if(!challengeid) throw new Error('Challengeid cannot be undefined');
     try {
-      const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/submitChallengeProgress',
+      const actions = [{date: moment().format(env.MOMENT_DATE_FORMAT), value}]
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/submitChallengeActions',
                       { token: authService.getToken(), 
-                        challengeid, progress}, {} ), 
+                        challengeid, actions}, {} ), 
                       true, 'Saving challenge, please wait.');
       console.log(res);
 

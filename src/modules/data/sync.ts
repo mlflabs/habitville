@@ -43,8 +43,6 @@ export const syncData = async (props:{  data:any[],
     }),false,'');
 
     if(res) {
-      //first save channel checkpoints
-      const keys = Object.keys(res.data.checkpoints);
       //merge the 2 checkpoints
       const chpoints = await localStorageService.getObject('channel_checkpoints') || {};
       await localStorageService.setObject('channel_checkpoints',{...chpoints, ...res.data.checkpoints})

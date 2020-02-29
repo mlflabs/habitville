@@ -23,7 +23,8 @@ export enum ChallengeIntervals {
 export interface PartyMember {
   id: string,
   username: string,
-  rights: string
+  rights: string,
+  score: {exp: number},
 }
 
 export interface ChallengeRewards {
@@ -39,7 +40,7 @@ export interface ChallengeAction {
 export interface ChallengeMember {
   id: string,
   username: string,
-  score: number,
+  score: {exp: number},
   joinDate: number,
   actions: { [key:string]: ChallengeAction },
   lastCalculatedDate?: string,

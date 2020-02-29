@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import {
   IonPage,
   IonContent,
@@ -19,6 +19,11 @@ import PartyEditComponent from '../components/Party.edit.component';
 import { partyService } from '../party.service';
 import PartyListItemComponent from '../components/Party.listitem.component';
 import { useHistory } from 'react-router-dom';
+import ulog from 'ulog';
+
+const log = ulog('parties');
+
+
 
 export interface PartiesState {
   userId: string,
@@ -68,8 +73,8 @@ const PartiesPage = () => {
       authService.username$.subscribe(username => {
         dispatch('userid', authService.userid);
       }),
-
       partyService.state$.subscribe(changes => {
+        log.error('TESTING SUBSCRIBE::::: ', changes);
         dispatch('docs', changes.docs);
       }),
 

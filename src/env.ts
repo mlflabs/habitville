@@ -23,7 +23,7 @@ export const env = {...{
   //myenvoy settings
   ACCESS_META_KEY: 'access',
   SERVER_ACCESS_META_KEY: 'ch',
-  
+  MOMENT_DATE_FORMAT: 'YYYYMMDD',
 
   //Auth
   TOKEN_EXPIRATION: 300, // how many days
