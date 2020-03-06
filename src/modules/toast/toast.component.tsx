@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { IonToast } from '@ionic/react';
 import { Subscription } from 'rxjs';
 import { toastService, ToastMessage } from './toastService';
 import { ToastContainer } from 'react-toastify';
@@ -16,20 +15,6 @@ export const Toasts: React.FC = () => {
     ];
     return () => { subscriptions.map(it => it.unsubscribe()) };
   },[message]);
-
-  console.log('PRINTING TOAST: ', message);
-
-  /*
-  const print = () => {
-    if(message)
-      return <IonToast
-                isOpen={message != null}
-                message={message.message}
-                duration={message.duration}
-                onDidDismiss={() => setMessage(null)}
-              />
-  } 
-*/
 
   return (
     <div className='toastDiv' >

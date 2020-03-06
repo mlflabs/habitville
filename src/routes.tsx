@@ -8,7 +8,6 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import UnauthenticatedRoute from './modules/auth/unauthenticatedRoute';
 import HabitsPage from './pages/habits/Habits.page';
-import { home, timer, apps } from '../node_modules/ionicons/icons';
 import { IonSplitPane, IonRouterOutlet } from '../node_modules/@ionic/react';
 import Menu from './components/Menu';
 import PartiesPage from './modules/parties/pages/Parties.page';
@@ -19,24 +18,19 @@ export const Routes = () => {
   const history = useHistory();
   const location = useLocation();
 
-  console.log('APP RERENDER::::::::::::::::::::::::::::::::::::::', appStatus, location, history);
-  
-
-  
   if(appStatus.status === AppStatus.auth && location.pathname.startsWith('/auth/')){
     if(location.state){
       const newpath = location.state['prev'] || '/';
       history.push(newpath);
     }
-    
   }
-
+  
   const getRoutes = () => {
     switch(appStatus.status){
       case AppStatus.auth:
         return (
           <IonSplitPane when="sm" contentId="main">
-            <Menu key="menu"/>
+            <Menu key="menumain"/>
             <IonRouterOutlet id="main">
                 <Route path="/home" component={Home} exact={true} />           
                 <Route exact path="/auth/user" component={UserPage} />

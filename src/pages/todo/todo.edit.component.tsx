@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Todo } from './models';
 import { DataFunctions } from './hooks/todos.hook';
 import _ from 'lodash';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonTextarea, IonButton, IonIcon, IonFabButton, IonAlert, IonGrid, IonRouterLink, IonRow, IonCol } from '@ionic/react';
+import { IonCard, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput, IonTextarea, IonButton, IonIcon, IonFabButton, IonAlert, IonGrid, IonRow, IonCol } from '@ionic/react';
 import './todo.edit.component.css';
-import { sunny, star, heart, train, trash, basket, construct } from '../../../node_modules/ionicons/icons';
+import { sunny, star, heart, trash, basket, construct } from '../../../node_modules/ionicons/icons';
 
 const getDefaultState = (todo:Todo) =>  {
   return {
@@ -15,7 +15,6 @@ const getDefaultState = (todo:Todo) =>  {
 const TodoEditComponent = ({todo, tags, dataFunctions}: 
         {todo:Todo,  tags:string[], dataFunctions: DataFunctions}) => {
   const backgroundColor = "medium";
-  console.log("Edit Todo Render::: ", todo);
 
   const [state, setState] = useState(getDefaultState(todo));
 
@@ -30,7 +29,7 @@ const TodoEditComponent = ({todo, tags, dataFunctions}:
     setState(newState);
   }
 
-  const handleBlur = (e) => {
+  const handleBlur = () => {
     dataFunctions.save(state.todo);
   }
 
@@ -45,7 +44,6 @@ const TodoEditComponent = ({todo, tags, dataFunctions}:
 
   const remove = () => {
     hideRemoveWarrning();
-    console.log('REMVE ACTION STATE::::::: ', state);
     if(state.todo.id)
       dataFunctions.remove(state.todo.id);
   }

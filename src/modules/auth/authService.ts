@@ -2,23 +2,19 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import * as moment from 'moment';
 import { isEqual } from 'lodash';
-import anylogger from 'anylogger';
 import localStorageService from '../localStorage/localStorageService';
 import {env} from '../../env';
 import  { getPostRequest, post, ajaxResponse } from '../ajax/ajax';
 import { toastService } from '../toast/toastService';
+import ulog from 'ulog';
 
-
-const log =  anylogger('auth: authService');
-
-
+const log =  ulog('auth');
 
 export enum AuthStatus {
   Loading, 
   Guest, //not loged in
   User // loged in
 }
-
 
 export const GUEST = 'Guest';
 export const AUTH_USER_KEY = 'auth-user-key';
@@ -71,15 +67,8 @@ export function getGuestUser(username:string = 'Guest'):User {
 
 export class AuthService {
   private _user:User = getGuestUser('null');
-  //private _authReady = false;
-  //public authReady$ = new BehaviorSubject(this._authReady);
-  //private _isAuthenticated = false;
-  //public isAuthenticated$  = new BehaviorSubject(false);
-
   private _authStatus = AuthStatus.Loading;
-  
   public authStatus$ = new BehaviorSubject(this._authStatus);
-  
   public username$ = new Subject<string>();
 
   constructor() {
@@ -106,7 +95,6 @@ export class AuthService {
         await localStorageService.setObject(AUTH_USER_KEY, user)
         this.username$.next(user.username);
       }
-      console.log('Testing if we need to save user object');
       if(!isEqual(this._user, user)) {
         log.info('New user object, save it', user);
         this._user = user;
@@ -129,7 +117,6 @@ export class AuthService {
 
 
   async loadAuth() {
-    log.info('----------------- Check login');
     try {
       const user = getUser(await localStorageService.getObject(AUTH_USER_KEY));
       log.info('LOADED USER', user);
@@ -137,12 +124,8 @@ export class AuthService {
       if(!user.token || !user.token_expiery) {
         return this.updateUser(getGuestUser());
       }
-
-      log.info('LOADED USER', user);
-
       const exp = moment.unix(user.token_expiery);
       if(exp.isAfter(moment.now())) {
-        log.info('TOKEN VALID');
         return this.updateUser(user);
       }
       else {
@@ -158,15 +141,10 @@ export class AuthService {
 
 
   public async loginAndRedirect(id: string, password: string, history, location) {
-    console.log('LoginWithRedirect:: ');
     const res = await post( getPostRequest(env.AUTH_API_URL+'/auth/login',
       { id, password, app: env.APP_ID },), true,  'Login in, please wait');
-
-      console.log("Login RES: ", res);
       if(res.success) {
         this.updateUser(getUser(res.data))
-        console.log("LOGIN LOCATION:::: ", location, history);
-
         let next;
         if(location && location.state && location.state.prev){
           next = location.state.prev.startsWith('/auth/')? '/': location.state.prev;
@@ -175,7 +153,6 @@ export class AuthService {
         history.push(next || '/');
       }
       else {
-        console.log(res);
         toastService.printServerErrors(res);
       }
   }
@@ -193,20 +170,16 @@ export class AuthService {
 
 
   public async renewToken() {
-    console.log("Renew Token");
     const res = await post(getPostRequest(env.AUTH_API_URL+'/auth/renewToken',
                           {token: this._user.token}), false);
-    console.log(res);
+    log.info('Renewed Token: ', res);
     if(res.success){
       await this.updateUser({...this._user, ...{token: res.data.token, 
                                 [env.ACCESS_META_KEY]: res.data[env.SERVER_ACCESS_META_KEY],
                                 token_expiery: res.data.expires}})
-      //console.log('Token updated: ', res.data.token);
-      console.log('NEW USER:: ', this._user);
       return true;
     }
     else {
-      console.log('Token updated error: ', res);
       //is it bad token, or just no internet
       if(res.status && res.status === 422){
         await this.updateUser(getGuestUser());
@@ -218,18 +191,13 @@ export class AuthService {
   }
 
   public async register(username:string, email: string, password: string): Promise<boolean> {
-    console.log('Register:: ');
     const res = await post( getPostRequest(env.AUTH_API_URL+'/auth/register',
                       { username, password, email }),
                       true,  'Registering, please wait');
-
-    console.log("Registering RES: ", res);
-
     if(res.success) {
         return true;
     }
     else {
-      console.log(res);
       toastService.printServerErrors(res);
       return false;
     }
@@ -261,18 +229,4 @@ export class AuthService {
 
 }
 export const authService = new AuthService();
-
-
-
-
-
-/*
-export function createAuthEvent(success: boolean = true,
-  code = 1,
-  data = {}): AuthEvent {
-  return {
-    success, code, data
-  };
-}
-*/
 

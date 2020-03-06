@@ -140,9 +140,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
           <IonText  color="secondary">
             {printDateRelative(msg.updated)}
           </IonText>
-          <p>
             {printClubRequestAcceptRejectButtons(msg)}
-          </p>
           
         </IonLabel>
         {printReplyStatus(msg)}
@@ -159,9 +157,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
             <IonText  color="secondary">
               {printDateRelative(msg.updated)}
             </IonText>
-            <p>
               {printFriendRequestAcceptRejectButtons(msg)}
-            </p>
         </IonLabel>
         {printReplyStatus(msg)}
       </IonItem>

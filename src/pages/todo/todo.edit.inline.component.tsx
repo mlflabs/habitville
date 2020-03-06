@@ -5,8 +5,7 @@ import _ from 'lodash';
 import ulog from 'ulog';
 import { IonLabel, IonTextarea, IonButton, IonIcon, IonAlert } from '@ionic/react';
 import './todo.edit.component.css';
-import { sunny, star, heart, trash, basket, construct, close, checkmark } from '../../../node_modules/ionicons/icons';
-import AnimatedIcon from '../../components/animatedIcon';
+import { trash, close } from '../../../node_modules/ionicons/icons';
 
 
 const log = ulog('todo');
@@ -37,15 +36,12 @@ const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}:
   const [state, setState] = useState(getDefaultState(todo, tagDocs));
 
   useEffect(() => {
-    log.error('USE EFFECT::::: ', todo, tagDocs);
     setState(getDefaultState(todo, tagDocs));
   }, [todo, tagDocs])
 
   const handleTitleChange = (e) => {
     const text = e.detail.value;
-    console.log(text);
     var match = /\r|\n/.exec(text);
-    console.log('Title Chagne: ', text, match)
     if(match){
       const name = text.substring(0, match.index);
       const note = text.substring(match.index+1);
@@ -61,7 +57,6 @@ const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}:
   }
 
   const handleBlur = () => {
-    console.log("Saving todo::: ", state);
     dataFunctions.save(state.todo);
   }
 
@@ -76,15 +71,13 @@ const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}:
 
   const remove = () => {
     hideRemoveWarrning();
-    console.log('REMVE ACTION STATE::::::: ', state);
     if(state.todo.id)
       dataFunctions.remove(state.todo.id);
   }
 
   const printTag = (tag: TodoTag) => {
-    log.warn('Print TAg:::: ', tag, tagDocs,  state);
     let color;
-    if(_.includes(state.todo.tags,tag.fullname)){
+    if(_.includes(state.todo.tags,tag.name)){
       color = 'success';
     }
     else {
@@ -103,13 +96,13 @@ const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}:
   const handleTagChange = (tag: TodoTag) => {
     log.error(tag, tagDocs);
     if(!state.todo.tags) state.todo.tags = [];
-    const res = state.todo.tags.find(t=>t===tag.fullname);
+    const res = state.todo.tags.find(t=>t===tag.name);
     let newtags;
     if(res === undefined){
-      newtags = _.concat(state.todo.tags, tag.fullname);
+      newtags = _.concat(state.todo.tags, tag.name);
     }
     else {
-      newtags = _.filter(state.todo.tags, t=>t!==tag.fullname);
+      newtags = _.filter(state.todo.tags, t=>t!==tag.name);
     }
     dataFunctions.save(Object.assign(state.todo, {tags: newtags}));
   }
@@ -146,11 +139,6 @@ const TodoEditInlineComponent = ({todo, tagDocs, dataFunctions}:
           </div>
         </div>
         <div className="todoInlineEditPadding"> </div>   
-
-
-
-
-
 
         <IonAlert
             isOpen={state.showDeleteWarrning}

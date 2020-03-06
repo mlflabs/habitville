@@ -15,12 +15,8 @@ import AuthMenuComponent from './auth.menu.component';
 import './auth.css';
 
 const LoginPage  = () => {
-
-  console.log("LOGIN PAGE");
   const location = useLocation();
   const history = useHistory();
-  console.log("LOCATION++++++++++++:::: ", location)
-
   const options = getFormOptions({
     submitButtongText: "Login"
   });
@@ -47,7 +43,6 @@ const LoginPage  = () => {
   ]
   
   const submit = async (form) => {
-    console.log(form);
     authService.loginAndRedirect(
         form['id'].value, 
         form['password'].value,

@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { IonLabel, IonRow, IonCol, 
-        IonIcon, IonGrid, IonButton, IonItemGroup, IonItemSliding, IonItem, IonItemOptions, IonItemOption, IonText, IonAvatar, IonThumbnail } from '@ionic/react';
-import { Todo, TodoList, TodoTag } from './models';
+        IonIcon, IonGrid, IonItem, IonText, IonAvatar } from '@ionic/react';
+import { Todo, TodoTag } from './models';
 import _ from 'lodash';
-import { radioButtonOff, radioButtonOn, sunny, star, heart, basket, construct, arrowDownCircle, arrowForwardCircle, checkmark } from '../../../node_modules/ionicons/icons';
-import { printCleanNote, getAction } from '../../utils';
 import './todo.component.css'
 import { DataFunctions } from './hooks/todos.hook';
 import TodoEditInlineComponent from './todo.edit.inline.component';
@@ -13,6 +11,7 @@ import ulog from 'ulog'
 import check from '../../icons/check.json';
 import restart from '../../icons/restart.json'
 import AnimatedIcon from '../../components/animatedIcon';
+import { COLOR_SUCCESS } from '../../colors';
 
 const log = ulog('todo');
 
@@ -33,7 +32,7 @@ const reducer = (state, {type, payload}): TodoState => {
 
 
 //Component Start
-const TodoListItemComp = ({todo, tagDocs, selectedTodo, lastChild,  dataFunctions}:
+const TodoListItemComp = ({todo, tagDocs, selectedTodo, dataFunctions}:
   {todo:Todo, tagDocs:TodoTag[], lastChild: boolean,  selectedTodo: Todo|null,  dataFunctions: DataFunctions}) => {
   
 
@@ -50,10 +49,6 @@ const TodoListItemComp = ({todo, tagDocs, selectedTodo, lastChild,  dataFunction
     _dispatch({type, payload});
   }
   
-  console.log('STATE TODONAME: ', state.todo.name);
-  console.log(state);
-
-
   const doneHandler = () => {
     const newDoc = gamifyService.calculateFinishedTodoRewards(
         {...state.todo, ...{done: !state.todo.done}});
@@ -72,30 +67,28 @@ const TodoListItemComp = ({todo, tagDocs, selectedTodo, lastChild,  dataFunction
 
   
 
-  const printSmallTagFromFullname = (name:string) => {
-    log.warn(tagDocs);
-    const tag = tagDocs.find(t => t.fullname === name);
-    console.log('Print small tag: ',tag, name)
+  const printSmallTagFromName = (name:string) => {
+    //log.warn(tagDocs);
+    const tag = tagDocs.find(t => t.name === name);
     if(tag && tag.icon) {
       return <IonIcon  
-                key={tag.fullname}
+                class="todoListItemTagIcon"
+                key={tag.name}
                 size="small" 
                 color='success' 
                 src={"/assets/icons/"+tag.icon} />
     }
 
-    return <IonIcon  
-                key={name}
-                size="small" 
+    return <IonText 
+              key={name}
+              class="todoListItemTag"
+              color={COLOR_SUCCESS} >
+              <IonIcon  
                 color='success' 
-                src={"/assets/icons/tag.svg"} >
+                src={"/assets/icons/tag.svg"} />
           {name}  
-          </IonIcon>
-    
+          </IonText>
   }
-
-
-
 
   const printTask = () => (
     <>
@@ -123,7 +116,7 @@ const TodoListItemComp = ({todo, tagDocs, selectedTodo, lastChild,  dataFunction
                
               </IonLabel>
               {state.todo.tags.sort().map(
-                tag=>printSmallTagFromFullname(tag)
+                tag=>printSmallTagFromName(tag)
               )}
         </IonItem>
         {printEdit()}

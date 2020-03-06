@@ -3,22 +3,22 @@ import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabB
 import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS, COLOR_DANGER } from '../../colors';
 import { radioButtonOff, checkmarkCircleOutline, cog } from '../../../node_modules/ionicons/icons';
 import moment from 'moment';
-import { Habit, MOMENT_DATE_FORMAT, HabitProgress } from './models';
+import { Habit, MOMENT_DATE_FORMAT, HabitAction } from './models';
 import { habitDataFunctions } from './hooks/habits.hook';
 import './Habit.listitem.component.css';
-import { saveIntoArray, getIndexById } from '../../modules/data/utilsData';
 import { calculateCurrentStreak } from './utilsHabits';
 import { gamifyService } from '../../modules/gamify/gamifyService';
+import { toastService } from '../../modules/toast/toastService';
 
 
 
 const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   {habit:Habit, dataFunctions: habitDataFunctions, showEditModalFunction:{(habit: Habit)}}) => {
 
-  const [doc, setDoc] = useState(habit);
+  const [doc, setDoc] = useState(new Habit(habit));
 
   useEffect(() => {
-    setDoc(habit);
+    setDoc(new Habit(habit));
   }, [habit])
 
 
@@ -55,7 +55,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
       <IonItem>
         <IonNote>
           Remember you promised that you will repeat this habit 
-          <strong> {doc.regularityValue} times {doc.regularityInterval}</strong>
+          <strong> {doc.regularityIntervalGoal} times {doc.regularityInterval}</strong>
         </IonNote>
       </IonItem>
     )
@@ -66,44 +66,41 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
 
   const printDayIcon = (index: number, active=false) => {
     const day = moment().subtract(index, 'day');
-    let progress = doc.progress.find(obj => day.format(MOMENT_DATE_FORMAT) === obj.date);
-    if(!progress)
-      progress = {date: day.format(MOMENT_DATE_FORMAT), value: 0};
 
-    
+    console.log(doc);
+
+    let action = doc.actions[day.format(MOMENT_DATE_FORMAT)];
+    if(!action)
+      action = {date: day.format(MOMENT_DATE_FORMAT), value: 0};
+
+    console.log(action);
     if(active){
-      //TODO: find a way to caluclate if buffer can be used for the ones not done
-      // @ts-ignore: undefined, but we are forsing assignment just before this
-      return (<IonIcon  onClick={() => updatehabit(index, progress)}
+      return (<IonIcon  onClick={() => updatehabit({...action, ...{value: 1}})}
                       size="large" 
                       key={index}
-                      color={ progress.value > 0? COLOR_SUCCESS:  COLOR_DARK} 
-                      icon={progress.value > 0? checkmarkCircleOutline : radioButtonOff} />)
+                      color={ action.value > 0? COLOR_SUCCESS:  COLOR_DARK } 
+                      icon={ action.value > 0? checkmarkCircleOutline : radioButtonOff } />)
     }
     // @ts-ignore: undefined, but we are forsing assignment just before this
     return (<IonIcon  
-    size="large" 
-    key={index}
-    color={ progress.value > 0? COLOR_SUCCESS:  COLOR_DANGER} 
-    icon={progress.value > 0? checkmarkCircleOutline : radioButtonOff} />)
+                      size="large" 
+                      key={index}
+                      color={ action.value > 0? COLOR_SUCCESS:  COLOR_DANGER } 
+                      icon={ action.value > 0? checkmarkCircleOutline : radioButtonOff } />)
 
     
   }
 
-  const updatehabit = (index: number, progress:{date:string, value:number}) => {
-    console.log(' %%%%%%%%%%%%%%%%%%%%%%%%%%  Update Progress::: ', index, progress);
-    let newProgress: HabitProgress = {date: progress.date, value: (progress.value === 0)? 1: 0 }
-
-    const i = getIndexById(newProgress.date, doc.progress, 'date')
-    if(i !== -1) {
-      newProgress = {...doc.progress[i], ...newProgress }
+  const updatehabit = (action: HabitAction) => {
+    try {
+      const {habit, rewards} = calculateCurrentStreak(doc, [action])
+      gamifyService.addRewards(rewards);
+      console.log(habit, rewards, action)
+      dataFunctions.save(habit);
     }
-    const progresslist = saveIntoArray(newProgress, doc.progress, 'date');
-    const newDoc = gamifyService.calculateHabitProgressRewards(
-                    calculateCurrentStreak({...doc, ...{progress: progresslist}}), newProgress);
-    console.log('NEW PROGRESSSSSSS:::::::::::::::::::::::;', newDoc);
-    dataFunctions.save(newDoc);
-
+    catch(e) {
+      toastService.printSimpleError(e.message)
+    }
   }
 
   const print = () => {
@@ -113,7 +110,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
             {/*<IonCardSubtitle>Card Subtitle</IonCardSubtitle>*/}
             <IonCardTitle>{doc.name}</IonCardTitle>
             <IonBadge class="habitBadge" color="success">{doc.currentStreak}</IonBadge>
-            <IonBadge class="habitBadge" color="tertiary">{doc.bestStreak}</IonBadge>
+            <IonBadge class="habitBadge" color="tertiary">{doc.biggestStreak}</IonBadge>
           </IonCardHeader>
           <IonItem>
             <IonGrid>

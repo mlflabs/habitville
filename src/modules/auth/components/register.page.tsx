@@ -16,12 +16,8 @@ import AuthMenuComponent from './auth.menu.component';
 import './auth.css';
 
 const RegisterPage  = () => {
-
-  console.log("REGISTER PAGE");
   const location = useLocation();
   const history = useHistory();
-  console.log("LOCATION++++++++++++:::: ", location)
-
   const options = getFormOptions({
     submitButtongText: "Login"
   });
@@ -57,7 +53,6 @@ const RegisterPage  = () => {
   ]
   
   const submit = async (form) => {
-    console.log(form);
     const res = await authService.register(
                         form['username'].value, 
                         form['email'].value,
@@ -70,12 +65,6 @@ const RegisterPage  = () => {
                         location)
     }
   }
-
-
-
-
-
-
 
   return (
     <IonPage>

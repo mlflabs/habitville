@@ -20,7 +20,6 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
   const [modalState, setModalState] = useState({showModal: false, modalhabit: new Habit()});
 
   const addhabit = (habit:Habit = new Habit()) => {
-    console.log('Add habit:  ', habit);
     setModalState({showModal: true, modalhabit: habit});
   }
 
@@ -29,10 +28,10 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
   }
 
   const addHabitDismissFunction = (habit: Habit|null, action:'save'|'remove'|'none') => {
-    console.log('habit: ', habit)
     setModalState({showModal: false, modalhabit: new Habit()});
     if(action === 'save' && habit != null){
-      dataFunc.save(habit);
+      console.log(habit);
+      //dataFunc.save(habit);
     }
     else if(action === 'remove' && habit != null && habit.id){
       dataFunc.remove(habit.id);

@@ -4,6 +4,9 @@ import { dataService } from '../../data/dataService';
 import { GUEST, authService } from '../../auth/authService';
 import { gamifyService } from '../../gamify/gamifyService';
 import { partyService } from '../../parties/party.service';
+import ulog from 'ulog';
+
+const log = ulog('app');
 
 export enum AppStatus {
   loading, auth, guest
@@ -15,31 +18,26 @@ export function useAppStatus(): [{status:AppStatus, dataReady:boolean, username:
   const [appStatus, setAppStatus] = useState({status: AppStatus.loading, dataReady: false, username: GUEST});
 
 
-  console.log('APP Router Status: ', appStatus);
+  log.info('APP Router Status: ', appStatus);
 
   useEffect(() => {
-    console.log('App Stats Effect::');
+    log.info('App Stats Effect::');
     const subscriptions: Subscription[] = [
       dataService.getReadySub().subscribe(ready => {
-        console.log('DataService READY', ready, dataService.ready);
         if(ready === appStatus.dataReady) return;
           setStatusFunction();
       }),
       authService.username$.subscribe(async (username) => {
-        console.log('USERNAME CHANGED: ', username);
-
         //renew token
         if(authService.getIsAuthenticated()){
           authService.renewToken();
         }
-        
         setStatusFunction();
-        console.log('USER:::::: ', authService.getUser(), authService.getIsAuthenticated())
         const userid = authService.getUser().id;
         await dataService.init( userid, username !== GUEST);
-        console.log("Ready to start gamify service");
         await gamifyService.init(userid);
         await partyService.init();
+        dataService.addSyncCall$.next();
       }),
 
     ];
@@ -53,7 +51,7 @@ export function useAppStatus(): [{status:AppStatus, dataReady:boolean, username:
     const username = authService.getUsername();
     if(dataReady === appStatus.dataReady && username === appStatus.username)
       return;
-    console.log('STATUS ----------------', dataReady, username, appStatus);
+    log.info('STATUS:', dataReady, username, appStatus);
     
     if(dataReady){
       if(username === GUEST)

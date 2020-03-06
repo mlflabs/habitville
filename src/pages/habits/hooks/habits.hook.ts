@@ -24,7 +24,6 @@ export function useHabitsCollectionFacade(project: ProjectItem):
           
   const dataFunctions = {
     save: (doc: Habit) => {
-      console.log('@@@@@@@@@@@@@@@@@@@@@ Habit Hook Save: ', habitsService.current, doc)
       habitsService.current.save(doc)
     },
     remove: (id) => habitsService.current.remove(id), //TODO: allow user to choose, sync or not to sync
@@ -33,7 +32,6 @@ export function useHabitsCollectionFacade(project: ProjectItem):
   }
 
   useEffect(() => {
-    console.log('habitS HOOK - UseEffect NEW SERVICE------------------------------');
     if(_.isEqual(habitsService.current.getProject(), project)) 
         return;
     habitsService.current.init(project)
@@ -44,7 +42,6 @@ export function useHabitsCollectionFacade(project: ProjectItem):
   useEffect(() => {
     const subscriptions: Subscription[] = [
       habitsService.current.state$.subscribe(state => {
-        console.log('habits Hook Sub: ', state);
         setState(state);
       })
     ];

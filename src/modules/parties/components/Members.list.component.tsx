@@ -1,10 +1,12 @@
 import React, { useReducer } from 'react';
 import { PartyProject, PartyMember } from '../models';
-import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel } from '@ionic/react';
+import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel, IonBadge } from '@ionic/react';
 import { partyService } from '../party.service';
 import  ulog from 'ulog';
 import { authService } from '../../auth/authService';
 import { canEditProjectByRights } from '../../data/utilsData';
+import { COLOR_LIGHT, COLOR_SUCCESS, COLOR_SECONDARY } from '../../../colors';
+import ChallengeMemberScoreHistory from './Challenge.member.scoreHistory';
 const log = ulog('memberlist');
 
 export interface MembersState {
@@ -53,6 +55,14 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
     return canEditProjectByRights(self.rights);
   }
 
+  const printScore = (score, index) =>{
+    let color = COLOR_LIGHT;
+    if(index === 0) color = COLOR_SUCCESS;
+    if(index === 1) color = COLOR_SECONDARY;
+    return <IonBadge slot="end" color={color}>{score.exp}</IonBadge>
+  }
+
+  
   return (
     <IonCard>
       <IonCardHeader>
@@ -60,14 +70,16 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
       </IonCardHeader>
       <IonCardContent>
         <IonList>
-            {project.members.map(member => (
-              <IonItem  button 
-                        key={member.id}
-                        onClick={() => {}}>
-              <IonLabel>
-                {member.username}
-              </IonLabel>
-            </IonItem>
+            {project.members.sort((a,b) => b.score.exp - a.score.exp)
+                            .map((member, i) => (
+          <IonItem key={member.id}>
+            <IonLabel>
+              <h2>{member.username} - 
+                  <ChallengeMemberScoreHistory member={member}  />
+              </h2>
+            </IonLabel>
+              {printScore(member.score, i)}
+          </IonItem>
             ))}
         </IonList>
         
@@ -87,8 +99,6 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
             name: 'userid',
             type: 'text',
             id: 'adduserid',
-
-
           }
         ]}
         buttons={[

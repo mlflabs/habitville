@@ -40,18 +40,15 @@ export function getAction(todo:'showModal', data = {}){
 
 
 const HabitsPage: React.FC = () => {
-  console.log(getDefaultProject(authService.userid));
   const [habitsState, dataFunc] = useHabitsCollectionFacade(getDefaultProject(authService.userid));
   const [state, dispatch] = useReducer(reducer, {
     showModal:false,
     modalHabit: null,
   })
 
-  console.log('STATE::: ', state);
   const { habits } = habitsState;
 
   const addhabit = (habit:Habit = new Habit()) => {
-    console.log('Add habit:  ', habit);
     dispatch(getAction('showModal', {showModal: true, habit}));
   }
 
@@ -60,7 +57,6 @@ const HabitsPage: React.FC = () => {
   }
 
   const habitDismissFunc = (habit: Habit|null, action:'save'|'remove'|'none') => {
-    console.log('habit: ', habit)
     dispatch(getAction('showModal', {showModal: false, habit: null}));
     if(action === 'save' && habit != null){
       dataFunc.save(habit);

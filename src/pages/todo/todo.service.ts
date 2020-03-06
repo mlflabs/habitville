@@ -1,5 +1,5 @@
 
-import { Todo, TYPE_TODO, TodoList, TYPE_TODO_LIST, TodoTag, TYPE_TODO_TAG, getDefaultTodoList, getDefaultTodoTag } from './models';
+import { Todo, TYPE_TODO, TodoList, TYPE_TODO_LIST, TodoTag, getDefaultTodoList, getDefaultTodoTag, TYPE_TODO_TAG } from './models';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { dataService } from '../../modules/data/dataService';
 import { waitMS, getProjectChildId } from '../../modules/data/utilsData';
@@ -7,8 +7,7 @@ import _ from 'lodash';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import ulog from 'ulog';
 import { toastService } from '../../modules/toast/toastService';
-import sun from '../../icons/sun.json'
-import star from '../../icons/star.json'
+
 
 const log = ulog('todo');
 
@@ -20,9 +19,10 @@ export interface TodoState {
   docs: Todo[],
   tagDocs: TodoTag[],
   doneTodos: boolean,
+  orderFilter: string,
+  orderAsync: number,
+  showNewTagFilter: boolean,
 }
-
-
 
 export const getInitTodoState = (): TodoState => {
   return {
@@ -32,9 +32,11 @@ export const getInitTodoState = (): TodoState => {
     docs: [],
     tagDocs: [],
     doneTodos: false,
+    orderFilter: 'created',
+    orderAsync: 1,
+    showNewTagFilter: false,
   }
 }
-
 
 export class TodoService {
   
@@ -59,12 +61,10 @@ export class TodoService {
   }
 
   async _init(projectid: string, listName: string|undefined, tagName: string|undefined) {
-    console.log('-------------------------------------------');
-    console.log("Init: ", projectid, TYPE_TODO);
 
     if(this._projectid  === projectid && 
         this._state.list?.fullname === listName && 
-        this._state.tag?.fullname === tagName) return;
+        this._state.tag?.name === tagName) return;
 
     let list, tag
     if(!listName && !tagName){
@@ -75,12 +75,10 @@ export class TodoService {
     if(tagName)
       tag = getDefaultTodoTag(tagName, projectid);
 
-
-
     this._state = {...this.state, ...{
       tag, 
       list,
-      tagDocs: this.getTags(projectid)}};
+      tagDocs: this.getTags()}};
     
       log.warn(this._state);
     
@@ -110,21 +108,32 @@ export class TodoService {
      else if(this.state.tag){
         log.info('Todo Query by Tags')
         docs = await dataService.queryByProperty(
-          'tags', 'equals', this.state.tag.fullname, TYPE_TODO);
+          'tags', 'equals', this.state.tag.name, TYPE_TODO);
     }
 
     this.filterAndSaveTodos(docs);
    
   }
 
+  public async getTagsByStartingName(value){
+    return await dataService.queryByProperty(
+      'name', 'startsWith', value, TYPE_TODO_TAG); 
+  }
+
   private filterAndSaveTodos(docs: Todo[]):Todo[] {
-    const filtered = docs.filter(doc => this.filterDoneParentFunction(doc));
+    const filtered = docs.filter(doc => this.filterDoneParentFunction(doc))
+                        .sort((a,b) => this.orderFunction(a,b));
     this.state = {...this.state, ...{docs: filtered}};
     return filtered;
   }
 
+  private orderFunction(a:Todo, b:Todo) {
+    return (a[this._state.orderFilter] > b[this._state.orderFilter])?
+     (1 * this._state.orderAsync) : (-1 * this._state.orderAsync)
+  }
+
+
   private filterDoneParentFunction(doc:Todo) {
-      console.log('Filter1: ', doc.done !== this._state.doneTodos)
       if (doc.done !== this._state.doneTodos) return false;
       return true;
   }
@@ -135,7 +144,6 @@ export class TodoService {
     return this._state;
   }
   public set state(value: TodoState) {
-    console.log('State: ', value);
     this._state = value;
     this.state$.next(this._state);
   }
@@ -150,7 +158,7 @@ export class TodoService {
       }
     }
     catch(e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -164,17 +172,17 @@ export class TodoService {
       }
     }
     catch(e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
 
   public async save(doc:Todo, parentId: string|null = null) {
-    console.log("------- Save: ", doc, this._projectid, TYPE_TODO);
+    log.info("Save: ", doc, this._projectid, TYPE_TODO);
     //see if its new
     if(doc._new) {
       delete(doc._new);
-      doc.tags = [];
+      
       if(this.state.list)
         doc.list = this.state.list.fullname;
       else
@@ -182,20 +190,31 @@ export class TodoService {
       if(!doc.tags){
         doc.tags = [];
       }
-      if(this.state.tag)
-        doc.tags.push(this.state.tag.fullname)
-     
-        
-
+      await this.saveNewTags(doc.tags);
       doc = gamifyService.calculateNewTodo(doc);
     }
     const res = await dataService.save({...{done: false}, ...doc}, TYPE_TODO, {projectid: this._projectid});
     if(parentId && doc.id) {
       this.addSubTodoToParent(doc.id, parentId)
     }
-    console.log(res);
     return res;
 
+  }
+
+  public async saveNewTags(tags:string[]) {
+    console.log('Tags::: ', tags);
+    let tagDoc;
+    for(let i = 0; i < tags.length; i++) {
+      console.log(tags[i]);
+      tagDoc = await dataService.queryByProperty('name', 'equals', tags[i], TYPE_TODO_TAG);
+      console.log(tagDoc);
+      if(tagDoc.length === 0) {
+        //save new tag
+        await dataService.save(new TodoTag({
+          name: tags[i], 
+        }), TYPE_TODO_TAG, {projectid: this._projectid, remoteSync:true });
+      }
+    }
   }
 
   public async saveList(doc:TodoList) {
@@ -239,7 +258,7 @@ export class TodoService {
       }
     }
     catch(e) {
-      console.log(e);
+      log.error(e);
     }
     dataService.remove(id, TYPE_TODO);
   }
@@ -252,13 +271,40 @@ export class TodoService {
     if(done === this._state.doneTodos) return;
     this._state = {...this._state, ...{ doneTodos: done} };
     this.reloadTodos();
-
   }
 
-  public getTags(projectid):TodoTag[] {
+  public showNewTagFilter(show) {
+    this.state = {...this.state, ...{showNewTagFilter: show}};
+  }
+
+  public changeOrderFilter(filter: string) {
+    if(this._state.orderFilter === filter){
+      this._state = {...this._state, ...{ orderFilter: filter, 
+        orderAsync: (this._state.orderAsync === 1)? -1:1} };
+    }
+    else {
+      this._state = {...this._state, ...{ orderFilter: filter} };
+    }
+    this.reloadTodos();
+  }
+
+  public getTags():TodoTag[] {
     const tags =  [
-      getDefaultTodoTag('today', projectid), 
-      getDefaultTodoTag('important', projectid)];
+      new TodoTag({
+        id: undefined,
+        icon: 'sun.svg',
+        name: 'today',
+        fullname: 'today',
+      }),
+      new TodoTag({
+        id: undefined,
+        icon: 'star.svg',
+        name: 'important',
+        fullname: 'important',
+      })
+      //getDefaultTodoTag('today', projectid, 'sun.svg'), 
+      //getDefaultTodoTag('important', projectid, 'star.svg')];
+    ]
     return tags;
   }
 

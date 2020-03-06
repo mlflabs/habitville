@@ -22,8 +22,6 @@ export const initPartyState = {
   docs: []
 }
 
-
-
 export class PartyService {
   private _subscription: Array<Subscription> = [];
   
@@ -35,15 +33,9 @@ export class PartyService {
 
 
     const sub1 = dataService.subscribeChanges().subscribe(doc => {
-      log.info(doc);
       if(doc.type === 'party' && doc.secondaryType === 'project'){
-        console.log('Updating Party Project: ', doc);
         const docs = saveIntoDocList(doc, this._state.docs);
         this.state = {...this._state, ...{docs}};
-        console.log('Updating Party Project: ', doc, this._state);
-      }
-      else {
-        log.info('Didnt pass test, ', doc.type, doc.secondaryType);
       }
     });
     this._subscription.push(sub1);
@@ -62,7 +54,6 @@ export class PartyService {
   */
   public async addUser(id:string, party: PartyProject) {
     try {
-      console.log('PARTY:::: ', party)
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/sendAddMemberRequest',
                       { token: authService.getToken(), 
                         channelid: getChannelFromProjectId(party.id),
@@ -70,20 +61,17 @@ export class PartyService {
                         rights: '0121' //see all, edit own items 
                       }), 
                       true, 'Adding member, please wait');
-      console.log(res);
 
       if(!res.success){
         return toastService.printServerErrors(res);
       }
 
       toastService.showMessage('Member invitation sent', ToastType.success);
-
       waitMS(3000);
-
       dataService.addSyncCall$.next();
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
     
   }
@@ -96,17 +84,14 @@ export class PartyService {
 
   //make new party ajax
   private async _createParty(partyProject: PartyProject) {
-    console.log('Saving party Project::: ', partyProject);
+    log.info('Saving party Project::: ', partyProject);
     loadingService.showLoading('Creating party, please wait, ' +
                 'internet connection required');
     const res = await dataService.saveNewProject(partyProject, TYPE_PARTY);
-
     if(!res.success){
       return toastService.printServerErrors(res);
-    }
-        
+    } 
     loadingService.hideLoading();
-
   }
 
   public saveChallenge(challenge:Challenge, party:PartyProject){
@@ -116,11 +101,10 @@ export class PartyService {
   }
 
   private async _createChallenge(challenge:Challenge, partyProject: PartyProject) {
-    console.log('Saving System Doc::: ', partyProject);
+    log.info('Saving System Doc::: ', partyProject);
     loadingService.showLoading('Adding Challenge, please wait, ' +
                 'internet connection required');
     const res = await dataService.saveSystemDoc(challenge,partyProject, TYPE_PARTY);
-    console.log(res);
     if(!res.success){
       return toastService.printServerErrors(res);
     }
@@ -134,23 +118,18 @@ export class PartyService {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/acceptChannelInvitation',
                       { token: authService.getToken(), msgId: msg.id,}, {} ), 
                       true, 'Accept Reply sent, waiting for reply.');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
 
       toastService.showMessage('Pary Membership request sent. Please wait for app update.', ToastType.success);
-
       await waitMS(2000);
-
       dataService.addSyncCall$.next();
-
       msg.replied = {accepted: true, date: Date.now()};
       dataService.save(msg, TYPE_MSG);
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -160,8 +139,6 @@ export class PartyService {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/social/acceptFriendInvitation',
                       { token: authService.getToken(), msgId: msg.id,}, {} ), 
                       true, 'Accept Reply sent, waiting for reply.');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
@@ -177,7 +154,7 @@ export class PartyService {
       dataService.save(msg, TYPE_MSG);
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -198,12 +175,9 @@ export class PartyService {
                       { token: authService.getToken(), 
                         challengeid, state}, {} ), 
                       true, 'Saving challenge, please wait.');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
-
       await dataService.saveFromServer(res.data.doc, TYPE_PARTY);
 
       toastService.showMessage('Challenge saved.', 
@@ -215,7 +189,7 @@ export class PartyService {
       dataService.addSyncCall$.next();
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -227,21 +201,24 @@ export class PartyService {
                       { token: authService.getToken(), 
                         challengeid, actions}, {} ), 
                       true, 'Saving challenge, please wait.');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
+      log.trace(res);
+      
+      if(res.data && res.data.challenge)
+        dataService.saveFromServer(res.data.challenge, TYPE_PARTY);
 
-      toastService.showMessage('Challenge action submitted, please wait for update', 
-        ToastType.success);
+      if(res.data && res.data.rewards)
+        toastService.showMessage('You have recieved '+res.data.rewards+' points', 
+          ToastType.success);
       await waitMS(2000);
       dataService.addSyncCall$.next();
       await waitMS(2000);
       dataService.addSyncCall$.next();
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -251,21 +228,17 @@ export class PartyService {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/acceptChallenge',
                       { token: authService.getToken(), challengeid: challenge.id}, {} ), 
                       true, 'Accept Reply sent, waiting for reply.');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
 
       toastService.showMessage('Challenge acceptance request sent. Please wait for update.', 
         ToastType.success);
-
       await waitMS(2000);
-
       dataService.addSyncCall$.next();
     }
     catch (e) {
-      console.log(e);
+      log.error(e);
     }
   }
 
@@ -278,8 +251,6 @@ export class PartyService {
     this._state = value;
     this.state$.next(this._state);
   }
-
-
 
   public unsubscribe() {
     if(!this) return;

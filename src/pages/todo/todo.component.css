@@ -76,3 +76,18 @@
   position: absolute;
   right: 50px;
 }
+
+.todoListItemTag {
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.todoListItemTagIcon {
+  margin-left: 5px;
+}
+
+.newTodoCloseButton {
+  position: absolute;
+  right: 10px;
+  top: 0;
+}

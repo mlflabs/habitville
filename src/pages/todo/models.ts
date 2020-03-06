@@ -39,14 +39,12 @@ export class TodoList extends Doc {
   }
 }
 
-export const getDefaultTodoTag = (name:string = 'tasks', projectid:string, icon:string ='check'):TodoTag => {
-  const project = getProjectChildId(projectid);
+export const getDefaultTodoTag = (name:string = 'tasks', icon:string ='check'):TodoTag => {
   return new TodoTag({
     id: undefined,
     type: TYPE_TODO_TAG,
     icon,
     name,
-    fullname: project + name,
   })
 }
 
@@ -56,7 +54,6 @@ export class TodoTag extends Doc {
   animatedIcon?:any;
   color?:string;
   _new?: boolean;
-  fullname!: string;
   constructor(values: Object = {}) {
     super();
     Object.assign(this, values);

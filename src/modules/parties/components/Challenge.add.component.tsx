@@ -7,7 +7,9 @@ import { ChallengeIntervals, Challenge, ChallengeDifficulty } from '../models';
 import { capitalize } from '../../../utils';
 import { COLOR_DANGER } from '../../../colors';
 import { trash } from 'ionicons/icons';
+import ulog from 'ulog';
 
+const log = ulog('party');
 
 
 interface challengeState {
@@ -33,7 +35,6 @@ const getRegularityValues = (interval: ChallengeIntervals) => {
 
 const ChallengeAddComponent = ({challenge, dismissFunc}:
   {challenge:Challenge|null, dismissFunc: {(challenge:Challenge|null, action: 'save'|'remove'|'none')}}) => {
-  console.log('Add Challenge Form:::::: ', challenge);
   const _challenge = challenge|| new Challenge();
   const getDefaultRegularityState: challengeState = {
     regularity: getRegularityValues(_challenge.regularityInterval),
@@ -43,8 +44,6 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
   const [state, setState] = useState<challengeState>({...getDefaultRegularityState, ...{doc: _challenge}});
 
 
-
-  console.log(state);
   const handleChange = (e) => {
     const newDoc = {...state.doc, ...{[e.target.name]:e.detail.value}}
     const newState = {...state, ...{doc: newDoc}};
@@ -52,7 +51,6 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
   }
 
   const handlerRegularityValue = (e) => {
-    console.log(e);
     const newDoc = {...state.doc, ...{regularityValue: e.detail.value}};
     setState({...state, ...{doc: newDoc}});
   }
@@ -62,7 +60,6 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
     const newDoc = {...state.doc, ...{regularityInterval: value, regularityValue: 1}};
     const newReg = {...state.regularity, ...getRegularityValues(value)};
     setState({...state, ...{doc:newDoc, regularity: newReg}});
-    console.log(state);
   }
 
   const printRegularityLabel = () => {
@@ -105,7 +102,6 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
 
   const removehabit = () => {
     hideRemoveWarrning();
-    console.log('REMVE ACTION STATE::::::: ', state);
     dismissFunc(state.doc, 'remove');
   }
 
@@ -225,7 +221,6 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
       );
   }
   
-  console.log("Ready to return form");
   return print();
 };
 

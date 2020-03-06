@@ -1,225 +1,300 @@
-import { Habit, MOMENT_DATE_FORMAT, habitIntervals } from './models';
-import moment, { Moment } from 'moment';
-import { FIRST_DAY_OF_WEEK } from '../../env';
-import { clamp } from '../../utils';
+import { Habit, MOMENT_DATE_FORMAT, HabitAction } from './models';
+import moment from 'moment';
+import { FIRST_DAY_OF_WEEK, env } from '../../env';
+import ulog from 'ulog';
 
+const log = ulog('utils');
 
 export interface GamifyRewards {
   gold:number,
   experience: number,
-  item:any
+  items:any[]
+}
+
+export const mergeRewards = (rewards1: GamifyRewards, 
+                             rewards2: GamifyRewards): GamifyRewards => {
+  return Object.assign({
+    gold: rewards1.gold + rewards2.gold,
+    experience: rewards1.experience + rewards2.experience,
+    items: [...rewards1.items, ...rewards2.items]
+  });
 }
 
 
 
 export const getInitGamifyRewards =  (base?:GamifyRewards):GamifyRewards =>  {
-  return {...{ gold: 0, experience: 0, item:undefined }, ...base};
+  return {...{ gold: 0, experience: 0, items:[] }, ...base};
 }
 
 
-export const calculateCurrentStreak = (hab:Habit, bufferSize = 3): Habit => {
-  console.log('calculateCurrentStreak:::: ', hab, bufferSize);
-  if(hab.regularityInterval === habitIntervals.day){
-    const h = calculateDailyHabitStreak(hab, bufferSize)
-    return h;
-  }
-
-  if(hab.regularityInterval === habitIntervals.week){
-    return calculateHabitStreakByWeek(hab, bufferSize);
-  }
-
-  if(hab.regularityInterval === habitIntervals.month){
-    return calculateHabitStreakByMonth(hab, bufferSize);
-  }
-
-  return hab;
+const sortByDate = (a, b) =>{
+  if(a.date > b.date) return 1;
+  return -1;
 }
 
-
-const getStreakByWeek = (hab:Habit, weeksBack:number, firstDayOfWeek: string): number => {
-  const firstDay = moment().day(FIRST_DAY_OF_WEEK);
-  let currentValue = 0;
-  let streak = 0;
-  if(!firstDay.isSame(moment(), 'day')){
-    console.log('Not same day start');
-    firstDay.add(1, 'week');
-  }
-  console.log(firstDay);
-  //now we have the current first day of week, subtrack weeksBack
-  firstDay.subtract(weeksBack, 'week');
-
-  for(let i = 0; i < 7; i++) {
-    currentValue = getProgressValueByDate(getProgressDate(firstDay,i), hab);
-    if(currentValue > 0) 
-      streak++;
-  }
-  return streak;
-}
-
-const getStreakByMonth = (hab:Habit, monthsBack:number): number => {
-  const firstDay = moment().date(1);
-  
-  if(!firstDay.isSame(moment(), 'day')){
-    console.log('Not same day start');
-    firstDay.add(1, 'month');
-  }
-  console.log(firstDay);
-  let currentValue = 0;
-  let streak = 0;
-  firstDay.subtract(monthsBack, 'month');
-
-  const currentDay = moment(firstDay);
-  while(currentDay.isSame(firstDay, 'month')){
-    currentValue = getProgressValueByDate(currentDay.format(MOMENT_DATE_FORMAT), hab);
-    if(currentValue > 0) 
-      streak++;
-
-    currentDay.add(1, 'day');
-  }
-  return streak;
-}
-
-const withinWeekBuffer = (buffer: number, offset:number):boolean => {
-  if(offset === 0) return true;
-
-
-  const firstDay = moment().day(FIRST_DAY_OF_WEEK);
-  if(!firstDay.isSame(moment(), 'day')){
-    console.log('Not same day start');
-    firstDay.add(1, 'week');
-  }
-
-  //now remove offset
-  firstDay.subtract(offset, 'week');
-
-  if(firstDay.isAfter(moment().subtract(buffer,'day'))) {
-    return true;
-  }
-  
-  return false;
-}
-
-
-const calculateHabitStreakByMonth = (hab:Habit, bufferSize:number): Habit => {
-  console.log("Calculate Current Streak By Month: ", hab);
-  let streak = 0;
-  let currentBiggestStreak = 0;
-  let cont = true;
-  let offset = 0;
-  let currentValue = 0;
-  while(cont) {
-    currentValue = getStreakByMonth(hab, offset);
-    console.log('Month Streak: ', currentValue);
-    console.log('--------------------Clamp:::: ', clamp(currentValue, hab.regularityValue))
-    streak += clamp(currentValue, hab.regularityValue);
-    if(streak > currentBiggestStreak) currentBiggestStreak = streak;
-
-    if(currentValue < hab.regularityValue && !withinWeekBuffer(bufferSize, offset)){
-      cont = false;
-    }
-    //cont
-    offset++;
-  } 
-  let bestStreak = hab.bestStreak;
-  if(!hab.bestStreak)hab.bestStreak = 0;
-  if(currentBiggestStreak > hab.bestStreak) bestStreak = currentBiggestStreak;
-  return {...hab, currentStreak: streak, bestStreak}
-}
-
-
-const calculateHabitStreakByWeek = (hab:Habit, bufferSize:number): Habit => {
-  console.log("Calculate Current Streak By Week: ", hab);
-  let streak = 0;
-  let currentBiggestStreak = 0;
-  let cont = true;
-  let offset = 0;
-  let currentValue = 0;
-  while(cont) {
-
-    currentValue = getStreakByWeek(hab, offset, FIRST_DAY_OF_WEEK);
-    
-    console.log('Week Streak: ', currentValue);
-    console.log('--------------------Clamp:::: ', clamp(currentValue, hab.regularityValue))
-    streak += clamp(currentValue, hab.regularityValue);
-    if(streak > currentBiggestStreak) currentBiggestStreak = streak;
-
-
-    if(currentValue >= hab.regularityValue){
+export const calculateCurrentStreak = (habit: Habit, actions: HabitAction[]) => {
+    //loop through actions and add up rewards
+    let r ={habit: Object.assign(habit), rewards: getInitGamifyRewards()};
+    let rewards: GamifyRewards = getInitGamifyRewards();
+    actions.sort(sortByDate).forEach(action => {
+      //make sure we don't have future day, or past last calculated date day
+      if(r.habit.lastCalculatedDate){
+        if(moment(action.date).isBefore(moment(r.habit.lastCalculatedDate)))
+          throw new Error('Action date is too old, can not modify this action');
+        if(moment(action.date).isSame(moment(r.habit.lastCalculatedDate)))
+          throw new Error('Action for this date already submitted.');
+      }
+      if(moment(action.date).isAfter(moment()))
+        throw new Error('Action date is in the future, cannot modify this action');
       
-    }
-    else {
-
-      //do we still have buffer for this time period
-
-      //streak = 0;
-      //failed on this day,see if we are in the buffer
+      if(r.habit.regularityInterval === 'day')
+        r = calculateDailyChallengeStreak(r.habit, action)
+      else if(habit.regularityInterval === 'week')
+        r = calculateWeeklyChallengeStreak(r.habit, action)
+      else if(r.habit.regularityInterval === 'month')
+        r = calculateMonthlyChallengeStreak(r.habit, action)
+      else {
+        throw new Error('Challenge has incorrect regularityInterval, ' + 
+          r.habit.regularityInterval )
+      }
+      rewards = mergeRewards(r.rewards, rewards);
       
-      if(withinWeekBuffer(bufferSize, offset)){
-        console.log("We are within buffer, ", bufferSize, offset);
-        //still have a chance
-        
+    });
+    return {habit: r.habit, rewards};
+}
+
+
+//from action and back
+const calculateDailyChallengeStreak = (habit: Habit, action: HabitAction) => {
+  
+
+  if(!habit.lastCalculatedDate) {
+    habit.actions = {};
+    habit.lastCalculatedDate = moment(action.date).subtract(1,'d').format(MOMENT_DATE_FORMAT);
+    habit.biggestStreak = 0;
+    habit.currentStreak = 0;
+  }
+
+  habit.actions[action.date] = action;
+
+  let currentAction;
+  let currentDateMoment = moment(habit.lastCalculatedDate).add(1, 'd');
+
+  //run this after going action/lastcalculateddate logic
+  while(currentDateMoment.isSameOrBefore(moment(action.date))) {
+    currentAction = habit.actions[currentDateMoment.format(MOMENT_DATE_FORMAT)];
+
+    //see if its null, no action or if contains values
+    if(currentAction) {
+      //do we have a value
+      if(currentAction.value >= habit.regularityEachDayGoal){
+        //success
+        habit.currentStreak++;
       }
       else {
-        console.log("We are past buffer, ", bufferSize, offset);
-        // did we success this time period
-
-        //out of buffer, plus failed
-        cont = false;
+        //we have an action, but not a success
+        habit.currentStreak = 0;
       }
     }
-      
-    //cont
-    offset++;
-  } 
-  let bestStreak = hab.bestStreak;
-  if(!hab.bestStreak)hab.bestStreak = 0;
-  if(currentBiggestStreak > hab.bestStreak) bestStreak = currentBiggestStreak;
-  return {...hab, currentStreak: streak, bestStreak}
-}
-
-
-
-const calculateDailyHabitStreak = (hab:Habit, bufferSize:number): Habit => {
-  console.log("Calculate Current Streak: ", hab);
-  let streak = 0;
-  let currentBiggestStreak = 0;
-  let cont = true;
-  let offset = 0;
-  let currentValue = 0;
-  while(cont) {
-    currentValue = getProgressValueByDate(getProgressDateBySubtract(offset), hab);
-    if(currentValue > 0){
-      streak++
-      if(streak > currentBiggestStreak) currentBiggestStreak = streak;
-    }
     else {
-      cont = false;
+        //currentAction is null, failed
+        habit.currentStreak = 0;
     }
-      
-    //cont
-    offset++;
-  } 
-  let bestStreak = hab.bestStreak;
-  if(!hab.bestStreak)hab.bestStreak = 0;
-  if(currentBiggestStreak > hab.bestStreak) bestStreak = currentBiggestStreak;
-  return {...hab, currentStreak: streak, bestStreak}
+    if(habit.currentStreak > habit.biggestStreak)
+      habit.biggestStreak = habit.currentStreak;
+
+    currentDateMoment.add(1, 'day');
+  }
+
+  habit.lastCalculatedDate = action.date;
+
+  //calculate rewards
+  let rewards = getInitGamifyRewards();
+  if(habit.currentStreak === 0){
+    rewards.gold = Math.floor(env.GAMIFY_HABIT_GOLD_BASE_REWARD * 
+                        (action.value / habit.regularityEachDayGoal));
+    rewards.experience = Math.floor(env.GAMIFY_HABIT_EXPERIENCE_BASE_REWARD * 
+                        (action.value / habit.regularityEachDayGoal));
+  }
+  else {
+    rewards.gold = calculateGoldByStreak(habit.currentStreak, 
+                                          habit.difficulty,
+                                          env.GAMIFY_HABIT_GOLD_BASE_REWARD);
+    rewards.experience = calculateExperienceByStreak(habit.currentStreak,
+                                          habit.difficulty,
+                                          env.GAMIFY_HABIT_EXPERIENCE_BASE_REWARD);
+  }
+  return {habit: Object.assign(habit), rewards};
 }
 
-const getProgressValueByDate = (date: string, hab:Habit):number => {
-  if(!hab.progress) hab.progress = [];
-  for(let i = 0; i < hab.progress.length; i++){
-    if(hab.progress[i].date === date)
-    {
-      return hab.progress[i].value;
+
+
+const analizeDay = (currentAction: HabitAction, 
+                     habit:Habit):{habit:Habit, 
+                                   rewards:GamifyRewards} => {
+   //see if its null, no action or if contains values
+   let rewards = getInitGamifyRewards();
+   if(currentAction) {
+    //do we have a value
+    if(currentAction.value >= habit.regularityEachDayGoal){
+      //success
+      if(habit.currentTimeperiedStreak < habit.regularityIntervalGoal){
+        habit.currentTimeperiedStreak++;
+        habit.currentStreak++;
+        rewards.gold = calculateGoldByStreak(habit.currentStreak, 
+          habit.difficulty,
+          env.GAMIFY_HABIT_GOLD_BASE_REWARD);
+        rewards.experience = calculateExperienceByStreak(habit.currentStreak,
+          habit.difficulty,
+          env.GAMIFY_HABIT_EXPERIENCE_BASE_REWARD);
+      }
+      else
+      {
+        //we made it, but we are over the goal value, just give basic bonus
+        //make it half of even a non streak one
+        rewards.gold = Math.floor(env.GAMIFY_HABIT_GOLD_BASE_REWARD/2);
+        rewards.experience = Math.floor(env.GAMIFY_HABIT_EXPERIENCE_BASE_REWARD/1.5);
+      }
+    } 
+    else {
+      //we didn't make it this day, just give a basic, fraction of base reward
+      rewards.gold = calculateGoldByStreak(habit.currentStreak, 
+        habit.difficulty,
+        env.GAMIFY_HABIT_GOLD_BASE_REWARD);
+      rewards.experience = calculateExperienceByStreak(habit.currentStreak,
+        habit.difficulty,
+        env.GAMIFY_HABIT_EXPERIENCE_BASE_REWARD);
     }
   }
-  return 0;
+   
+  if(habit.currentStreak > habit.biggestStreak)
+    habit.biggestStreak = habit.currentStreak;
+  
+  return {habit: Object.assign(habit), rewards};
 }
 
-const getProgressDateBySubtract = (subtract:number):string => {
-  return moment().subtract(subtract, 'day').format(MOMENT_DATE_FORMAT);
+//from action and back
+const calculateMonthlyChallengeStreak = (h: Habit, action: HabitAction) => {
+  let habit = Object.assign(h);
+  if(!habit.lastCalculatedDate) {
+    habit.actions = {};
+    habit.lastCalculatedDate = moment(action.date).subtract(1,'d').format(MOMENT_DATE_FORMAT);
+    habit.biggestStreak = 0;
+    habit.currentStreak = 0;
+    habit.currentTimeperiedStreak = 0;
+    habit.currentTimeperiodLastDay = moment(habit.lastCalculatedDate).date(1)
+                                        .add(1, 'month').format(MOMENT_DATE_FORMAT);
+  }
+
+  habit.actions[action.date] = action;
+
+  let currentAction;
+
+  let nextTimeperiodFirstDay = moment(habit.currentTimeperiodLastDay);
+  let currentDateMoment = moment(habit.lastCalculatedDate).add(1, 'd');
+  let rewards = getInitGamifyRewards();
+  //run this after going action/lastcalculateddate logic
+  while(currentDateMoment.isSameOrBefore(moment(action.date))) {
+    currentAction = habit.actions[currentDateMoment.format(MOMENT_DATE_FORMAT)];
+
+    //are we in the same week
+    if(currentDateMoment.isBefore(nextTimeperiodFirstDay)) {
+      const res = analizeDay(currentAction, habit)
+      habit = res.habit;
+      rewards = res.rewards;
+
+    }
+    else{ 
+      //starting new timeperiod
+      //see if we made it last period
+      if(habit.currentTimeperiedStreak < habit.regularityIntervalGoal){
+        //we didn't make it, clear the streak
+        habit.currentStreak = 0;
+      }
+      nextTimeperiodFirstDay.add(1, 'month');
+      habit.currentTimeperiodLastDay = nextTimeperiodFirstDay.format(MOMENT_DATE_FORMAT);
+      //if we are before action date, its an error, too big of time span
+      if(currentDateMoment.isAfter(nextTimeperiodFirstDay)){
+        throw new Error('Action dates are too much apart.');
+      }
+      habit.currentTimeperiedStreak = 0;
+      const res = analizeDay(currentAction, habit);
+      habit = res.habit;
+      rewards = res.rewards;
+    }
+    currentDateMoment.add(1, 'day');
+  }
+
+  habit.lastCalculatedDate = action.date;
+  return {habit, rewards};
 }
 
-const getProgressDate = (date: Moment, subtract: number): string => {
-  return moment(date).subtract(subtract, 'd').format(MOMENT_DATE_FORMAT);
+
+
+const calculateWeeklyChallengeStreak = (h:Habit, action:HabitAction) => {
+  let habit = h;
+  if(!habit.lastCalculatedDate) {
+    habit.lastCalculatedDate = moment(action.date).subtract(1,'d').format(MOMENT_DATE_FORMAT);
+    habit.biggestStreak = 0;
+    habit.currentStreak = 0;
+    habit.currentTimeperiedStreak = 0;
+    habit.currentTimeperiodLastDay = moment(habit.lastCalculatedDate).day(FIRST_DAY_OF_WEEK)
+                                          .add(1, 'week').format(MOMENT_DATE_FORMAT);
+                                          habit.actions = {};
+  }
+
+  habit.actions[action.date] = action;
+
+  let currentAction;
+
+  let nextWeekFirstDay = moment(habit.currentTimeperiodLastDay);
+  let currentDateMoment = moment(habit.lastCalculatedDate).add(1, 'd');
+  let rewards = getInitGamifyRewards();
+  //run this after going action/lastcalculateddate logic
+  while(currentDateMoment.isSameOrBefore(moment(action.date))) {
+    currentAction = habit.actions[currentDateMoment.format(MOMENT_DATE_FORMAT)];
+
+    //are we in the same week
+    if(currentDateMoment.isBefore(nextWeekFirstDay)) {
+      const res = analizeDay(currentAction, habit)
+      rewards = res.rewards;
+      habit = res.habit;
+    }
+    else{ 
+      //starting new timeperiod
+      //see if we made it last period
+      if(habit.currentTimeperiedStreak < habit.regularityIntervalGoal){
+        //we didn't make it, clear the streak
+        habit.currentStreak = 0;
+      }
+      nextWeekFirstDay.add(1, 'week');
+      habit.currentTimeperiodLastDay = nextWeekFirstDay.format(MOMENT_DATE_FORMAT);
+      //if we are before action date, its an error, too big of time span
+      if(currentDateMoment.isAfter(nextWeekFirstDay)){
+        throw new Error('Action dates are too much apart.');
+      }
+      habit.currentTimeperiedStreak = 0;
+      const res = analizeDay(currentAction, habit);
+      habit = res.habit;
+      rewards = res.rewards;
+    }
+    currentDateMoment.add(1, 'day');
+  }
+
+  habit.lastCalculatedDate = action.date;
+  return {habit, rewards};
 }
+
+
+const calculateExperienceByStreak = (streak, difficulty,  baseXP) => {
+  let exponent = 0.7 + difficulty/5;
+  return Math.floor(baseXP + (streak * exponent))
+  
+}
+
+const calculateGoldByStreak = (streak, difficulty,  baseXP) => {
+  let exponent = 1 + difficulty/5;
+  return Math.floor(baseXP + (streak * exponent))
+  
+}
+

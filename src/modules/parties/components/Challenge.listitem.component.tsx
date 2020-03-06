@@ -59,9 +59,6 @@ const ChallengeListItemComponent = ({challenge, showEditModalFunction}:
     }
     return <IonCardTitle>{state.challenge.name}</IonCardTitle>
   }
-  
-
-
 
   const printInfo = () => {
     if(state.challenge.regularityInterval === 'day'){
@@ -97,12 +94,13 @@ const ChallengeListItemComponent = ({challenge, showEditModalFunction}:
 
   const printActionButtons = () => {
     if(state.challenge.state === ChallengeState.waiting && joined === undefined){
-      return <IonButton size="small" onClick={() => partyService.acceptChallenge(state.challenge)} >
+      return <IonButton size="small"   fill="clear"
+            onClick={() => partyService.acceptChallenge(state.challenge)} >
             Accept Challenge</IonButton>
     }
     else if(state.challenge.state === ChallengeState.current){
       if(challengeSubmitForToday()) return;
-      return <IonButton size="small" 
+      return <IonButton size="small"  fill="clear"
         onClick={() => partyService.submitChallengeActions(state.challenge.id, 1)} >
             Done</IonButton>
     }
@@ -119,10 +117,10 @@ const ChallengeListItemComponent = ({challenge, showEditModalFunction}:
     if(!canEditProject(state.challenge.id, authService.getUser())) return;
     if(state.challenge.state === ChallengeState.waiting){
       return <>
-              <IonButton size="small" 
+              <IonButton size="small" fill="clear"
                 onClick={() => partyService.changeChallengeState(state.challenge.id, ChallengeState.current)} >
                 Start Challenge</IonButton>
-              <IonButton size="small" 
+              <IonButton size="small" fill="clear"
                 onClick={() => partyService.changeChallengeState(state.challenge.id, ChallengeState.waiting)} >
                 Freeze For Future Use</IonButton>
             </>

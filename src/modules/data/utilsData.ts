@@ -1,4 +1,4 @@
-import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, LASTCHAR, ProjectItem, Doc } from './models';
+import { PROJECT_SERVICE, DIV, PROJECT_INDEX_SERVICE, ProjectItem, Doc } from './models';
 import shortid from 'shortid';
 import { env } from '../../env';
 
@@ -122,7 +122,6 @@ export const extractChannelNameFromDocId = (id) => {
 */
 
 export const getDocumentRights = (id: string|undefined, user):string|undefined => {
-  console.log(id, user);
   const channel = getChannelNameFromId(id);
   return user[env.ACCESS_META_KEY][channel];
 }
@@ -162,3 +161,4 @@ export const canEditOthersItemByRights = (rights: string): boolean => {
 export const canEditItemByRights = (rights: string, myItem:boolean): boolean => {
   return (myItem)? canEditOwnedItemByRights(rights) : canEditOthersItemByRights(rights);
 }
+

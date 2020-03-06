@@ -32,7 +32,6 @@ export interface PartiesState {
   docs: PartyProject[],
 }
 const reducer = (state, action:{type:string, data:any}): PartiesState => {
-  console.log(action, state);
   switch(action.type) {
     case 'dismissEdit':
       return {...state, ...{showModal: false, party: null}}
@@ -43,7 +42,7 @@ const reducer = (state, action:{type:string, data:any}): PartiesState => {
     case 'userid': 
       return {...state, ...{userId: action.data}};
     default:
-      console.log('ERROR, INCORRECT ACTION TYPE ', action);
+      log.error('ERROR, INCORRECT ACTION TYPE ', action);
       return state;
   }
 }
@@ -66,15 +65,12 @@ const PartiesPage = () => {
       _dispatch({type, data});                      
   }
 
-  console.log('Parties Page:: ', state);
-
   useEffect(() => {
     const subs = [
       authService.username$.subscribe(username => {
         dispatch('userid', authService.userid);
       }),
       partyService.state$.subscribe(changes => {
-        log.error('TESTING SUBSCRIBE::::: ', changes);
         dispatch('docs', changes.docs);
       }),
 
@@ -88,13 +84,11 @@ const PartiesPage = () => {
   }, [])
 
   const editParty = (party:PartyProject = new PartyProject()) => {
-    console.log('Add party:  ', party);
     dispatch('edit', party);
   }
 
 
   const modalDismissFunc = (party: PartyProject|null, action:'save'|'remove'|'none') => {
-    console.log('PARTY: ', party)
     dispatch('dismissEdit')
     if(action === 'save' && party != null){
       partyService.saveParty(party)

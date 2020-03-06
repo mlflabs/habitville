@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { getNested } from '../../utils';
 import { loadingService } from '../loading/loadingService';
+import ulog from 'ulog';
 
+const log = ulog('ajax');
 
 
 export interface ajaxResponse {
@@ -56,16 +58,14 @@ export const post = async (req: postRequest, showLoading = true, loadingMessage=
   try {
     if(showLoading)
       loadingService.showLoading(loadingMessage);
-    console.log(req);
     const res = await axios.post(req.url, req.form, req.options);
 
     loadingService.hideLoading();
-    console.log(res);
+    log.info(res);
     return getAjaxMessage(true, res.data, 200);
   }
   catch(err) {
     loadingService.hideLoading();
-    //console.log(err.response);
     const response = getNested(err, 'response');
     if(!response || !response.status) {
       return getAjaxMessage(false, null, 503, [getErrorMessage("Service is temporarly unavailable")]);

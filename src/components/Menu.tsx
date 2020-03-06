@@ -26,7 +26,7 @@ const Menu = () => {
   log.warn(path);
   return (
     <IonMenu key="ionmenu_left" contentId="main" type="overlay">
-      <MenuHeaderWithProgress />
+      <MenuHeaderWithProgress key="menu_header" />
       <IonContent key="menu_left" >
         <IonGrid>
         {state.appPages.map((appPage, index) => {

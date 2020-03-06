@@ -2,6 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import { IonItem, IonLabel, IonList, IonText, IonBadge } from '@ionic/react';
 import { Challenge } from '../models';
 import { COLOR_LIGHT, COLOR_SUCCESS, COLOR_SECONDARY } from '../../../colors';
+import ChallengeMemberScoreHistory from './Challenge.member.scoreHistory';
 
 
 export interface ChallengeLocalState {
@@ -46,11 +47,13 @@ const ChallengeMembersItem = ({challenge}:
   const print = () => {
     return (
       <IonList>
-        {state.challenge.members.sort((a,b)=> a.score.exp - b.score.exp)
+        {state.challenge.members.sort((a,b)=> b.score.exp - a.score.exp)
           .map((member, i) => (
             <IonItem key={member.id}>
               <IonLabel>
-                <h2>{member.username}</h2>
+                <h2>{member.username} - 
+                  <ChallengeMemberScoreHistory member={member} />
+                </h2>
               </IonLabel>
               {printScore(member.score, i)}
             </IonItem>

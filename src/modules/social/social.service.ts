@@ -36,14 +36,11 @@ export class SocialService {
 
   public async addFriend(username?:string) {
     try {
-      console.log('Friend:::: ', username)
       const res = await post(getPostRequest(env.AUTH_API_URL +'/social/sendAddFriendRequest',
                       { token: authService.getToken(), 
                         username,
                       }), 
                       true, 'Sending invitatin request, please wait');
-      console.log(res);
-
       if(!res.success){
         return toastService.printServerErrors(res);
       }
@@ -61,16 +58,10 @@ export class SocialService {
   }
 
 
-
-
-
-
-
   public get state(): SocialState {
     return this._state;
   }
   public set state(value: SocialState) {
-    console.log('State: ', value);
     this._state = value;
     this.state$.next(this._state);
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { IonButton } from '@ionic/react';
 import './auth.css';
 import { useLocation, useHistory } from 'react-router-dom';
@@ -12,14 +12,11 @@ const AuthMenuComponent = ({page}: {page:string}) => {
   const history = useHistory();
   
   const push = (url:string) => {
-    console.log(location.pathname);
     if(location.pathname && url !== location.pathname){
       history.push(url);
     }
-
   }
-  
-  
+
   return (
     <div className="authMenuParent" >
       <IonButton  onClick={() => push('/auth/login')}
@@ -38,5 +35,4 @@ const AuthMenuComponent = ({page}: {page:string}) => {
     </div>
   );
 }
-
 export default AuthMenuComponent;

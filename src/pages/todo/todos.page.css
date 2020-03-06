@@ -13,6 +13,12 @@
   margin: 0px;
 }
 
+.todoHeaderIcons {
+  font-size: 18px;
+}
+
+
+
 .todoSubHeaderButtons {
   display: inline-flex;
   position: relative;

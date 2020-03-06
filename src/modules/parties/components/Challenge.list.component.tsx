@@ -49,8 +49,6 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   });
 
   useEffect(() => {
-    //hvCSL13RdC.ch party
-    console.log('CHALLENGE LIST COMP::::::: ', project.id, TYPE_PARTY);
     const sub = dataService.subscribeByPropertyChange('secondaryType', 'challenge')
       .subscribe(change => {
         if(change.id.startsWith(getProjectChildId(project.id)))
@@ -81,7 +79,6 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   }
   
   const addChallenge = (ch:Challenge = new Challenge()) => {
-    console.log('Add challenge:  ', ch);
     dispatch('addChallengeModal', ch);
   }
 
@@ -90,7 +87,6 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   }
 
   const challengeDismissFunc = (challenge: Challenge|null, action:'save'|'remove'|'none') => {
-    console.log('Challenge: ', challenge)
     hideChallengeModal();
     if(action === 'save' && challenge != null){
       partyService.saveChallenge(challenge, project);

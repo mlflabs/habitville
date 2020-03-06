@@ -2,11 +2,14 @@
 import { Habit, habitStage, TYPE_HABBIT } from './models';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { dataService } from '../../modules/data/dataService';
-import { saveIntoArray, waitMS, isThisUserProject } from '../../modules/data/utilsData';
+import { saveIntoArray, isThisUserProject } from '../../modules/data/utilsData';
 import { ProjectItem } from '../../modules/data/models';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import _ from 'lodash';
 import { authService } from '../../modules/auth/authService';
+import ulog from 'ulog';
+
+const log = ulog('habits');
 
 export interface habitsState {
   selected: Habit | null,
@@ -51,23 +54,18 @@ export class HabitsService {
   }
 
   async _init(project: ProjectItem) {
-    console.log("################################# Init: ", project, TYPE_HABBIT);
     if (this._project && this._project.id === project.id) return;
-    console.log('Saving....', this._project, project);
     this._project = project;
     this._docs = await dataService.getAllByProject(project.id, TYPE_HABBIT);
-    console.log("Init Docs: ", this._docs);
     this.filterhabits();
 
     //manage changes
 
     const sub = dataService.subscribeProjectTypeChanges(project.id, TYPE_HABBIT)
       .subscribe(doc => {
-        console.log("habit Service Subscription: ", doc);
         if (doc.deleted)
           this._docs = this._docs.filter(d => d.id !== doc.id);
         else {
-          console.log('Updating doc: ', doc);
           this._docs = saveIntoArray(doc, this._docs);
         }
         this.filterhabits();
@@ -79,10 +77,8 @@ export class HabitsService {
 
 
   private filterhabits() {
-    console.log("Filterhabits", this._docs);
     const filtered = this._docs.filter(doc => this.filterFunction(doc));
     this.state = { ...this._state, ...{ habits: filtered } };
-    console.log("Filtered State: ", this._state);
   }
 
   private filterFunction(doc: Habit) {
@@ -110,17 +106,16 @@ export class HabitsService {
 
 
   public save(doc: Habit) {
-    console.log("Save: ", doc, this._project, TYPE_HABBIT);
+    log.info("Save: ", doc, this._project, TYPE_HABBIT);
 
     //check if its new, no id, its noew
     if (!doc.id) {
       if(isThisUserProject(this._project.id, authService.getUser().id)){
-        console.log('Savingl new personal challenge');
         doc = Object.assign(gamifyService.calculateNewHabitRewards(doc));
         return dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { projectid: this._project.id });
       }
       else {
-        console.log('Saving party challenge')
+
       }
     }
     else

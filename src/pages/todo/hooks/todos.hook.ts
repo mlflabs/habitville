@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { Todo, TodoList, getDefaultTodoList, getDefaultTodoTag } from '../models';
+import { Todo, TodoList } from '../models';
 import { TodoService, TodoState, getInitTodoState } from '../todo.service';
 import ulog from 'ulog';
 
@@ -12,6 +12,8 @@ export interface DataFunctions {
   select: {(doc: Todo | null)},
   selectList: {(list: TodoList)},
   changeDoneFilter: {(done:boolean)}
+  changeOrderFilter: {(type: string)},
+  showNewTag: {(show:boolean)}
 }
 
 
@@ -32,6 +34,8 @@ export function useTodosCollectionFacade(
     select: (doc: Todo | null) => todoService.current.select(doc),
     selectList: (list: TodoList) => todoService.current.selectList(list),
     changeDoneFilter: (done:boolean) => todoService.current.changeDoneFilter(done),
+    changeOrderFilter: (filter:string) => todoService.current.changeOrderFilter(filter),
+    showNewTag: (show:boolean) => todoService.current.showNewTagFilter(show),
   }
 
   useEffect(() => {
@@ -40,10 +44,8 @@ export function useTodosCollectionFacade(
   }, [projectid, list, tag])
 
   useEffect(() => {
-    console.log('EFFECT ====================');
     const subscriptions: Subscription[] = [
       todoService.current.state$.subscribe(state => {
-        console.log('TODO Hook Sub: ', state);
         setState(state);
       })
     ];

@@ -25,6 +25,7 @@ export interface PartyMember {
   username: string,
   rights: string,
   score: {exp: number},
+  scoreHistory: {[key:string]: {exp:number}};
 }
 
 export interface ChallengeRewards {
@@ -41,12 +42,13 @@ export interface ChallengeMember {
   id: string,
   username: string,
   score: {exp: number},
+  scoreHistory: {[key:string]: {exp:number}};
   joinDate: number,
   actions: { [key:string]: ChallengeAction },
   lastCalculatedDate?: string,
   currentStreak?: number,
   biggestStreak?: number,
-  skippedDays?: number,
+
 }
 
 

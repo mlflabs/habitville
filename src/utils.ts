@@ -1,5 +1,7 @@
 import moment from 'moment';
+import ulog from 'ulog'
 
+const log = ulog('utils');
 
 export const capitalize = (s: string) => {
   if (typeof s !== 'string') return ''
@@ -18,7 +20,7 @@ export const printDateRelative = (timestamp: number) => {
     }
   }
   catch(e){
-    console.log(e);
+    log.error(e);
   }
 }
 

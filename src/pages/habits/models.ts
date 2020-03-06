@@ -38,9 +38,9 @@ export const printDifficulty = (hab:habitDifficulty):string => {
 }
 
 
-export interface HabitProgress {
-  date:string, 
+export interface HabitAction {
   value: number, 
+  date:string, 
   reward?: GamifyRewards,
 }
 
@@ -52,13 +52,18 @@ export class Habit extends Doc {
   difficulty:habitDifficulty = habitDifficulty.medium;
   //regularity
   regularityInterval:habitIntervals = habitIntervals.day;
-  regularityValue: number = 1;
-  regularityEachDayGoal?: number = 1;
+  regularityIntervalGoal: number = 1;
+  regularityEachDayGoal: number = 1;
 
-  progress: HabitProgress[] = [];
+  actions: {[key: string]: HabitAction } = {};
   //streaks
+  //member info
+  lastCalculatedDate?:string;
+  currentTimeperiedStreak: number = 0;
+  currentTimeperiodLastDay?: string;
+
   currentStreak: number = 0;
-  bestStreak: number = 0;
+  biggestStreak: number = 0;
 
   newRewards?: GamifyRewards;
   

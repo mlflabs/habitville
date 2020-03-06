@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { IonItem, IonLabel, IonIcon, IonInput, IonTextarea, IonButton, IonHeader, IonTitle, IonToolbar, IonContent, IonFooter, IonButtons, IonSelect, IonSelectOption, IonRange, IonFab, IonFabButton, IonAlert, IonSegment, IonSegmentButton } from '@ionic/react';
-import { arrowBack, trash } from '../../../node_modules/ionicons/icons';
+import { trash } from '../../../node_modules/ionicons/icons';
 import { Habit, habitIntervals, habitDifficulty, printDifficulty } from './models';
 import { capitalize } from '../../utils';
 import { COLOR_DANGER } from '../../colors';
@@ -30,19 +30,15 @@ const getRegularityValues = (interval: habitIntervals) => {
 
 const HabitAddComponent = ({habit, dismissFunc}:
   {habit:Habit, dismissFunc: {(habit:Habit|null, action: 'save'|'remove'|'none')}}) => {
-  console.log('Add habits Form:::::: ', habit);
-  const getDefaultRegularityState: habitState = {
+  
+    const getDefaultRegularityState: habitState = {
     regularity: getRegularityValues(habit.regularityInterval),
     doc: new Habit(),
     showDeleteWarrning: false
   }
 
-
   const [state, setState] = useState<habitState>({...getDefaultRegularityState, ...{doc: habit}});
 
-
-
-  console.log(state);
   const handleChange = (e) => {
     const newDoc = {...state.doc, ...{[e.target.name]:e.detail.value}}
     const newState = {...state, ...{doc: newDoc}};
@@ -50,27 +46,25 @@ const HabitAddComponent = ({habit, dismissFunc}:
   }
 
   const handlerRegularityValue = (e) => {
-    console.log(e);
-    const newDoc = {...state.doc, ...{regularityValue: e.detail.value}};
+    const newDoc = {...state.doc, ...{regularityIntervalGoal: e.detail.value}};
     setState({...state, ...{doc: newDoc}});
   }
 
   const handlerRegularityIntervalChange = (value) => {
     value = value || 'day';
-    const newDoc = {...state.doc, ...{regularityInterval: value, regularityValue: 1}};
+    const newDoc = {...state.doc, ...{regularityInterval: value, regularityIntervalGoal: 1}};
     const newReg = {...state.regularity, ...getRegularityValues(value)};
     setState({...state, ...{doc:newDoc, regularity: newReg}});
-    console.log(state);
   }
 
   const printRegularityLabel = () => {
 
-    const times = (state.doc.regularityValue > 1)? ' times a ': ' time a ';
+    const times = (state.doc.regularityIntervalGoal > 1)? ' times a ': ' time a ';
     if(state.doc.regularityInterval === 'day'){
       return 'I will repeat this habit every day.'
     }
     
-    return 'I will repeat this habit ' +state.doc.regularityValue + times + state.doc.regularityInterval
+    return 'I will repeat this habit ' +state.doc.regularityIntervalGoal + times + state.doc.regularityInterval
   }
 
   const handleDifficultyChange = (e) => {
@@ -103,7 +97,6 @@ const HabitAddComponent = ({habit, dismissFunc}:
 
   const removehabit = () => {
     hideRemoveWarrning();
-    console.log('REMVE ACTION STATE::::::: ', state);
     dismissFunc(state.doc, 'remove');
   }
 
@@ -160,7 +153,7 @@ const HabitAddComponent = ({habit, dismissFunc}:
                     min={state.regularity.min}
                     max={state.regularity.max}
                     debounce={100}
-                    value={state.doc.regularityValue}
+                    value={state.doc.regularityIntervalGoal}
                     onIonChange={handlerRegularityValue}
                     color="secondary" >
                 <IonLabel slot="start">{state.regularity.min}</IonLabel>
@@ -222,8 +215,7 @@ const HabitAddComponent = ({habit, dismissFunc}:
       </>
       );
   }
-  
-  console.log("Ready to return form");
+
   return print();
 };
 

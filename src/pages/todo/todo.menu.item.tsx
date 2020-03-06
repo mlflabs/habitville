@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { IonItem } from '@ionic/react'
 import Lottie from 'react-lottie';
 import sun from '../../icons/sun.json';
+import star from '../../icons/star.json';
 import './todo.menu.css';
 
 export const waitMS = (ms: number) => {
@@ -10,8 +11,8 @@ export const waitMS = (ms: number) => {
   });
 };
 
-const TodoMenuItemButtonComponet = ({name, color, actonFunc}:
-  {name: string, color:string, actonFunc:Function}) => {
+const TodoMenuItemButtonComponet = ({name, color, icon, actonFunc}:
+  {name: string, icon: string, color:string, actonFunc:Function}) => {
   
   const [state, setState] = useState({isStopped:true, isPaused:true})
   
@@ -19,7 +20,7 @@ const TodoMenuItemButtonComponet = ({name, color, actonFunc}:
   const defaultOptions = {
     loop: true,
     autoplay: true, 
-    animationData: sun,
+    animationData: (icon === 'today')? sun : star,
     rendererSettings: {
       clearCanvas: true,
       scaleMode: 'noScale',
@@ -41,7 +42,7 @@ const TodoMenuItemButtonComponet = ({name, color, actonFunc}:
     <IonItem  button 
         onClick={() => actionHandler()}
         color={color}  
-        routerLink={encodeURI('/todos/tag/today')} 
+        routerLink={encodeURI('/todos/tag/' + icon)} 
         routerDirection="none"
         lines="none">
     <div className ="lottieicon">
