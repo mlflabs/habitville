@@ -1,5 +1,5 @@
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { map, filter, throttleTime } from 'rxjs/operators';
+import { map, filter, throttleTime, first } from 'rxjs/operators';
 import { getProjectChildId, generateCollectionId, 
   TYPE_SETTINGS, waitMS, getChannelFromProjectId } from './utilsData';
 
@@ -17,6 +17,7 @@ import { syncData } from './sync';
 import { post, getPostRequest } from '../ajax/ajax';
 import ulog from 'ulog';
 import { TYPE_SOCIAL } from '../social/models';
+import { RefresherEventDetail } from '@ionic/core';
 
 const log = ulog('dataService');
 
@@ -80,7 +81,6 @@ class DataService {
   private _ready = false;
   public _ready$ = new BehaviorSubject(this._ready);
   public addSyncCall$ = new Subject(); // do we need to sync with server
-
   constructor() {
     //subscriptions
     this.addSyncCall$.pipe(
@@ -188,21 +188,35 @@ class DataService {
   }
 
   async saveSystemDoc(doc: any, project:ProjectItem, collection: string): Promise<any> {
-    const doc2 = {}
-    if(!doc.type) 
-      throw new Error('Saving system doc requires doc to have type property');
-    if(doc.secondaryType)
-      doc2['secondaryType'] = doc.secondaryType;
+    if(doc.id){
+      log.warn('Editing SystemDoc, ', doc);
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/editSystemDoc',
+                            { token: authService.getToken(), doc}, {} ), false) ;
+      if(!res.success)
+        return res;
+  
+      return await this.db.save(res.data.doc, collection, false);
+    }
+    else {
+      log.warn('Saving new SystemDoc, ', doc);
+      const doc2 = {}
+      if(!doc.type) 
+        throw new Error('Saving system doc requires doc to have type property');
+      if(doc.secondaryType)
+        doc2['secondaryType'] = doc.secondaryType;
+  
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/addNewSystemDoc',
+                        {...{ token: authService.getToken(), 
+                          doctype: doc.type,
+                          channelname: getChannelFromProjectId(project.id),
+                          doc: doc }, ...doc2}, {} ), false) ;
+      if(!res.success)
+        return res;
+  
+      return await this.db.save(res.data.doc, collection, false);
+    }
+    
 
-    const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/addNewSystemDoc',
-                      {...{ token: authService.getToken(), 
-                        doctype: doc.type,
-                        channelname: getChannelFromProjectId(project.id),
-                        doc: doc }, ...doc2}, {} ), false) ;
-    if(!res.success)
-      return res;
-
-    return await this.db.save(res.data.doc, collection, false);
   }
 
 
@@ -323,6 +337,10 @@ class DataService {
       this._ready$.next(value);
   }
 
+  public async refresh(event: CustomEvent<RefresherEventDetail>) {
+    await this._syncRemote();
+    event.detail.complete();
+  }
 
   public async init(authid: string , syncRemote = true) {
     log.info('Init DB')
@@ -343,6 +361,7 @@ class DataService {
   }
 
   private async _syncRemote() {
+    console.log('Sync Remote:::')
     let ck = Number(await localStorageService.getItem('SYNC_CHECKPOINT'));
     if(!ck) ck = 0; 
     
@@ -368,7 +387,7 @@ class DataService {
           keys[i]);
       }
     }
-
+    console.log('Finished sync');
   }
 
 

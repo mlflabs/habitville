@@ -11,7 +11,9 @@ import {
   IonLabel,
   IonButton,
   IonModal,
-  IonItem} from '@ionic/react';
+  IonItem,
+  IonRefresher,
+  IonRefresherContent} from '@ionic/react';
 import HeaderWithProgress from '../../../components/HeaderWithProgress';
 import { authService } from '../../auth/authService';
 import { PartyProject } from '../models';
@@ -20,6 +22,7 @@ import { partyService } from '../party.service';
 import PartyListItemComponent from '../components/Party.listitem.component';
 import { useHistory } from 'react-router-dom';
 import ulog from 'ulog';
+import { dataService } from '../../data/dataService';
 
 const log = ulog('parties');
 
@@ -106,6 +109,10 @@ const PartiesPage = () => {
     <IonPage>
       <HeaderWithProgress title="Parties" />
       <IonContent>
+      <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
+          <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
+     
         {state.showModal? (
           <IonModal isOpen={state.showModal} onDidDismiss={() => hideModal()}>
             <PartyEditComponent party={state.party} 

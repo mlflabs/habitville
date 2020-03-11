@@ -7,7 +7,9 @@ import {
   IonMenuToggle,
   IonGrid,
   IonCol,
-  IonRow
+  IonRow,
+  IonRefresherContent,
+  IonRefresher
 } from '@ionic/react';
 import React from 'react';
 import { withRouter, useLocation } from 'react-router-dom';
@@ -15,6 +17,7 @@ import MenuHeaderWithProgress from './MenuHeaderWithProgress';
 import { useMenuHookFacade } from '../modules/menu/hooks/menu.hook';
 import './menu.css';
 import ulog from 'ulog'
+import { dataService } from '../modules/data/dataService';
 
 const log = ulog('menu')
 
@@ -28,6 +31,9 @@ const Menu = () => {
     <IonMenu key="ionmenu_left" contentId="main" type="overlay">
       <MenuHeaderWithProgress key="menu_header" />
       <IonContent key="menu_left" >
+        <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
+            <IonRefresherContent></IonRefresherContent>
+        </IonRefresher>
         <IonGrid>
         {state.appPages.map((appPage, index) => {
           return (

@@ -4,10 +4,11 @@ import  ulog from 'ulog';
 import { Msg } from '../../messages/models';
 import { dataService } from '../../data/dataService';
 import { TYPE_MSG } from '../models';
-import { mail, personAdd, happy, sad, peopleCircle } from 'ionicons/icons';
+import { mail, personAdd, happy, sad, peopleCircle, documentTextOutline } from 'ionicons/icons';
 import { printDateRelative, saveIntoArray } from '../../../utils';
 import { partyService } from '../../parties/party.service';
 import { COLOR_SUCCESS, COLOR_WARNING } from '../../../colors';
+import './messages.css';
 const log = ulog('messages');
 
 export interface MessagesState {
@@ -31,7 +32,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
   const [state, _dispatch] = useReducer(reducer, {
     messages: [],
   })
-
+  log.warn('MSSGS:  ', channel);
   useEffect(() => {
     loadMsgs()
     const sub = dataService.subscribeChannelTypeChanges(channel, TYPE_MSG)
@@ -54,6 +55,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
   const loadMsgs = async () => {
     log.info('Get all by project, type', channel, TYPE_MSG);
     const msgs = await dataService.getAllByChannel(channel, TYPE_MSG);
+    log.warn(msgs);
     dispatch('setMessages', msgs.sort((a,b)=>{
       if(a.updated < b.updated) return 1;
       return -1;
@@ -70,6 +72,9 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
     }
     else if(msg.messageType === 'friendinvite') {
       return <IonIcon icon={personAdd}  slot="start" />
+    }
+    else if(msg.messageType === 'action' && msg.messageSubType === 'Note2') {
+      return <IonIcon icon={documentTextOutline}  slot="start" />
     }
   }
 
@@ -161,7 +166,23 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
         </IonLabel>
         {printReplyStatus(msg)}
       </IonItem>
-    }                        
+    }  
+    else if(msg.messageType === 'action' && msg.messageSubType === 'Note') {
+      return <IonItem  button 
+                key={msg.id}
+                onClick={() => {}}>
+        {printMessageIcon(msg)}
+        <IonLabel className="ion-text-wrap, messageActionNote">
+            <h2 className="messageActionNoteHeader">{msg.challengeName}: <strong>{msg.username}</strong></h2>
+            <h3  dangerouslySetInnerHTML={{__html: msg.data.note.replace(/(?:\r\n|\r|\n)/g, '<br>')}} />
+             
+            <IonText  color="secondary">
+              {printDateRelative(msg.updated)}
+            </IonText>
+        </IonLabel>
+        {printReplyStatus(msg)}
+      </IonItem>
+    }                                     
   }
 
 

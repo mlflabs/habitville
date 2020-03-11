@@ -8,19 +8,27 @@ import './challenge.css';
 
 
 const ChallengeMemberScoreHistory = ({member}:
-  {member: PartyMember|ChallengeMember}) => {
+  {member: any}) => {
 
 
  const printDay = (dateString) => {
-  const score = member.scoreHistory[dateString];
+  let score;
+  if(member['actions'])
+    score = member['actions'][dateString];
+  else if(member['scoreHistory'])
+    score = member['scoreHistory'][dateString];
+
   let color = COLOR_LIGHT;
-  let exp = 0;
+  let reward = 0;
   if(score){
     color = COLOR_SUCCESS;
-    exp = score.exp;
+    if(score.reward)
+      reward = score.reward.value || score.reward;
   }
+  if(!Number(reward)) reward = 0;
 
-  return <IonBadge class="scoreHistoryBadge"  color={color}>{exp}</IonBadge>
+
+  return <IonBadge class="scoreHistoryBadge"  color={color}>{reward}</IonBadge>
  }
 
   

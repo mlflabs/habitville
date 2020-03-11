@@ -51,5 +51,3 @@ export const env = {...{
   SYNC_SERVER: 'http://localhost:3002',
   AUTH_API_URL: 'http://localhost:3002',
 }, ...detail}
-
-//Serial: F17XL0MBKXLJ · UDID: 00008020-00036DD93AF2002E · Model: iPhone11,8

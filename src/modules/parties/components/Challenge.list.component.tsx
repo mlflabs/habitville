@@ -26,9 +26,9 @@ export interface ChallengeListState {
 const reducer = (state, action): ChallengeListState => {
   switch(action.type) {
     case 'addChallengeModal': 
-      return {...state, ...{showModal: true, modalChalleng: action.data}}
+      return {...state, ...{showModal: true, modalChallenge: action.data}}
     case 'hideChallengeModal':
-      return {...state, ...{showModal: false, modalChalleng: null}}
+      return {...state, ...{showModal: false, modalChallenge: null}}
     case 'loadChallenges': 
       return {...state, ...{challenges: action.data}}
     case 'challengeChange':
@@ -79,6 +79,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   }
   
   const addChallenge = (ch:Challenge = new Challenge()) => {
+    log.warn('Add Challenge::: ', ch);
     dispatch('addChallengeModal', ch);
   }
 
@@ -117,14 +118,11 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
                           showEditModalFunction={addChallenge}/>
           ))}
         </IonList>
-        {state.showModal? (
           <IonModal isOpen={state.showModal} onDidDismiss={() => hideChallengeModal()}>
           <ChallengeAddComponent challenge={state.modalChallenge} 
                               dismissFunc = {challengeDismissFunc}  />
           </IonModal>
-        ) : (
-          <></>
-        )}
+
       </IonCardContent>
       <IonFooter>
         {canEditThisProject()? (

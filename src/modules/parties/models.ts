@@ -10,6 +10,27 @@ export enum ChallengeState {
   resting = 'resting',
 }
 
+export enum ChallengeType {
+  checkin = 'Check-In',
+  value = 'Value',
+  note = 'Note',
+  quizz = 'Quizz',
+  looser = 'Biggest Looser',
+  gainer = 'Biggest Gainer'
+}
+
+export enum ChallengeTypeUnit {
+  Cup = 'Cup',
+  Dollar = "Dollar",
+  Page = 'Page',
+  Minute = 'Minute',
+  Hour = 'Hour',
+  Meter = 'Meter',
+  Kilometer = 'Kilometer',
+  Other = 'Other'
+}
+
+
 export enum ChallengeDifficulty {
   trivial, easy, medium, hard, extreme
 }
@@ -24,12 +45,12 @@ export interface PartyMember {
   id: string,
   username: string,
   rights: string,
-  score: {exp: number},
-  scoreHistory: {[key:string]: {exp:number}};
+  score: {reward: number},
+  scoreHistory: {[key:string]: {reward:number}};
 }
 
 export interface ChallengeRewards {
-  score: number,
+  value: number,
   item?: any,
 }
 
@@ -37,18 +58,17 @@ export interface ChallengeAction {
   date: string,
   value: number, 
   reward: ChallengeRewards,
+  data?: any,
 }
 export interface ChallengeMember {
   id: string,
   username: string,
-  score: {exp: number},
-  scoreHistory: {[key:string]: {exp:number}};
+  score: {reward: number},
   joinDate: number,
   actions: { [key:string]: ChallengeAction },
   lastCalculatedDate?: string,
   currentStreak?: number,
   biggestStreak?: number,
-
 }
 
 
@@ -82,6 +102,14 @@ export class Challenge extends Doc {
   regularityInterval:ChallengeIntervals = ChallengeIntervals.day;
   regularityIntervalGoal: number = 1;
   regularityEachDayGoal: number = 1;
+
+  //type
+  challengeType: ChallengeType = ChallengeType.checkin;
+  challengeTypeUnit: ChallengeTypeUnit = ChallengeTypeUnit.Other;
+  chalengeTypeOther: string = '';
+  challengePointMultiplier: number = 1;
+
+  chalengeTypeNoteVote: boolean = false;
 
   //members
   members: ChallengeMember[]  = []

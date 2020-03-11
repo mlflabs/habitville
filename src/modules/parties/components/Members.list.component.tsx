@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { PartyProject, PartyMember } from '../models';
 import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel, IonBadge } from '@ionic/react';
 import { partyService } from '../party.service';
@@ -11,7 +11,7 @@ const log = ulog('memberlist');
 
 export interface MembersState {
   showAddModal: boolean,
-  members: PartyMember[],
+  project: PartyProject,
 }
 
 
@@ -21,7 +21,8 @@ const reducer = (state, action): MembersState => {
       return {...state, ...{showAddModal: true}};
     case 'hideAddMemberModal':
       return {...state, ...{showAddModal: false}};
-
+    case 'setProject':
+      return {...state, project: action.data}
     default:
       log.error('Action type is not a match');
       return state;
@@ -31,11 +32,17 @@ const reducer = (state, action): MembersState => {
 const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
   const [state, _dispatch] = useReducer(reducer, {
     showAddModal: false,
-    members: [],
+    project,
   })
 
+  useEffect(() => {
+    dispatch('setProject', project);
+    
+  }, [project])
+
   const dispatch = (type: 'showAddMemberModal'|
-                          'hideAddMemberModal', 
+                          'hideAddMemberModal'|
+                          'setProject',
                     data:any = {}) => {
     _dispatch({type, data});
   }
@@ -59,7 +66,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
     let color = COLOR_LIGHT;
     if(index === 0) color = COLOR_SUCCESS;
     if(index === 1) color = COLOR_SECONDARY;
-    return <IonBadge slot="end" color={color}>{score.exp}</IonBadge>
+    return <IonBadge slot="end" color={color}>{score.reward}</IonBadge>
   }
 
   
@@ -70,7 +77,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
       </IonCardHeader>
       <IonCardContent>
         <IonList>
-            {project.members.sort((a,b) => b.score.exp - a.score.exp)
+            {project.members.sort((a,b) => b.score.reward - a.score.reward)
                             .map((member, i) => (
           <IonItem key={member.id}>
             <IonLabel>
@@ -92,11 +99,10 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
       <IonAlert 
         isOpen={state.showAddModal}
         onDidDismiss={() => hideAddUser()}
-        header="Friend ID:"
-        subHeader={'Found at bottom of parties page.'}
+        header="Friend Username:"
         inputs={[
           {
-            name: 'userid',
+            name: 'username',
             type: 'text',
             id: 'adduserid',
           }
@@ -113,7 +119,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
           {
             text: 'Invite User',
             handler: (data) => {
-              partyService.addUser(data.userid, project);
+              partyService.addUser(data.username, project);
               hideAddUser();
             }
           }

@@ -3,14 +3,15 @@ import {
   IonPage,
   IonContent,
   IonList,
-  IonItem,
   IonButton,
   IonToolbar,
   IonChip,
   IonIcon,
   IonLabel,
   IonFab,
-  IonFabButton} from '@ionic/react';
+  IonFabButton,
+  IonRefresher,
+  IonRefresherContent} from '@ionic/react';
 import { Plugins, KeyboardInfo } from '@capacitor/core';
 
 import TodoNewComp from './todo.new.component';
@@ -24,6 +25,7 @@ import { getDefaultProject } from '../../modules/data/utilsData';
 import { authService } from '../../modules/auth/authService';
 import ulog from 'ulog';
 import { checkmarkCircleOutline, radioButtonOff, arrowDownOutline, arrowUpOutline, add } from 'ionicons/icons';
+import { dataService } from '../../modules/data/dataService';
 
 const log = ulog('todo');
 const { Keyboard, Device } = Plugins;
@@ -100,6 +102,9 @@ const TodosPage  = () => {
     <IonPage>
       <HeaderWithProgress title={printTitle()} />
       <IonContent id="todoContent">
+      <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
+          <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
         <div>
           <IonButton  color={(!state.doneTodos)? 'light':'success'} 
                       class="todoHeaderIcons" 

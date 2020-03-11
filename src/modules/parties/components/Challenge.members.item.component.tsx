@@ -37,21 +37,22 @@ const ChallengeMembersItem = ({challenge}:
   }, [challenge])
 
   const printScore = (score, index) =>{
+    if(!score) return;
+    if(!score.reward)return;
     let color = COLOR_LIGHT;
     if(index === 0) color = COLOR_SUCCESS;
     if(index === 1) color = COLOR_SECONDARY;
-    return <IonBadge slot="end" color={color}>{score.exp}</IonBadge>
+    return <IonBadge slot="end" color={color}>{score.reward}</IonBadge>
   }
-
 
   const print = () => {
     return (
       <IonList>
-        {state.challenge.members.sort((a,b)=> b.score.exp - a.score.exp)
+        {state.challenge.members.sort((a,b)=> b.score.reward - a.score.reward)
           .map((member, i) => (
             <IonItem key={member.id}>
               <IonLabel>
-                <h2>{member.username} - 
+                <h2>{member.username} - - 
                   <ChallengeMemberScoreHistory member={member} />
                 </h2>
               </IonLabel>

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PartyProject } from '../models';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonBadge } from '@ionic/react';
-import { useHistory } from '../../../../node_modules/@types/react-router';
 
 
 const PartyListItemComponent = ({partyProject, history,  showEditModalFunction}:

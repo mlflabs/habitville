@@ -1,5 +1,5 @@
 import { Subscription, BehaviorSubject } from "rxjs";
-import { PartyProject, TYPE_PARTY, Challenge, ChallengeState } from "./models";
+import { PartyProject, TYPE_PARTY, Challenge, ChallengeState, ChallengeAction } from "./models";
 import { getPostRequest, post } from '../ajax/ajax';
 import { env } from "../../env";
 import { loadingService } from "../loading/loadingService";
@@ -7,7 +7,6 @@ import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
 import { waitMS, getChannelFromProjectId } from '../data/utilsData';
 import { Msg, TYPE_MSG } from "../messages/models";
-import moment from "moment";
 import { saveIntoDocList } from "../../utils";
 import ulog from 'ulog';
 import { authService } from "../auth/authService";
@@ -52,12 +51,12 @@ export class PartyService {
     2.  (Project children) 0 - can't see, 1 - can see own, 2 - can see all items
     3.  (Project children edit) 0 -can't edit, 1 can edit/make own, 2 can edit all 
   */
-  public async addUser(id:string, party: PartyProject) {
+  public async addUser(username:string, party: PartyProject) {
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/channels/sendAddMemberRequest',
                       { token: authService.getToken(), 
                         channelid: getChannelFromProjectId(party.id),
-                        id: id,
+                        username,
                         rights: '0121' //see all, edit own items 
                       }), 
                       true, 'Adding member, please wait');
@@ -95,9 +94,7 @@ export class PartyService {
   }
 
   public saveChallenge(challenge:Challenge, party:PartyProject){
-    if(!challenge.id) {
       this._createChallenge(challenge, party);
-    }
   }
 
   private async _createChallenge(challenge:Challenge, partyProject: PartyProject) {
@@ -193,10 +190,9 @@ export class PartyService {
     }
   }
 
-  public async submitChallengeActions(challengeid: string|undefined, value:number){
+  public async submitChallengeActions(challengeid: string|undefined, actions: ChallengeAction[]){
     if(!challengeid) throw new Error('Challengeid cannot be undefined');
     try {
-      const actions = [{date: moment().format(env.MOMENT_DATE_FORMAT), value}]
       const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/submitChallengeActions',
                       { token: authService.getToken(), 
                         challengeid, actions}, {} ), 
@@ -204,36 +200,40 @@ export class PartyService {
       if(!res.success){
         return toastService.printServerErrors(res);
       }
-      log.trace(res);
-      
       if(res.data && res.data.challenge)
         dataService.saveFromServer(res.data.challenge, TYPE_PARTY);
 
-      if(res.data && res.data.rewards)
-        toastService.showMessage('You have recieved '+res.data.rewards+' points', 
-          ToastType.success);
+      if(res.data && res.data.rewards >= 0) {
+        log.info('Shwoing rewards::: ', res.data.rewards);
+        toastService.showMessage('You have recieved '+res.data.rewards, 
+        ToastType.success);
+      }
+
       await waitMS(2000);
       dataService.addSyncCall$.next();
       await waitMS(2000);
       dataService.addSyncCall$.next();
+       
     }
     catch (e) {
       log.error(e);
     }
   }
 
-  public async acceptChallenge(challenge:Challenge){
+  public async acceptChallenge(challenge:Challenge, data:any = {}){
     //lets send a request
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/habits/acceptChallenge',
-                      { token: authService.getToken(), challengeid: challenge.id}, {} ), 
+                      { token: authService.getToken(), 
+                        data,
+                        challengeid: challenge.id}, {} ), 
                       true, 'Accept Reply sent, waiting for reply.');
       if(!res.success){
         return toastService.printServerErrors(res);
       }
-
-      toastService.showMessage('Challenge acceptance request sent. Please wait for update.', 
+      toastService.showMessage('Challenge acceptance request sent', 
         ToastType.success);
+      await dataService.saveFromServer(res.data.doc, TYPE_PARTY);
       await waitMS(2000);
       dataService.addSyncCall$.next();
     }
