@@ -6,6 +6,7 @@ import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
 import { waitMS } from '../data/utilsData';
 import { Friend } from "./models";
+import { Msg, MessageItem } from "../messages/models";
 
 export interface SocialState {
   friends: Friend[],
@@ -56,6 +57,29 @@ export class SocialService {
     }
     
   }
+
+
+
+  public async sendMessage(msgDoc: MessageItem) {
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/social/sendMessage',
+                      { token: authService.getToken(), 
+                        msgDoc,
+                      }), 
+                      true, 'Sending message, please wait');
+      if(!res.success){
+        return toastService.printServerErrors(res);
+      }
+
+      await waitMS(3000);
+    }
+    catch (e) {
+      console.log(e);
+    }
+  }
+
+
+
 
 
   public get state(): SocialState {

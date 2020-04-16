@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabButton, IonCardContent, IonGrid, IonRow, IonCol, IonNote, IonBadge, IonLabel } from '@ionic/react';
-import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS, COLOR_DANGER } from '../../colors';
+import { IonItem, IonCard, IonCardHeader, IonCardTitle, IonIcon, IonFab, IonFabButton, IonCardContent, IonGrid, IonRow, IonCol, IonNote, IonBadge, IonLabel, IonAlert, IonModal } from '@ionic/react';
+import { COLOR_LIGHT, COLOR_DARK, COLOR_SUCCESS, COLOR_DANGER, COLOR_SECONDARY, COLOR_PRIMARY, COLOR_MEDIUM, COLOR_WARNING } from '../../colors';
 import { radioButtonOff, checkmarkCircleOutline, cog } from '../../../node_modules/ionicons/icons';
 import moment from 'moment';
 import { Habit, MOMENT_DATE_FORMAT, HabitAction } from './models';
@@ -9,16 +9,22 @@ import './Habit.listitem.component.css';
 import { calculateCurrentStreak } from './utilsHabits';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import { toastService } from '../../modules/toast/toastService';
+import { Line } from 'rc-progress';
+import { HabitPlantComponent } from './habit.plant.component';
 
 
 
 const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   {habit:Habit, dataFunctions: habitDataFunctions, showEditModalFunction:{(habit: Habit)}}) => {
 
-  const [doc, setDoc] = useState(new Habit(habit));
+  const [state, setState] = useState({
+    doc: new Habit(habit),
+    showPlantStats: false
+  });
 
   useEffect(() => {
-    setDoc(new Habit(habit));
+    setState({...state, ...{doc: new Habit(habit)} });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habit])
 
 
@@ -40,7 +46,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   }
 
   const printGoal = () => {
-    if(doc.regularityInterval === 'day'){
+    if(state.doc.regularityInterval === 'day'){
       return (
         <IonItem>
               <IonNote>
@@ -55,7 +61,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
       <IonItem>
         <IonNote>
           Remember you promised that you will repeat this habit 
-          <strong> {doc.regularityIntervalGoal} times {doc.regularityInterval}</strong>
+          <strong> {state.doc.regularityIntervalGoal} times {state.doc.regularityInterval}</strong>
         </IonNote>
       </IonItem>
     )
@@ -67,9 +73,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   const printDayIcon = (index: number, active=false) => {
     const day = moment().subtract(index, 'day');
 
-    console.log(doc);
-
-    let action = doc.actions[day.format(MOMENT_DATE_FORMAT)];
+    let action = state.doc.actions[day.format(MOMENT_DATE_FORMAT)];
     if(!action)
       action = {date: day.format(MOMENT_DATE_FORMAT), value: 0};
 
@@ -93,7 +97,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
 
   const updatehabit = (action: HabitAction) => {
     try {
-      const {habit, rewards} = calculateCurrentStreak(doc, [action])
+      const {habit, rewards} = calculateCurrentStreak(state.doc, [action])
       gamifyService.addRewards(rewards);
       console.log(habit, rewards, action)
       dataFunctions.save(habit);
@@ -103,14 +107,30 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
     }
   }
 
+  const hidePlantModal = () => {
+    setState({...state, ...{showPlantStats: false}});
+  }
+  const showPlantModal = () => {
+    setState({...state, ...{showPlantStats: true}});
+  }
+  const plantModalDismissFunc = (habit: Habit|null, action:'save'|'remove'|'none') => {
+    hidePlantModal();
+    if(action === 'save' && habit != null){
+      
+    }
+    else if(action === 'remove' && habit != null && habit.id){
+      //dataFunc.remove(habit.id);
+    }
+  }
+
   const print = () => {
     return (
         <IonCard>
           <IonCardHeader>
             {/*<IonCardSubtitle>Card Subtitle</IonCardSubtitle>*/}
-            <IonCardTitle>{doc.name}</IonCardTitle>
-            <IonBadge class="habitBadge" color="success">{doc.currentStreak}</IonBadge>
-            <IonBadge class="habitBadge" color="tertiary">{doc.biggestStreak}</IonBadge>
+            <IonCardTitle>{state.doc.name}</IonCardTitle>
+            <IonBadge class="habitBadge" color="success">{state.doc.currentStreak}</IonBadge>
+            <IonBadge class="habitBadge" color="tertiary">{state.doc.biggestStreak}</IonBadge>
           </IonCardHeader>
           <IonItem>
             <IonGrid>
@@ -138,11 +158,31 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
             {printGoal()}
           </IonCardContent>
           <IonFab horizontal="end" vertical="bottom" edge>
-            <IonFabButton size="small" color={COLOR_LIGHT} onClick={() => showEditModalFunction(doc)}>
+            <IonFabButton size="small" color={COLOR_MEDIUM} onClick={() => showEditModalFunction(state.doc)}>
               <IonIcon size="large" icon={cog} />
             </IonFabButton>
           </IonFab>
+
+          <IonFab horizontal="end" vertical="top" >
+            <IonFabButton  
+                onClick={() => showPlantModal()}
+                color={COLOR_LIGHT}>
+              <IonIcon 
+                class="habitPlantIcon"
+                src={'/assets/plants/' + state.doc.plantName+ '/' + state.doc.plantLevel + '.svg'}  />
+              <Line trailWidth={0}  percent={(state.doc.plantExp/state.doc.plantNextLevelExp*100)} 
+                className="plantProgressBar"
+                strokeWidth={5} strokeColor="#157F1F" />
+            </IonFabButton>
+          </IonFab>
+
+          <IonModal isOpen={state.showPlantStats} onDidDismiss={() => hidePlantModal()}>
+            <HabitPlantComponent 
+              doc={state.doc} 
+              closeFunc = {plantModalDismissFunc}  />
+          </IonModal>
         </IonCard>
+        
     );
   }
   

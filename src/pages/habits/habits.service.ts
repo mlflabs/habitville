@@ -82,7 +82,7 @@ export class HabitsService {
   }
 
   private filterFunction(doc: Habit) {
-    return (doc.stage === this._state.stageFilter)
+    return (doc.stage === this._state.stageFilter && !doc.deleted)
   }
 
 
@@ -112,6 +112,8 @@ export class HabitsService {
     if (!doc.id) {
       if(isThisUserProject(this._project.id, authService.getUser().id)){
         doc = Object.assign(gamifyService.calculateNewHabitRewards(doc));
+        gamifyService.removeUserItem(doc.plantName);
+
         return dataService.save({ ...{ done: false }, ...doc }, TYPE_HABBIT, { projectid: this._project.id });
       }
       else {

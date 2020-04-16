@@ -3,12 +3,13 @@ import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem,
 import  ulog from 'ulog';
 import { Msg } from '../../messages/models';
 import { dataService } from '../../data/dataService';
-import { TYPE_MSG } from '../models';
+import { TYPE_MSG, newMessage } from '../models';
 import { mail, personAdd, happy, sad, peopleCircle, documentTextOutline } from 'ionicons/icons';
 import { printDateRelative, saveIntoArray } from '../../../utils';
 import { partyService } from '../../parties/party.service';
 import { COLOR_SUCCESS, COLOR_WARNING } from '../../../colors';
 import './messages.css';
+import { socialService } from '../../social/social.service';
 const log = ulog('messages');
 
 export interface MessagesState {
@@ -21,7 +22,10 @@ const reducer = (state, {type, payload}): MessagesState => {
     case 'setMessages':
       return {...state, ...{messages: payload}};
       case 'updateMessage':
-        return {...state, ...{messages: saveIntoArray(payload, state.messages)}};
+        return {...state, ...{messages: saveIntoArray(payload, state.messages)
+                  .sort((a,b)=>{ if(a.updated < b.updated) return 1;
+                                            return -1;
+                  })}};
     default:
       log.error('Action type is not a match');
       return state;
@@ -33,6 +37,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
     messages: [],
   })
   log.warn('MSSGS:  ', channel);
+  log.error(channel, TYPE_MSG);
   useEffect(() => {
     loadMsgs()
     const sub = dataService.subscribeChannelTypeChanges(channel, TYPE_MSG)
@@ -185,11 +190,19 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
     }                                     
   }
 
+  const sendMessage = async () => {
+    const msg = newMessage('Testing message');
+    const res = await socialService.sendMessage(msg);
+    console.log(res);
+    dataService.addSyncCall$.next();
+  }
+
 
   return (
     <IonCard>
       <IonCardHeader>
         <IonCardTitle>Messages</IonCardTitle>
+        <IonButton onClick={() => sendMessage()} >Send Message</IonButton>
       </IonCardHeader>
       <IonCardContent>
         <IonList>

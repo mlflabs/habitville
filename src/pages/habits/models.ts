@@ -1,6 +1,7 @@
 
 import { Doc } from '../../modules/data/models'
-import { GamifyRewards } from './utilsHabits';
+import { GamifyRewards } from './utilsHabits'; 
+import { DEFAULT_SEED_NAME, MarketItem } from '../../modules/market/models';
 
 export const TYPE_HABBIT = 'hab';
 export const MOMENT_DATE_FORMAT = 'YYYYMMDD';
@@ -66,6 +67,13 @@ export class Habit extends Doc {
   biggestStreak: number = 0;
 
   newRewards?: GamifyRewards;
+
+  seedItem?: MarketItem;
+  plantName: string = DEFAULT_SEED_NAME;
+  plantLevel: number = 0;
+  plantExp: number = 0;
+  plantNextLevelExp: number = 0;
+  plantDifficultyLevel: number = 0;
   
   constructor(values: Object = {}) {
     super()

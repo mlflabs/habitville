@@ -16,3 +16,12 @@
 .habitBadge {
   margin: 5px;
 }
+
+.habitPlantIconParent {
+  color: var(--ion-color-background);
+}
+
+.plantProgressBar {
+  position: absolute;
+  bottom: 10px;
+}

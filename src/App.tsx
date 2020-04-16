@@ -26,33 +26,18 @@ import './theme/my.css';
 
 import { Loading } from './modules/loading/loading.component';
 import { Routes } from './routes';
-import { Toasts } from './modules/toast/toast.component';
-import {I18nextProvider} from 'react-i18next';
-import i18next from 'i18next';
-
-//transllations
-import common_en from "./translations/en/common.json";
+import { Toasts } from './modules/toast/toast.component'; 
+import AppModals from './modules/app/AppModals';
 
 
 
-i18next.init({
-  interpolation: { escapeValue: false },  // React already does escaping
-  lng: 'en',                              // language to use
-  resources: {
-      en: {
-          common: common_en               // 'common' is our custom namespace
-      },
-  },
-});
 
 
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <I18nextProvider i18n={i18next}>
-        <Loading /><Toasts />
+        <Loading /><Toasts /><AppModals />
         <Routes />
-      </I18nextProvider>,
     </IonReactRouter>
   </IonApp>
 );

@@ -3,39 +3,44 @@ import { toast } from 'react-toastify';
 import { Todo } from '../../pages/todo/models';
 import { Habit } from '../../pages/habits/models';
 import { dataService } from '../data/dataService';
-import { calculateLevelExperience, calculateDoneTodoGold, calculateDoneTodoExperience } from './utilsGamify';
+import { calculateLevelExperience, calculateDoneTodoGold, calculateDoneTodoExperience, calculatePlantExperience } from './utilsGamify';
 import { throttleTime } from '../../../node_modules/rxjs/operators';
 import { isEqual } from 'lodash';
 import { getInitGamifyRewards, GamifyRewards } from '../../pages/habits/utilsHabits';
-import { generateCollectionId, genrateMetaData, TYPE_SETTINGS, getDefaultProject } from '../data/utilsData';
+import { generateCollectionId, TYPE_SETTINGS, getDefaultProject } from '../data/utilsData';
 import { env } from '../../env';
 import { authService } from '../auth/authService';
 import ulog from 'ulog';
+import { MarketItem, MarketItemType, DEFAULT_SEED_NAME, defaultSeed } from '../market/models';
+import { planet } from 'ionicons/icons';
+import { messageService } from '../messages/messages.service';
+import { socialService } from '../social/social.service';
+import { MessageItem, newMessage } from '../messages/models';
 
 const log = ulog('gamify');
 
 
+
+
 export interface GamifyState {
-  health:number,
-  maxHealth: number,
   experience: number,
   maxExperience: number,
   level: number,
   gold: number,
 
-  items: any[],
+  userItems: MarketItem[],
+
 }
 
 export const getInitGamifyState = () => {
   return {
-    health: 50,
-    maxHealth: 50,
     experience: 0,
     maxExperience: 20,
     level: 1,
     gold: 0,
 
-    items:[]
+    userItems: [],
+    
   }
 }
 
@@ -44,7 +49,7 @@ export class GamifyService {
   private _userId = '';
   private _subscriptions:any[] = [];
   private _state: GamifyState = getInitGamifyState();
-  
+
   public state$ = new BehaviorSubject<GamifyState>(this._state);
   
 
@@ -60,28 +65,41 @@ export class GamifyService {
   
       const sub2 = dataService.subscribeDocChanges(this.getGamifyDocId())
         .subscribe(doc => {
+          console.log(doc, this.state);
           const equal = isEqual(this._state, doc.state);
           if(!equal)
-            this.state = doc.state;
+            this.state = {...this.state, ...doc.state};
         });
   
       this._subscriptions.push(sub);
       this._subscriptions.push(sub2);
       //load the init stae
+      console.log(this.state, doc);
       if(doc)
-        this.state = doc.state;
+        this.state = {...this.state, ...doc.state};
 
       dataSub.unsubscribe();
     })
   }
 
-
-
-  private unsubscribe() {
-    this._subscriptions.forEach(s=>{
-      if(s)s.unsubscribe();
-    })
+  public buyItem(item:MarketItem) {
+    if(item.price > this.state.gold) return;
+    this._state.gold -= item.price;
+    const i = this._state.userItems.find(i => i.name === item.name);
+    if(i){
+      i.quantity++;
+    }
+    else{
+      this._state.userItems.push({...item, ...{quantity: 1}});
+    }
+    this.state = Object.assign(this._state);
   }
+
+  public getUserSeeds(): MarketItem[] {
+    return [...[defaultSeed],
+            ...this.state.userItems.filter(i => i.itemType === MarketItemType.seed)]
+  }
+  
 
   public calculateFinishedTodoRewards = (todo: Todo): Todo => {
     if(!todo.doneRewards || !todo.doneRewards.gold){
@@ -124,11 +142,19 @@ export class GamifyService {
   }
 
   public calculateNewHabitRewards = (habit:Habit): Habit => {
+    if(!habit.seedItem) throw new Error('Seed item cannot be undefined');
+    
     habit.newRewards = getInitGamifyRewards({
       gold: env.HABIT_REWARDS_NEW_GOLD,
       experience: env.HABIT_REWARDS_NEW_EXPERIENCE,
       items: [],
     });
+
+    habit.plantName = habit.seedItem.name;
+    habit.plantLevel = 1;
+    habit.plantExp = 0;
+    habit.plantDifficultyLevel = habit.seedItem.difficulty;
+    habit.plantNextLevelExp = calculatePlantExperience(habit.plantLevel, habit.plantDifficultyLevel);
 
     this.addGold(habit.newRewards.gold);
     this.messageReceivedGold(habit.newRewards.gold)
@@ -136,6 +162,21 @@ export class GamifyService {
     this.messageReceivedExperience(habit.newRewards.experience)
 
     return {...{}, ...habit};
+  }
+
+  public removeUserItem(name:string) {
+    console.log(name, this._state)
+    if(name === DEFAULT_SEED_NAME) return;
+    const item = this._state.userItems.find(i => i.name === name);
+    if(!item) throw new Error('Item does not exist');
+
+    item.quantity--;
+    console.log('Removing item, ', item);
+    if(item.quantity < 1) {
+      console.log('0 left, so need to filter');
+      this._state.userItems = this._state.userItems.filter(i => i.quantity > 0);
+    }
+    this.state = Object.assign(this._state);
   }
 
   private addGold(value:number, save = true) {
@@ -147,10 +188,13 @@ export class GamifyService {
     let experience = this._state.experience + value;
     
     if(experience > this._state.maxExperience){
+      const level = this._state.level + 1;
       experience = (this._state.maxExperience - experience) * -1;
       this._state = {...this._state, 
         ...{maxExperience: calculateLevelExperience(this._state.level+1),
-            level: this._state.level + 1}}
+            level}}
+
+      socialService.sendMessage(newMessage('New level reached', 'userLevelUp', '', { level }));
     }
     this._state = {...this._state, ...{experience}}
     if(save) this.state = this._state;
@@ -232,7 +276,6 @@ export class GamifyService {
           id: this.getGamifyDocId(),
           state: getInitGamifyState(),
           type: TYPE_SETTINGS,
-          [env.ACCESS_META_KEY]: genrateMetaData(id),
           userid: id,
           created: ts,
           updated: ts
@@ -249,9 +292,17 @@ export class GamifyService {
     return this._state;
   }
   public set state(value: GamifyState) {
+
     this._state = value;
     this.state$.next(value);
   }
+
+  private unsubscribe() {
+    this._subscriptions.forEach(s=>{
+      if(s)s.unsubscribe();
+    })
+  }
+
 
 }
 export const gamifyService = new GamifyService();

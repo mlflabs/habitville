@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect } from 'react';
 import ulog from 'ulog'
 import { IonItem, IonHeader, IonToolbar, IonTitle,  IonContent, IonButton, IonTextarea } from '@ionic/react';
-import { Challenge, ChallengeAction } from '../models';
+import { ChallengeAction } from '../models';
 
 
 const log = ulog('challenge');

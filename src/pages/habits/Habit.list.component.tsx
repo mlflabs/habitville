@@ -31,13 +31,14 @@ const HabitListComponent = ({project}:{project: ProjectItem}) => {
     setModalState({showModal: false, modalhabit: new Habit()});
     if(action === 'save' && habit != null){
       console.log(habit);
-      //dataFunc.save(habit);
+      dataFunc.save(habit);
     }
     else if(action === 'remove' && habit != null && habit.id){
       dataFunc.remove(habit.id);
     }
   }
 
+  console.log(state);
 
   return (
     <IonCard>

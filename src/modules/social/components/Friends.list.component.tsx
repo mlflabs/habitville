@@ -3,6 +3,7 @@ import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem,
 import  ulog from 'ulog';
 import { Friend } from '../models';
 import { socialService } from '../social.service';
+import { useTranslation } from 'react-i18next';
 const log = ulog('social');
 
 export interface FriendsState {
@@ -30,6 +31,8 @@ const FriendsListComponent = () => {
     friends: [],
   })
 
+  const { t } = useTranslation();
+
   const dispatch = (type: 'showAddMemberModal'|
                           'hideAddMemberModal', 
                     data:any = {}) => {
@@ -48,7 +51,7 @@ const FriendsListComponent = () => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Friends</IonCardTitle>
+        <IonCardTitle>{t('Friends')}</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
         <IonList>
@@ -65,12 +68,12 @@ const FriendsListComponent = () => {
         
       </IonCardContent>
         <IonFooter>
-          <IonButton onClick={()=>addFriend()} fill="clear">Add Friend</IonButton>
+          <IonButton onClick={()=>addFriend()} fill="clear">{t('Add Friend')}</IonButton>
         </IonFooter>
       <IonAlert 
         isOpen={state.showAddModal}
         onDidDismiss={() => hideAddUser()}
-        header="Friend's Username:"
+        header= {t('Friends Username')}
         inputs={[
           {
             name: 'username',
@@ -82,7 +85,7 @@ const FriendsListComponent = () => {
         ]}
         buttons={[
           {
-            text: 'Cancel',
+            text: t('Cancel'),
             role: 'cancel',
             cssClass: 'secondary',
             handler: () => {
@@ -90,7 +93,7 @@ const FriendsListComponent = () => {
             }
           },
           {
-            text: 'Invite User',
+            text: t('Invite Friend'),
             handler: (data) => {
               socialService.addFriend(data.username);
               hideAddUser();

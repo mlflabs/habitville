@@ -1,4 +1,4 @@
-import anylogger from 'anylogger';
+ 
 
 /*
 //more simpler then auth hook, just read data

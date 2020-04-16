@@ -29,7 +29,7 @@ const loadParty = async (id:string, state, setState, history) => {
     
     if(!party){
       dataSub.unsubscribe();
-      history.push('/parties');
+      history.push('/clash');
       return
     }
     setState({...state, ...{party}})
@@ -43,13 +43,12 @@ const PartyViewPage = () => {
   const {id} = useParams();
   const history = useHistory();
   const [state, setState] = useState<State>(getInitState)
-
-  //if(!id) return history.push('/parties');
+ 
   useEffect(() => {
     if(id)
       loadParty(id, state, setState, history)
     else {
-      history.push('/parties');
+      history.push('/clash');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])

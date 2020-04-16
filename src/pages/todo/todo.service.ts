@@ -47,7 +47,6 @@ export class TodoService {
   private _subscription: Array<Subscription> = [];
 
   public init(projectid: string, list:string|undefined, tag:string|undefined) {
-    log.warn(projectid, list, tag);
     //first unsubscribe
     this.unsubscribe();
     const dataSub = dataService.getReadySub().subscribe( async (ready) => {
@@ -55,7 +54,7 @@ export class TodoService {
       
       this._init(projectid, list, tag);
 
-      await waitMS(1000);
+      await waitMS(5000);
       dataSub.unsubscribe();
     });
   }

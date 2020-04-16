@@ -1,7 +1,7 @@
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
-import { map, filter, throttleTime, first } from 'rxjs/operators';
+import { map, filter, throttleTime } from 'rxjs/operators';
 import { getProjectChildId, generateCollectionId, 
-  TYPE_SETTINGS, waitMS, getChannelFromProjectId } from './utilsData';
+  TYPE_SETTINGS, waitMS, getChannelFromProjectId, getDefaultProject } from './utilsData';
 
 import { ProjectItem, DIV } from './models';
 import _ from 'lodash';
@@ -137,6 +137,7 @@ class DataService {
         }
     
         if(!doc.id) {
+          console.log(doc, props);
           if(!props.projectid) throw new Error('Saving new doc requires valid props.project')
             // @ts-ignore:  we made this check at the begining
           doc.id = generateCollectionId(props.projectid, collection);
@@ -343,7 +344,7 @@ class DataService {
   }
 
   public async init(authid: string , syncRemote = true) {
-    log.info('Init DB')
+    log.info('Init DB', authid)
     const scheme = databaseScheme;
     scheme.name = authid;
     this.db = new DexieAdapter(scheme);
@@ -355,9 +356,50 @@ class DataService {
       if (syncRemote)
         this.addSyncCall$.next();
 
+      this._createSettingsDoc(authid)
       dbSub.unsubscribe();
       
     });
+  }
+
+  public getSettingsDocId(): string {
+    const defaultProject = getDefaultProject(authService.userid);
+    const id =  generateCollectionId(defaultProject.id, 'settings', '');
+    return id.substring(0, id.length-1);
+  }
+
+  public async getSettingsDoc(): Promise<any> {
+    const id = this.getSettingsDocId();
+    if(id === '')return;
+
+    return await this.getDoc(id, TYPE_SETTINGS);
+  }
+
+
+  private async _createSettingsDoc(userid:string) {
+    log.info('CreateSettingsDoc', userid);
+    try {
+      const id =  this.getSettingsDocId();
+      const s = await dataService.getDoc(id, TYPE_SETTINGS);
+      console.log(s);
+      if(s) return s;
+      const ts = Date.now();   
+      log.info('Compare ids ', userid + ' ' + authService.userid);
+      if(userid === authService.userid){  //half second pased, see if state changed
+        log.info('Saving new Settings Doc::: ', id)
+        const res = await dataService.save({
+          id,
+          type: TYPE_SETTINGS,
+          userid: userid,
+          created: ts,
+          updated: ts
+        }, TYPE_SETTINGS)
+      return res;
+      }
+    }
+    catch(e) {
+      log.error(e.red, userid);
+    }    
   }
 
   private async _syncRemote() {

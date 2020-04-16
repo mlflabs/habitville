@@ -4,7 +4,10 @@ import { trash } from '../../../node_modules/ionicons/icons';
 import { Habit, habitIntervals, habitDifficulty, printDifficulty } from './models';
 import { capitalize } from '../../utils';
 import { COLOR_DANGER } from '../../colors';
+import { gamifyService } from '../../modules/gamify/gamifyService';
 
+import './habit.css';
+import { MarketItem } from '../../modules/market/models';
 
 
 interface habitState {
@@ -100,6 +103,11 @@ const HabitAddComponent = ({habit, dismissFunc}:
     dismissFunc(state.doc, 'remove');
   }
 
+  const selectSeed = (item:MarketItem):any => {
+    const newDoc = {...state.doc, ...{plantName: item.name, seedItem: item}};
+    setState({...state, ...{doc: newDoc}});
+  }
+
 
 
   const print = () => {
@@ -179,6 +187,27 @@ const HabitAddComponent = ({habit, dismissFunc}:
           <IonItem>
             <IonLabel>{printDifficultyLabel(state.doc.difficulty)}</IonLabel>
           </IonItem>
+
+          {(!state.doc.id)? (
+            <IonItem>
+              <IonLabel>Choose Seed</IonLabel>
+            </IonItem>
+          ) : (<></>)}
+
+          {(!state.doc.id)? (
+            <div>
+              {gamifyService.getUserSeeds().map(item => {
+                return  <IonButton  key={item.name} 
+                                    fill={(item.name === state.doc.plantName)?'outline':'clear'} 
+                                    onClick={() => selectSeed(item)}>
+                            <IonIcon  class="seedSize" src={'assets/market/'+ item.pic + '.svg'} />
+                            <h3> {item.name} ({item.quantity})</h3>
+                        </IonButton>
+              })}
+            </div>
+          ) : (<></>)}
+          
+              
         </IonContent> 
 
         <IonFooter>
@@ -203,8 +232,7 @@ const HabitAddComponent = ({habit, dismissFunc}:
             {
               text: 'Cancel',
               role: 'cancel',
-              cssClass: 'secondary',
-              
+              cssClass: 'secondary'
             },
             {
               text: 'Yes Im Sure',

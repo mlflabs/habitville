@@ -2,6 +2,7 @@ import { Habit, MOMENT_DATE_FORMAT, HabitAction } from './models';
 import moment from 'moment';
 import { FIRST_DAY_OF_WEEK, env } from '../../env';
 import ulog from 'ulog';
+import { calculatePlantExperience } from '../../modules/gamify/utilsGamify';
 
 const log = ulog('utils');
 
@@ -58,9 +59,21 @@ export const calculateCurrentStreak = (habit: Habit, actions: HabitAction[]) => 
           r.habit.regularityInterval )
       }
       rewards = mergeRewards(r.rewards, rewards);
-      
     });
-    return {habit: r.habit, rewards};
+    const newHabit = addPlantExperience(r.habit, r.rewards);
+    console.log(rewards, newHabit);
+    return {habit: newHabit, rewards};
+}
+
+const addPlantExperience = (habit: Habit, rewards: GamifyRewards): Habit => {
+  const h = Object.assign(habit);
+  h.plantExp += rewards.experience;
+  if(h.plantExp >= h.plantNextLevelExp){
+    h.plantLevel++;
+    h.plantExp = h.plantExp - h.plantNextLevelExp;
+    h.plantNextLevelExp = calculatePlantExperience(h.plantLevel,h.plantDifficultyLevel);
+  }
+  return h
 }
 
 

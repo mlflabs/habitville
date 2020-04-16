@@ -23,6 +23,7 @@
   position: relative;
   left: 2px;
   width: 200px;
+  top:20px;
 
 
 }
@@ -47,9 +48,9 @@
 
 .statsBarMoneyBadge {
   position: relative;
-  top: 3px;
+  top: 20px;
   font-size: 16px;
-  left: 0px;
+  left: 15px;
   margin-right: 10px;
 }
 
@@ -131,6 +132,11 @@
 .headerSkyDetail {
   position: absolute;
   width: 10%;
+}
+
+.habitPlant {
+  position: absolute;
+  width: 20px;
 }
 
 

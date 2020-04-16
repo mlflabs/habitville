@@ -46,8 +46,8 @@ export const env = {...{
 
   //Auth
   TOKEN_EXPIRATION: 300, // how many days
-  //SYNC_SERVER: 'https://auth.mlflabs.com',
-  //AUTH_API_URL: 'https://auth.mlflabs.com',
-  SYNC_SERVER: 'http://localhost:3002',
-  AUTH_API_URL: 'http://localhost:3002',
+  SYNC_SERVER: 'https://auth.mlflabs.com',
+  AUTH_API_URL: 'https://auth.mlflabs.com',
+  //SYNC_SERVER: 'http://localhost:3002',
+  //AUTH_API_URL: 'http://localhost:3002',
 }, ...detail}

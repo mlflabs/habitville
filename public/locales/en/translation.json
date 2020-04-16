@@ -1,0 +1,64 @@
+{
+
+  "home": "Home",
+  "habits": "Habits",
+
+
+  "clashTitle": "Clash of Farmers",
+  "clash": {
+    "header": "Create your party to challenge your friends",
+    "createBtn": "Create Party",
+    "Friends": "Friends",
+    "Add Friend": "Add Friend",
+    "Invite Friend": "Invite Friend",
+    "Friends Username": "Friend's Username"
+  },
+
+  "todosTitle": "Todos",
+  "todos": {
+    "today": "Today",
+    "important": "Important"
+  },
+
+
+
+  "listsTitle": "Lists",
+  "lists": {
+    "AddNewList": "Add New List?"
+  },
+  
+
+  "tagsTitle": "Tags",
+  "tags": {
+
+  },
+
+  "marketTitle": "Farmers Market",
+  "market": {
+
+  },
+
+  "settingsTitle": "Settings",
+  "settings": {
+
+  },
+
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "name": "Name",
+    "username": "Username",
+    "ID": "ID"
+  },
+
+  
+
+  "menu": "Menu",
+  "date": "Date",
+
+  "cancel": "Cancel"
+  
+
+
+
+}

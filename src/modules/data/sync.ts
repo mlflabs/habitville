@@ -42,8 +42,14 @@ export const syncData = async (props:{  data:any[],
     }),false,'');
 
     if(res) {
+      //if error skipt
+      if(!res.data) {
+        log.warn(res)
+        return null;
+      }
       //merge the 2 checkpoints
       const chpoints = await localStorageService.getObject('channel_checkpoints') || {};
+      console.log(res);
       await localStorageService.setObject('channel_checkpoints',{...chpoints, ...res.data.checkpoints})
       return res.data.types;
     }

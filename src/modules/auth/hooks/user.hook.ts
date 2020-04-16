@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { authService, AuthStatus } from '../authService';
 
-import anylogger from 'anylogger';
-const log =  anylogger('auth: userHook');
+import ulog from 'ulog'
+const log =  ulog('auth');
 
 //more simpler then auth hook, just read data
 export function useUserFacade(): [AuthStatus, String] {

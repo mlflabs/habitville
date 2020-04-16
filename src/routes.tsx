@@ -12,6 +12,9 @@ import { IonSplitPane, IonRouterOutlet } from '../node_modules/@ionic/react';
 import Menu from './components/Menu';
 import PartiesPage from './modules/parties/pages/Parties.page';
 import PartyViewPage from './modules/parties/pages/Party.view.page';
+import SettingsPage from './pages/Settings';
+import Market from './modules/market/pages/market';
+import { Tutorial1 } from './components/slides/tutorial1';
 
 export const Routes = () => {
   const [appStatus] = useAppStatus();
@@ -32,14 +35,17 @@ export const Routes = () => {
           <IonSplitPane when="sm" contentId="main">
             <Menu key="menumain"/>
             <IonRouterOutlet id="main">
-                <Route path="/home" component={Home} exact={true} />           
+                <Route path="/home" component={Home} exact={true} /> 
+                <Route path="/tutorialslides" component={Tutorial1} exact={true} /> 
+                <Route path="/settings" component={SettingsPage} exact={true} />    
+                <Route path="/market" component={Market} exact={true} />       
                 <Route exact path="/auth/user" component={UserPage} />
                 <Route path="/todos" component={TodosPage} exact={true} />
                 <Route path="/todos/:list" component={TodosPage} exact={true} />
                 <Route path="/todos/tag/:tag" component={TodosPage} exact={true} />
                 <Route path="/habits" component={HabitsPage} exact={true} />
-                <Route path="/parties" component={PartiesPage} exact={true} />
-                <Route path="/parties/:id" component={PartyViewPage} exact={true} />
+                <Route path="/clash" component={PartiesPage} exact={true} />
+                <Route path="/clash/:id" component={PartyViewPage} exact={true} />
                 <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
                 <Route path="/404" component={NotFound} />
                 <Redirect to="/404" />

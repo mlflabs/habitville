@@ -11,6 +11,16 @@ export const calculateLevelExperience = (level:number): number => {
   return Math.floor(exp/4);
 }
 
+//diff 1-5
+export const calculatePlantExperience = (level:number, diff = 0): number => {
+  let exp = 0;
+  const d = diff * diff * 10;
+    for(let x = 1; x < level; x++){
+      exp += Math.floor((x+100+d) * Math.pow(2,(x/7)))
+    }
+  return Math.floor(exp/4) + 2;
+}
+
 
 export const calculateDoneTodoGold = (todo:Todo): number => {
   let days = 0;

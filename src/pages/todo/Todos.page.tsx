@@ -5,9 +5,7 @@ import {
   IonList,
   IonButton,
   IonToolbar,
-  IonChip,
   IonIcon,
-  IonLabel,
   IonFab,
   IonFabButton,
   IonRefresher,
@@ -26,6 +24,7 @@ import { authService } from '../../modules/auth/authService';
 import ulog from 'ulog';
 import { checkmarkCircleOutline, radioButtonOff, arrowDownOutline, arrowUpOutline, add } from 'ionicons/icons';
 import { dataService } from '../../modules/data/dataService';
+import { useTranslation } from 'react-i18next';
 
 const log = ulog('todo');
 const { Keyboard, Device } = Plugins;
@@ -36,6 +35,7 @@ const TodosPage  = () => {
   const project = getDefaultProject(authService.userid);
   const location = useLocation();
   
+  const {t} = useTranslation();
 
   let list, tag;
   const params = useParams();
@@ -79,22 +79,6 @@ const TodosPage  = () => {
     });
   }
 
-  const drawActiveInactiveChip = () => {
-    const label = 'Switch View';
-
-    return <IonChip>
-            <IonIcon onClick={() => {dataFunc.changeDoneFilter(!state.doneTodos)}}
-                     icon={radioButtonOff}
-                     color={(state.doneTodos)? 'light':'success'}  />
-            <IonLabel onClick={() => {dataFunc.changeDoneFilter(!state.doneTodos)}}>
-              {label}</IonLabel>
-            <IonIcon 
-                      color={(!state.doneTodos)? 'light':'success'} 
-                      icon={checkmarkCircleOutline}
-                      onClick={() => {dataFunc.changeDoneFilter(!state.doneTodos)}}/>
-          </IonChip>
-
-  }
 
   setKeyboard();
   
@@ -121,7 +105,7 @@ const TodosPage  = () => {
           <IonButton  color={(state.orderFilter!== 'created')? 'light':'success'} 
                       class="todoHeaderButtons" 
                       onClick={() => {dataFunc.changeOrderFilter('created')}}
-                      fill="clear">Date
+                      fill="clear">{t('date')}
                       {(state.orderFilter === 'created')? (
                         <IonIcon 
                           icon={((state.orderAsync === -1)? arrowDownOutline : arrowUpOutline)}/>
@@ -130,7 +114,7 @@ const TodosPage  = () => {
           <IonButton  color={(state.orderFilter !== 'name')? 'light':'success'} 
                       class="todoHeaderButtons" 
                       onClick={() => {dataFunc.changeOrderFilter('name')}}
-                      fill="clear">Name
+                      fill="clear">{t('name')}
                       {(state.orderFilter === 'name')? (
                         <IonIcon 
                           icon={((state.orderAsync === -1)? arrowDownOutline : arrowUpOutline)}/>

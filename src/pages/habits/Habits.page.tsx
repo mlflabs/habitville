@@ -66,6 +66,7 @@ const HabitsPage: React.FC = () => {
     }
   }
 
+  console.log(habits);
 
   return (
     <IonPage>

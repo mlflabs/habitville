@@ -1,11 +1,9 @@
 import React, { useReducer, useEffect } from 'react';
 import { IonList, IonModal, IonCard, 
-  IonCardContent, IonCardHeader, IonCardTitle, 
-  IonFab, IonFabButton, IonIcon, IonButton, IonFooter } from '@ionic/react';
+  IonCardContent, IonCardHeader, IonCardTitle, IonButton, IonFooter } from '@ionic/react';
 import { Challenge, PartyProject, TYPE_PARTY } from '../models';
 import ChallengeListItemComponent from './Challenge.listitem.component';
 import ChallengeAddComponent from './Challenge.add.component';
-import { add } from 'ionicons/icons';
 import { dataService } from '../../data/dataService';
 import { partyService } from '../party.service';
 import { getProjectChildId, canEditProjectByRights } from '../../data/utilsData';
@@ -93,7 +91,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
       partyService.saveChallenge(challenge, project);
     }
     else if(action === 'remove' && challenge != null && challenge.id){
-      //dataFunc.remove(habit.id);
+      // dataFunc.remove(habit.id);
     }
   }
 

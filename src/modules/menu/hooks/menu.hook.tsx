@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect } from 'react';
-import { home, apps, sunny, star, heart, basket, construct, bonfire, checkmark, refresh } from 'ionicons/icons';
+import { home, apps, sunny, star, heart, basket, construct, checkmark, refresh, cog, ribbon } from 'ionicons/icons';
 import { getDefaultProject } from '../../data/utilsData';
 import { authService } from '../../auth/authService';
 import ulog from 'ulog';
@@ -24,64 +24,42 @@ export interface MenuState {
   appPages: AppPage[];
 }
 
-export const todoTags: AppPage[] = [
-  {
-    title: 'Today',
-    url: '/todos/today',
-    icon: sunny,
-  },
-  {
-    title: 'Important',
-    url: '/todos/important',
-    icon: star,
-  },
-  {
-    title: 'Important',
-    url: '/todos/tasksmain33mmm',
-    icon: checkmark,
-  },
-  {
-    title: 'Whish List',
-    url: '/todos/whish',
-    icon: heart,
-  },
-  {
-    title: 'Buy',
-    url: '/todos/buy',
-    icon: basket,
-  },
-  {
-    title: 'Projects',
-    url: '/todos/projects',
-    icon: construct,
-  },
-]
 
 export const getMenuState = (projectid: string): MenuState => {
   return {
     projectid,
     appPages: [
       {
-        title: 'Home',
+        title: 'home',
         url: '/home',
         icon: home,
       },
       {
-        title: 'Habits',
+        title: 'habits',
         url: '/habits',
         icon: refresh,
       },
       {
-        title: 'Parties',
-        url: '/parties',
-        icon: bonfire,
+        title: 'clashTitle',
+        url: '/clash',
+        icon: ribbon,
       },
       {
-        title: 'Todos',
+        title: 'todosTitle',
         url: '/todos',
         icon: apps,
         lastComponent: <TodoMenuListComponent projectid={projectid}  />
-      }
+      },
+      {
+        title: 'marketTitle',
+        url: '/market',
+        icon: basket,
+      },
+      {
+        title: 'settingsTitle',
+        url: '/settings',
+        icon: cog,
+      },
     ]
   }
 };
@@ -114,9 +92,6 @@ export function useMenuHookFacade(): [MenuState, MenuFunctions] {
           
   const menuFunctions: MenuFunctions = {
   }
-
-  
-
 
   return [state, menuFunctions];
 }

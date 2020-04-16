@@ -6,7 +6,7 @@ import {
   IonTitle,
   IonContent,
   IonPage
-} from "@ionic/react";
+} from "@ionic/react"; 
 import { logIn} from 'ionicons/icons';
 import MyForm, { getValidator, FormItem, getFormOptions } from '../../forms/myForm';
 import { authService } from '../authService';

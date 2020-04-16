@@ -6,14 +6,15 @@ import {
   IonCard,
   IonCardHeader,
   IonCardTitle,
-  IonCardSubtitle,
   IonCardContent,
   IonLabel,
-  IonButton,
   IonModal,
   IonItem,
   IonRefresher,
-  IonRefresherContent} from '@ionic/react';
+  IonRefresherContent,
+  IonFab,
+  IonFabButton,
+  IonIcon} from '@ionic/react';
 import HeaderWithProgress from '../../../components/HeaderWithProgress';
 import { authService } from '../../auth/authService';
 import { PartyProject } from '../models';
@@ -23,10 +24,11 @@ import PartyListItemComponent from '../components/Party.listitem.component';
 import { useHistory } from 'react-router-dom';
 import ulog from 'ulog';
 import { dataService } from '../../data/dataService';
+import { useTranslation } from 'react-i18next';
+import { add } from 'ionicons/icons';
+
 
 const log = ulog('parties');
-
-
 
 export interface PartiesState {
   userId: string,
@@ -60,6 +62,8 @@ const PartiesPage = () => {
     party: new PartyProject(),
     docs: [],
   })
+
+  const {t} = useTranslation();
 
   const dispatch = (type: 'userid'|
                           'dismissEdit'|
@@ -107,7 +111,7 @@ const PartiesPage = () => {
 
   return (
     <IonPage>
-      <HeaderWithProgress title="Parties" />
+      <HeaderWithProgress title={t('Clash of Farmers')} />
       <IonContent>
       <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
           <IonRefresherContent></IonRefresherContent>
@@ -124,24 +128,13 @@ const PartiesPage = () => {
         <IonCard>
           <IonCardHeader>
             <IonCardTitle>
-              Here you can join friends to conquer those tasks together.
+              {t('clash.header')}
             </IonCardTitle>
-            <IonCardSubtitle>
-              
-            </IonCardSubtitle>
           </IonCardHeader>
           <IonCardContent>
-            <IonLabel>
-              Create your party to go on quests and challenge your friends.
-            </IonLabel>
-            <IonButton onClick={() =>editParty()} >Create Party</IonButton>
-            <br></br><br></br><br></br>
-            <IonLabel>
-              Join your friends party, give them your code: <strong>{state.userId}</strong>
-            </IonLabel>
-            
           </IonCardContent>
         </IonCard>
+        
       <IonList>
         {state.docs.map(party => (
           <PartyListItemComponent partyProject={party} 
@@ -150,10 +143,12 @@ const PartiesPage = () => {
                                   showEditModalFunction={editParty} />
         ))}  
       </IonList>
-      <IonItem>
-        <IonLabel>To join a party, you can give part leader your id: {state.userId} </IonLabel>
-      </IonItem>
-      
+     
+      <IonFab vertical="top" horizontal="end" slot="fixed" edge>
+          <IonFabButton onClick={() =>editParty()}>
+            <IonIcon icon={add} />
+          </IonFabButton>
+        </IonFab>
       </IonContent>
     </IonPage>
   );
