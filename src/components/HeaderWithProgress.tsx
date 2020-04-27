@@ -12,21 +12,26 @@ import { useHabitsCollectionFacade } from '../pages/habits/hooks/habits.hook';
 import { getDefaultProject } from '../modules/data/utilsData';
 import { authService } from '../modules/auth/authService';
 import { Habit } from '../pages/habits/models';
+import { getPlantPic, getLandscapePlantPic } from '../pages/habits/utilsHabits';
 
-const HeaderWithProgress = ({title}:{title:string}) => {
+const HeaderWithProgress = ({title, showDetail = true}:{title:string, showDetail?:boolean}) => {
 
   const [state, setState] = useState<GamifyState>(getInitGamifyState())
   const [habitsState] = useHabitsCollectionFacade(getDefaultProject(authService.userid));
   
   const {experience, maxExperience, level, gold} = state;
 
+  const landscape = Object.assign(state.landscape || {});
+  if(!landscape.trees) {
+    landscape.trees = [];
+  }
+
+  console.warn(landscape);
+
+
   useEffect(() => {
     const sub = gamifyService.state$.subscribe(s => {
       setState({...state, ...s});
-
-      //get num of plants
-
-
 
     })
     return () => {
@@ -39,18 +44,17 @@ const HeaderWithProgress = ({title}:{title:string}) => {
 
   console.log(habitsState);
 
-  const getPlantSize = (habit:Habit): string => {
-    if(habit.plantLevel < 3) return '5px'
-    if(habit.plantLevel < 4) return '50px'
-    if(habit.plantLevel < 6) return '60px';
-    if(habit.plantLevel < 8) return '70px';
+  const getPlantSize = (level: number): string => {
+    if(level < 3) return '5px'
+    if(level < 4) return '50px'
+    if(level < 6) return '60px';
+    if(level < 8) return '70px';
 
     return '100px';
   }
 
-  const getPlantTop = (habit:Habit): string => {
-    if(habit.plantLevel < 3) return '4px'
-    
+  const getPlantTop = (level:number): string => {
+    if(level < 3) return '4px'
     return '10px';
   }
 
@@ -71,36 +75,36 @@ const HeaderWithProgress = ({title}:{title:string}) => {
         <img src="/assets/pics/cloud1.svg" style={{right:'60px', top: '40px'}} className="headerSkyDetail" alt="Hills"/>
         <img src="/assets/pics/cloud2.svg" style={{right:'140px', top: '15px'}} className="headerSkyDetail" alt="Hills"/>
 
-        {habitsState.habits.map((habit, i )=> (
-          <img  src={'/assets/plants/' + habit.plantName+ '/' + habit.plantLevel + '.svg'}
-                key={habit.id}
-                style={{left: positionArray[i]+'px', bottom: getPlantTop(habit), width: getPlantSize(habit)}} 
-                className="habitPlant" alt="Plants"/>
-        
+        {landscape.trees.map(tree => (
+          <img  src={getLandscapePlantPic(tree)}
+                key={tree.habitId}
+                style={{left: tree.position +'px', bottom: getPlantTop(tree.level), width: getPlantSize(tree.level)}} 
+                className="habitPlant" alt="Tree"/>
         ))}
-      
-      
-      
+
       </div>
-      <div className="statsParent" >
-        <div className="statsBarParent" >
-  
+      {(showDetail? (
+        <div className="statsParent" >
+            <div className="statsBarParent" >
+      
+            </div>
+          <div className="statsBarParent" >
+            <IonIcon class="statsBarIcon" icon={leaf} style={{color: "#157F1F"}} />
+              <Line trailWidth={0}  percent={experience/maxExperience * 100} 
+                    className="statsBarLine"
+                    strokeWidth={4} strokeColor="#157F1F" />
+              <IonBadge class="statsBarBadge" 
+                        color="success" >{experience}/{maxExperience}</IonBadge>
+          </div>
+          <div className="statsBarMoneyParent" >
+            <IonBadge class="statsBarMoneyBadge" 
+                      color="warning" >Gold: {gold}</IonBadge>
+            <IonBadge class="statsBarMoneyBadge" 
+                      color="success" >Level: {level}</IonBadge>
+          </div>
         </div>
-        <div className="statsBarParent" >
-        <IonIcon class="statsBarIcon" icon={leaf} style={{color: "#157F1F"}} />
-          <Line trailWidth={0}  percent={experience/maxExperience * 100} 
-                className="statsBarLine"
-                strokeWidth={4} strokeColor="#157F1F" />
-          <IonBadge class="statsBarBadge" 
-                    color="success" >{experience}/{maxExperience}</IonBadge>
-        </div>
-        <div className="statsBarMoneyParent" >
-          <IonBadge class="statsBarMoneyBadge" 
-                    color="warning" >Gold: {gold}</IonBadge>
-          <IonBadge class="statsBarMoneyBadge" 
-                    color="success" >Level: {level}</IonBadge>
-        </div>
-      </div>
+      ) : (<></>))}
+      
       <h1>{title}</h1>
     </IonHeader>
   )

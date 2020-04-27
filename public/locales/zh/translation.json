@@ -1,6 +1,9 @@
 {
+  "habitville":"习惯维尔**",
   "home": "首页",
   "habits": "习惯",
+
+
   "clashTitle": "村民冲突",
   "clash": {
       "header": "标头",
@@ -20,8 +23,20 @@
       "AddNewList": "添加新列表"
   },
   "tagsTitle": "标签标题",
+  "tags": {
+
+  },
+
   "marketTitle": "集市",
+  "market": {
+
+  },
+
   "settingsTitle": "装置 Settings",
+  "settings": {
+    "changeLanguageRestartMessage": "Currently to initiate change language, a full app restart is needed**"
+  },
+
   "auth": {
       "login": "登录",
       "logout": "登出",
@@ -29,7 +44,65 @@
       "username": "用户名",
       "ID": "ID"
   },
+
+  "social": {
+    "members": "Members**",
+    "friends": "Friends**",
+    "friend": "Friend**",
+    "from": "From**",
+    "friendAdd": "Add Friend**",
+    "friendUsername": "Friends Username**",
+    "inviteFriend": "Invite Friend**",
+    "receivedFriendInvitation": "You have received friend invitation. Friend: **",
+    "receivedClashInvitation": "You have received party join invitation from **",
+    "channel": "Party Name**"
+  },
+
+  "messages": {
+    "messages": "Messages**",
+    "sendMessage": "Send Message**"
+  },
+
+  "Channel invitation accepted": "Party invitation accepted***",
+  "Friend invitation accepted": "Friend invitation accepted***",
+  "Friend invitation send": "Friend invitation send**", 
+  "Friend username is invalid": "Friend username is invalid**", 
+  "System Doc saved": "System Doc saved**",
+  "Channel saved": "Channel saved**",
+  "Channel name is not valid": "Channel name is not valid**",
+  "Request for this memeber has alread been sent": "Request for this memeber has alread been sent**",
+  "Invitation accepted": "Invitation accepted**",
+  "Challenge is not accepting invitations": "Challenge is not accepting invitations**",
+  "Challenge Accepted": "Challenge Accepted**",
+  "Action saved": "Action saved**",
+
+
+  "Insufficient rights": "Insufficient rights**",
+  "You do not have rights to this channel": "You do not have rights to this channel**",
+  "Already joined this challenge": "Already joined this challenge**",
+  "Friend Username is not valid": "Friend Username is not valid**",
+
+  "Token is not valid": "Token is not valid**",
+  "Message id is not valid": "Message id is not valid**",
+
+  "Singup successful": "Singup successful**",
+  "Username or Email not found": "Username or Email not found**",
+  "Error Username not found": "Error Username not found**",
+  "Error email or password not valid": "Error email or password not valid**",
+  "Error password not valid": "Error password not valid**",
+  "Invalid token, or token has expired. Please relogin": "Invalid token, or token has expired. Please relogin**",
+  "Error removing token, please try again": "Error removing token, please try again**", 
+  "Email is already in use": "Email is already in use**",
+
+
+  "Error saving, please wait and try again later": "Error saving, please wait and try again later**",
+
+
+
+  "accept": "Accept**",
+  "reject": "Reject**",
   "menu": "菜单",
   "date": "日期",
+  "invite": "Invite**",
   "cancel": "取消"
 }

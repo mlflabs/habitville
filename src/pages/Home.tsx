@@ -9,6 +9,7 @@ import MessagesListComponent from '../modules/messages/components/Messages.list.
 import ulog from 'ulog';
 import { generateUserChannelId } from '../modules/data/utilsData';
 import { authService } from '../modules/auth/authService';
+import { useTranslation } from 'react-i18next';
 
 const log = ulog('home');
 
@@ -29,6 +30,7 @@ const reducer = (state, {type, payload}:{type:string, payload:any}): HomeState =
 
 const Home: React.FC = () => {
 
+  const {t} = useTranslation();
   const [state, _dispatch] = useReducer(reducer, {
     userid:''
   })
@@ -54,7 +56,7 @@ const Home: React.FC = () => {
 
   return (
     <IonPage>
-      <HeaderWithProgress title="HabitVille" />
+      <HeaderWithProgress title={t("habitville")} />
       <IonContent >
         <FriendsListComponent />
         <MessagesListComponent channel={generateUserChannelId(state.userid)} />

@@ -6,7 +6,7 @@ import { toastService, ToastType } from "../toast/toastService";
 import { dataService } from "../data/dataService";
 import { waitMS } from '../data/utilsData';
 import { Friend } from "./models";
-import { Msg, MessageItem } from "../messages/models";
+import { MessageItem } from "../messages/models";
 
 export interface SocialState {
   friends: Friend[],
@@ -32,8 +32,33 @@ export class SocialService {
   }
 
   private async _init() {
-
+    this.updateSocialUsers()
   }
+
+
+
+  public async updateSocialUsers() {
+    try {
+      const res = await post(getPostRequest(env.AUTH_API_URL +'/social/getFriendsProgress',
+                      { token: authService.getToken(), 
+                      }), 
+                      false);
+      
+      console.log(res);
+
+      if(res.success)
+        this.state = {...this.state, ...{friends:res.data}};
+      
+    }
+    catch (e) {
+      console.log(e);
+    }
+    
+  }
+
+
+
+
 
   public async addFriend(username?:string) {
     try {

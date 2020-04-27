@@ -5,18 +5,15 @@ import {
   IonItem,
   IonLabel,
   IonSegmentButton,
-  IonSegment,
-  IonButton} from '@ionic/react';
+  IonSegment} from '@ionic/react';
 import React, { useReducer, useEffect } from 'react';
 import './Home.css';
 import HeaderWithProgress from '../components/HeaderWithProgress';
 import ulog from 'ulog';
 import { authService } from '../modules/auth/authService';
 import { dataService } from '../modules/data/dataService';
-import _ from 'lodash';
 import { TYPE_SETTINGS } from '../modules/data/utilsData';
 import { useTranslation } from 'react-i18next';
-import { appService } from '../modules/app/appService';
 
 const log = ulog('home');
 
@@ -126,12 +123,13 @@ const SettingsPage  = () => {
               <IonLabel>
                 <h1> {t('auth.username')}: {authService.getUser().username} </h1>
                 <h3> {t('auth.ID')}: {authService.userid} </h3>
-                {t('menu')}.....
+                
+                {/* 
                 <br/><br/>
                 Records number
                 <br /><br />
                 Change Password
-                <br /><br />
+                <br /><br />*/}
               </IonLabel>
           </IonItem>
               
@@ -150,12 +148,16 @@ const SettingsPage  = () => {
               </IonSegmentButton>
             </IonSegment>
           </IonItem>
-
+          <IonItem>
+            <p>{t('settings.changeLanguageRestartMessage')}</p>
+          </IonItem>
+          {/* 
           <IonItem>
             <IonButton size="large"
               onClick={() => appService.showTutorial(true)}
             >Show Tutorial</IonButton>
           </IonItem>
+          */}
         </IonList>
       </IonContent>
     </IonPage>

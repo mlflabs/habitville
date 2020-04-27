@@ -8,6 +8,9 @@ import { gamifyService } from '../../modules/gamify/gamifyService';
 
 import './habit.css';
 import { MarketItem } from '../../modules/market/models';
+import { useTranslation } from 'react-i18next';
+import { HelpTooltip } from '../../components/tooltip';
+import { getPlantSeedPic } from './utilsHabits';
 
 
 interface habitState {
@@ -34,7 +37,8 @@ const getRegularityValues = (interval: habitIntervals) => {
 const HabitAddComponent = ({habit, dismissFunc}:
   {habit:Habit, dismissFunc: {(habit:Habit|null, action: 'save'|'remove'|'none')}}) => {
   
-    const getDefaultRegularityState: habitState = {
+  const {t} = useTranslation();
+  const getDefaultRegularityState: habitState = {
     regularity: getRegularityValues(habit.regularityInterval),
     doc: new Habit(),
     showDeleteWarrning: false
@@ -61,13 +65,12 @@ const HabitAddComponent = ({habit, dismissFunc}:
   }
 
   const printRegularityLabel = () => {
-
-    const times = (state.doc.regularityIntervalGoal > 1)? ' times a ': ' time a ';
     if(state.doc.regularityInterval === 'day'){
-      return 'I will repeat this habit every day.'
+      return t('I will repeat this habit every day')
     }
-    
-    return 'I will repeat this habit ' +state.doc.regularityIntervalGoal + times + state.doc.regularityInterval
+    return t('I will repeat this habit') + ": " +
+            state.doc.regularityIntervalGoal +
+            t("habits.everyinterval." + state.doc.regularityInterval)           
   }
 
   const handleDifficultyChange = (e) => {
@@ -78,15 +81,15 @@ const HabitAddComponent = ({habit, dismissFunc}:
   const printDifficultyLabel = (hab: habitDifficulty): string => {
     switch(hab) {
       case habitDifficulty.trivial:
-        return 'Easy peasy lemon squeezy';
+        return t("habits.difficulty.trivial");
       case habitDifficulty.easy:
-        return 'Piece of Cake';
+        return t("habits.difficulty.easy");
       case habitDifficulty.medium:
-        return "Let's Rock";
+        return t("habits.difficulty.medium");
       case habitDifficulty.hard:
-        return 'No Pain, No Gain';
+        return t("habits.difficulty.hard");
       case habitDifficulty.extreme:
-        return 'Death Wish';
+        return t("habits.difficulty.extreme");
     }
   }
 
@@ -104,10 +107,13 @@ const HabitAddComponent = ({habit, dismissFunc}:
   }
 
   const selectSeed = (item:MarketItem):any => {
-    const newDoc = {...state.doc, ...{plantName: item.name, seedItem: item}};
+    const newDoc = {...state.doc, ...{plantName: item.name, seedItem: item, seedId: item.id}};
     setState({...state, ...{doc: newDoc}});
   }
 
+  if(!state.doc.seedItem){
+    selectSeed(gamifyService.getUserSeeds()[0]);
+  }
 
 
   const print = () => {
@@ -120,37 +126,43 @@ const HabitAddComponent = ({habit, dismissFunc}:
               <IonButton> <IonIcon size="large" icon={arrowBack} /></IonButton>
             </IonButtons>
             */}
-            <IonTitle>Add Habit</IonTitle>
+            <IonTitle>{t("Add Habit")}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent>
           <IonItem>
-              <IonLabel position="floating">Name</IonLabel>
+              <IonLabel position="floating">{t("Name")}</IonLabel>
               <IonInput 
                   name="name"
-                  placeholder="Read book, Go running ..." 
+                  placeholder={t("habits.namePlaceholder")}
                   onIonChange={handleChange}
                   value={state.doc.name} />
           </IonItem>
           <IonItem>
-              <IonLabel position="floating">Note</IonLabel>
+              <IonLabel position="floating">{t('note')}</IonLabel>
               <IonTextarea 
-                  placeholder="Enter more information here, motivate yourself..."
+                  placeholder={t("habits.notePlaceholder")}
                   name="note"
                   onIonChange={handleChange}
                   value={state.doc.note}></IonTextarea>
           </IonItem>
+
+          <h3 style={{paddingLeft:'10px'}}>
+            {t('habits.regularity')}
+            <HelpTooltip top="5px" message={t('tooltips.habitRegularity')} />  
+          </h3>
+
           <IonItem>
             <IonSegment value={state.doc.regularityInterval}
                         onIonChange={(e) => handlerRegularityIntervalChange(e.detail.value)}>
               <IonSegmentButton value="day">
-                <IonLabel>Daily</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.day")}</IonLabel>
               </IonSegmentButton>
               <IonSegmentButton value="week">
-                <IonLabel>Weekly</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.week")}</IonLabel>
               </IonSegmentButton>
               <IonSegmentButton value="month">
-                <IonLabel>Monthly</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.month")}</IonLabel>
               </IonSegmentButton>
             </IonSegment>
           </IonItem>
@@ -174,6 +186,12 @@ const HabitAddComponent = ({habit, dismissFunc}:
             <IonLabel>{printRegularityLabel()}</IonLabel>
           </IonItem>
 
+
+          <h3 style={{paddingLeft:'10px'}}>
+            {t('habits.difficultyTitle')}
+            <HelpTooltip top="5px" message={t('tooltips.habitDifficultry')} />  
+          </h3>
+
           <IonRange min={0} 
                     max={4} 
                     debounce={100}
@@ -184,14 +202,22 @@ const HabitAddComponent = ({habit, dismissFunc}:
               <IonLabel slot="end">{capitalize(printDifficulty(habitDifficulty.extreme))}</IonLabel>
           </IonRange>
 
-          <IonItem>
+          <IonItem> 
             <IonLabel>{printDifficultyLabel(state.doc.difficulty)}</IonLabel>
           </IonItem>
 
+
           {(!state.doc.id)? (
+            <>
+            <h3 style={{paddingLeft:'10px'}}>
+              {t('plants.chooseSeed')}
+              <HelpTooltip top="5px" message={t('tooltips.habitsSeed')} />  
+            </h3>
+
             <IonItem>
-              <IonLabel>Choose Seed</IonLabel>
+              <IonLabel>{t('plants.chooseSeed')}</IonLabel>
             </IonItem>
+            </>
           ) : (<></>)}
 
           {(!state.doc.id)? (
@@ -200,8 +226,8 @@ const HabitAddComponent = ({habit, dismissFunc}:
                 return  <IonButton  key={item.name} 
                                     fill={(item.name === state.doc.plantName)?'outline':'clear'} 
                                     onClick={() => selectSeed(item)}>
-                            <IonIcon  class="seedSize" src={'assets/market/'+ item.pic + '.svg'} />
-                            <h3> {item.name} ({item.quantity})</h3>
+                            <IonIcon  class="seedSize" src={getPlantSeedPic(item)} />
+                            <h3> {t("plants.names."+item.name)} ({item.quantity})</h3>
                         </IonButton>
               })}
             </div>
@@ -213,30 +239,35 @@ const HabitAddComponent = ({habit, dismissFunc}:
         <IonFooter>
           <IonToolbar>
             <IonTitle>
-              <IonButton onClick={() => dismissFunc(state.doc, 'save')}>Save</IonButton>
-              <IonButton onClick={() => dismissFunc(null, 'none')}>Cancel</IonButton>
+              <IonButton onClick={() => dismissFunc(state.doc, 'save')}>{t('save')}</IonButton>
+              <IonButton onClick={() => dismissFunc(null, 'none')}>{t('cancel')}</IonButton>
             </IonTitle>
           </IonToolbar>
         </IonFooter>
-        <IonFab horizontal="end" vertical="bottom" >
-          <IonFabButton size="small" color={COLOR_DANGER} onClick={() => showRemoveWarrning()}>
-            <IonIcon size="large" icon={trash} />
-          </IonFabButton>
-        </IonFab>
+
+        {(state.doc.id)?(
+          <IonFab horizontal="end" vertical="bottom" >
+            <IonFabButton size="small" color={COLOR_DANGER} onClick={() => showRemoveWarrning()}>
+              <IonIcon size="large" icon={trash} />
+            </IonFabButton>
+          </IonFab>
+        ) : (<></>)}
+        
         <IonAlert
           isOpen={state.showDeleteWarrning}
           onDidDismiss={() => hideRemoveWarrning}
-          header={'Warrning!!!'}
-          message={'Are you sure you want to <strong>delete</strong> this habit?'}
+          header={t('warning')}
+          message={t('deleteMessage')}
           buttons={[
             {
-              text: 'Cancel',
+              text: t('cancel'),
               role: 'cancel',
               cssClass: 'secondary'
             },
             {
-              text: 'Yes Im Sure',
-              handler: () => removehabit()
+              text: t('deleteAccept'),
+              handler: () => removehabit(),
+              cssClass: 'warning'
             }
           ]}
         />

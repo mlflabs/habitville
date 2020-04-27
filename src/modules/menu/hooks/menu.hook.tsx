@@ -35,7 +35,7 @@ export const getMenuState = (projectid: string): MenuState => {
         icon: home,
       },
       {
-        title: 'habits',
+        title: 'habitsTitle',
         url: '/habits',
         icon: refresh,
       },
@@ -51,7 +51,7 @@ export const getMenuState = (projectid: string): MenuState => {
         lastComponent: <TodoMenuListComponent projectid={projectid}  />
       },
       {
-        title: 'marketTitle',
+        title: 'market.title',
         url: '/market',
         icon: basket,
       },

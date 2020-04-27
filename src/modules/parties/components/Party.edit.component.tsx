@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PartyProject } from '../models';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem, 
   IonInput, IonLabel, IonTextarea, IonFooter, IonButton } from '@ionic/react';
-
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -10,6 +10,7 @@ import { IonHeader, IonToolbar, IonTitle, IonContent, IonItem,
 const PartyEditComponent = ({party, dismissFunc}:
     {party: PartyProject| null, dismissFunc:{(party: PartyProject|null, action: 'save'| 'remove' | 'none')}}) => {
 
+  const {t} = useTranslation();
   const [state, setState] = useState({party: party||new PartyProject()})
 
 
@@ -24,22 +25,22 @@ const PartyEditComponent = ({party, dismissFunc}:
     <>
       <IonHeader>
             <IonToolbar>
-              <IonTitle>Add/Edit Party</IonTitle>
+              <IonTitle>{t("clash.editTitle")}</IonTitle>
             </IonToolbar>
       </IonHeader>
       <IonContent>
           <IonItem>
-                <IonLabel position="floating">Name</IonLabel>
+                <IonLabel position="floating">{t('name')}</IonLabel>
                 <IonInput 
                     name="name"
-                    placeholder="Your Cool Party Name" 
+                    placeholder={t('clash.namePlaceholder')} 
                     onIonChange={handleChange}
                     value={state.party.name} />
             </IonItem>
             <IonItem>
-                <IonLabel position="floating">Note</IonLabel>
+                <IonLabel position="floating">{t('note')}</IonLabel>
                 <IonTextarea 
-                    placeholder="More details for your party members"
+                    placeholder={t('clash.notePlaceholder')}
                     name="note"
                     onIonChange={handleChange}
                     value={state.party.note}></IonTextarea>
@@ -47,8 +48,8 @@ const PartyEditComponent = ({party, dismissFunc}:
             <IonFooter>
               <IonToolbar>
                 <IonTitle>
-                  <IonButton onClick={() => dismissFunc(state.party, 'save')}>Save</IonButton>
-                  <IonButton onClick={() => dismissFunc(null, 'none')}>Cancel</IonButton>
+                  <IonButton onClick={() => dismissFunc(state.party, 'save')}>{t('save')}</IonButton>
+                  <IonButton onClick={() => dismissFunc(null, 'none')}>{t('cancel')}</IonButton>
                 </IonTitle>
               </IonToolbar>
             </IonFooter>

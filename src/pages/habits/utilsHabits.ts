@@ -3,6 +3,8 @@ import moment from 'moment';
 import { FIRST_DAY_OF_WEEK, env } from '../../env';
 import ulog from 'ulog';
 import { calculatePlantExperience } from '../../modules/gamify/utilsGamify';
+import { MarketItem } from '../../modules/market/models';
+import { LandscapeTree } from '../../modules/gamify/models';
 
 const log = ulog('utils');
 
@@ -311,3 +313,37 @@ const calculateGoldByStreak = (streak, difficulty,  baseXP) => {
   
 }
 
+
+
+export const getPlantSeedPic = (item: MarketItem) => {
+  let id = item.id;
+  if(id.startsWith('mi.'))
+    id = id.replace('mi.', 'tree.')
+  return "assets/plants/"+ id + '/seed.svg'
+}
+
+
+export const getPlantPic = (habit: Habit) => {
+  let id = habit.plantId;
+  if(id === '') {
+    if(habit.plantName === 'starter')
+      id = 'tree.Maple'
+    if(habit.plantName === 'plant1')
+      id = 'tree.plant1'
+    if(habit.plantName === 'plant2')
+      id = 'tree.plant2'
+    if(habit.plantName === 'plant3')
+      id = 'tree.plant3'
+  }
+  return '/assets/plants/' + id + '/' + habit.plantLevel+ '.svg'
+}
+
+
+
+export const getLandscapePlantPic = (tree: LandscapeTree) => {
+  console.error(tree);
+  let id = tree.id || '';
+  if(id === '') id = 'tree.Maple';
+  id = id.replace('mi.', 'tree.').replace('starter', 'Maple');
+  return '/assets/plants/' + id + '/' + tree.level+ '.svg'
+}

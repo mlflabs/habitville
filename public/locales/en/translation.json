@@ -1,47 +1,160 @@
 {
-
   "home": "Home",
-  "habits": "Habits",
+
+  "habitville": "Habit Ville",
+  "homeTitle": "Home",
+
+
+  "habitsTitle": "Habits",
+  "habits": {
+    "name": "Name",
+    "namePlaceholder": "Read book, Go running ...",
+    "notePlaceholder": "Enter more information here, motivate yourself...",
+    "Add Habit": "Add Habit",
+    "I will repeat this habit every day": "I will repeat this habit every day",
+    "I will repeat this habit": "I will repeat this habit",
+    "regularity": "Regularity",
+    "interval": {
+      "day": "day",
+      "week": "week",
+      "month": "month"
+    },
+    "intervalContinious": {
+      "day": "Daily",
+      "week": "Weekly",
+      "month": "Monthly"
+    },
+    "everyinterval": {
+      "day": " time(s) a day",
+      "week": " time(s) a week",
+      "month": "times(s) a month"
+    },
+    "difficultyTitle": "Difficultry",
+    "difficulty": {
+      "trivial": "Easy peasy lemon squeezy",
+      "easy": "Piece of Cake",
+      "medium": "Let's Rock",
+      "hard": "No Pain, No Gain",
+      "extreme": "Death Wish"
+    },
+    "unitTitle": "Unit",
+    "valueTitle": "Value",
+    "units": {
+      "cup": "Cup",
+      "dollar": "Dollar",
+      "page": "Page",
+      "minute": "Minute",
+      "hour": "Hour",
+      "meter": "Meter",
+      "kilometer": "Kilometer",
+      "Other": "Other"
+    }
+  },
+
+
+
+
+  "plants": {
+    "exp": "Plant Growth",
+    "info": "Plant Information",
+    "chooseSeed": "Choose Seed",
+    "changePlantPosition": "Change Plant Position (Random) ",
+    "names": {
+      "Maple": "Maple",
+      "Green Ash": "Green Ash",
+      "River Birch": "River Birch",
+      "Paper Birch": "Paper Birch",
+      "starter": "Maple",
+      "plant1": "Green Ash",
+      "plant2": "River Birch",
+      "plant3": "Paper Birch"
+    }
+  },
+
+
 
 
   "clashTitle": "Clash of Farmers",
   "clash": {
+    "party": "Party",
     "header": "Create your party to challenge your friends",
     "createBtn": "Create Party",
     "Friends": "Friends",
     "Add Friend": "Add Friend",
     "Invite Friend": "Invite Friend",
-    "Friends Username": "Friend's Username"
+    "Friends Username": "Friend's Username",
+    "editTitle": "Add/Edit Party",
+    "namePlaceholder": "Your Cool Party Name",
+    "notePlaceholder": "More details for your party members"
   },
+
+
+
+
+
+  "challenges": {
+    "title": "Challenges",
+    "add": "Add New Challenge",
+    "types": {
+      "checkin": "Check-In",
+      "value": "Value",
+      "note": "Note",
+      "gainer": "Biggest Gainer",
+      "looser": "Biggest Looser"
+    },
+    "typesDesc": {
+      "multiplier": "Multiplier",
+      "looserMultiplier": "Points will be calculated based on progress times multiplier. For example if multiplier is 5, and first day your proggress is 5 less than starting value, then the points gained would be 25 (5 x 5 = 25)",
+      "gainerMultiplier": " Points will be calculated based on progress times multiplier. For example if multiplier is 5, and first day your proggress is 2 more than starting value, then the points gained would be 25 (5 x 2 = 10)"
+    },
+
+    "namePlaceholder": "Read book, Go running ..",
+    "notePlaceholder": "Enter more information here, motivate yourself...",
+
+    "voteEnabled": "Vote Enabled"
+  },
+
+
+
+
 
   "todosTitle": "Todos",
   "todos": {
+    "default": "Default",
     "today": "Today",
-    "important": "Important"
+    "important": "Important",
+
+    "lists": {
+      "title": "Lists",
+      "AddNewList": "Add New List?"
+    },
+    
+    "tags": {
+      "title": "Tags"
+    }
   },
 
 
 
-  "listsTitle": "Lists",
-  "lists": {
-    "AddNewList": "Add New List?"
-  },
-  
-
-  "tagsTitle": "Tags",
-  "tags": {
-
-  },
-
-  "marketTitle": "Farmers Market",
   "market": {
-
+    "title": "Farmers Market",
+    "userItems": "User Items",
+    "marketItems": "Market",
+    "buy": "Buy",
+    "gold": "Gold"
   },
+
+
+
+
 
   "settingsTitle": "Settings",
   "settings": {
-
+    "changeLanguageRestartMessage": "Currently to initiate change language, a full app restart is needed"
   },
+
+
+
 
   "auth": {
     "login": "Login",
@@ -51,14 +164,96 @@
     "ID": "ID"
   },
 
-  
 
+
+
+  "social": {
+    "members": "Members",
+    "friends": "Friends",
+    "friendAdd": "Add Friend",
+    "from": "From",
+    "friendUsername": "Friends Username",
+    "inviteFriend": "Invite Friend",
+    "receivedFriendInvitation": "You have received friend invitation. Friend:",
+    "receivedClashInvitation": "You have received party join invitation from",
+    "channel": "Party Name"
+  },
+
+
+  "gamify": {
+    "messages": {
+      "received": "You have recieved",
+      "lost": "You have lost"
+    },
+    "exp": "Experience"
+  },
+
+
+
+  "messages": {
+    "messages": "Messages",
+    "sendMessage": "Send Message"
+  },
+
+
+  "tooltips": {
+    "todosSort": "Here you can choose between viewing done and not done tasks. You can also change your sort order by date or name.  When you click on the sort date or name twice it will change the direction from ascending to descending.",
+    "havitStreakBadge": "First badge represents your current or latest streak, second badge represents your biggest streak for this habit.  The higher the current streak the bigger the rewards.",
+    "habitsSeed": "Different seeds will produce different plants, you can view these in the top banner.  You can buy seends at the market, located in the market",
+    "addFriends": "You will be able to see your friends progress, chat, and encourage eachother",
+    "habitRegularity": "Streaks don't have to be done every day, set your regularity here, streaks will be based on this selection",
+    "habitDifficultry": "The higher the difficultry the bigger the rewards"
+  },
+
+
+  "Channel invitation accepted": "Party invitation accepted",
+  "Friend invitation accepted": "Friend invitation accepted",
+  "Friend invitation send": "Friend invitation send", 
+  "Friend already added": "Friend already added",
+  "Friend username is invalid": "Friend username is invalid", 
+  "System Doc saved": "System Doc saved",
+  "Channel saved": "Channel saved",
+  "Channel name is not valid": "Channel name is not valid",
+  "Request for this memeber has alread been sent": "Request for this memeber has alread been sent",
+  "Invitation accepted": "Invitation accepted",
+  "Challenge is not accepting invitations": "Challenge is not accepting invitations",
+  "Challenge Accepted": "Challenge Accepted",
+  "Action saved": "Action saved",
+
+
+  "Insufficient rights": "Insufficient rights",
+  "You do not have rights to this channel": "You do not have rights to this channel",
+  "Already joined this challenge": "Already joined this challenge",
+  "Friend Username is not valid": "Friend Username is not valid",
+
+  "Token is not valid": "Token is not valid",
+  "Message id is not valid": "Message id is not valid",
+
+  "Singup successful": "Singup successful",
+  "Username or Email not found": "Username or Email not found",
+  "Error Username not found": "Error Username not found",
+  "Error email or password not valid": "Error email or password not valid",
+  "Error password not valid": "Error password not valid",
+  "Invalid token, or token has expired. Please relogin": "Invalid token, or token has expired. Please relogin",
+  "Error removing token, please try again": "Error removing token, please try again", 
+  "Email is already in use": "Email is already in use",
+
+  "Error saving, please wait and try again later": "Error saving, please wait and try again later",
+
+  "deleteMessage": "Are you sure you want to delete?",
+  "deleteAccept": "Yes Im Sure",
+
+  "save": "Save",
+  "accept": "Accept",
+  "reject": "Reject",
+  "name": "Name",
+  "note": "Note",
+  "level": "Level",
+  "nextLevelReq": "Next Level Requirement",
   "menu": "Menu",
   "date": "Date",
-
-  "cancel": "Cancel"
-  
-
-
-
+  "invite": "Invite",
+  "cancel": "Cancel",
+  "close": "Close",
+  "warning": "Warning!!!"
 }

@@ -90,6 +90,9 @@ export class PartyService {
     if(!res.success){
       return toastService.printServerErrors(res);
     } 
+
+    log.warn('New Party::::: ', res);
+    
     loadingService.hideLoading();
   }
 

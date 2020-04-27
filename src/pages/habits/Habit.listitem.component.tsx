@@ -6,17 +6,20 @@ import moment from 'moment';
 import { Habit, MOMENT_DATE_FORMAT, HabitAction } from './models';
 import { habitDataFunctions } from './hooks/habits.hook';
 import './Habit.listitem.component.css';
-import { calculateCurrentStreak } from './utilsHabits';
+import { calculateCurrentStreak, getPlantPic } from './utilsHabits';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import { toastService } from '../../modules/toast/toastService';
 import { Line } from 'rc-progress';
 import { HabitPlantComponent } from './habit.plant.component';
+import { HelpTooltip } from '../../components/tooltip';
+import { useTranslation } from 'react-i18next';
 
 
 
 const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   {habit:Habit, dataFunctions: habitDataFunctions, showEditModalFunction:{(habit: Habit)}}) => {
 
+  const {t} = useTranslation();
   const [state, setState] = useState({
     doc: new Habit(habit),
     showPlantStats: false
@@ -76,8 +79,6 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
     let action = state.doc.actions[day.format(MOMENT_DATE_FORMAT)];
     if(!action)
       action = {date: day.format(MOMENT_DATE_FORMAT), value: 0};
-
-    console.log(action);
     if(active){
       return (<IonIcon  onClick={() => updatehabit({...action, ...{value: 1}})}
                       size="large" 
@@ -98,7 +99,8 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
   const updatehabit = (action: HabitAction) => {
     try {
       const {habit, rewards} = calculateCurrentStreak(state.doc, [action])
-      gamifyService.addRewards(rewards);
+      gamifyService.addRewards(rewards, habit);
+
       console.log(habit, rewards, action)
       dataFunctions.save(habit);
     }
@@ -131,6 +133,7 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
             <IonCardTitle>{state.doc.name}</IonCardTitle>
             <IonBadge class="habitBadge" color="success">{state.doc.currentStreak}</IonBadge>
             <IonBadge class="habitBadge" color="tertiary">{state.doc.biggestStreak}</IonBadge>
+            <HelpTooltip message={t('tooltips.havitStreakBadge')} top="-5px" fontSize="24px"/>
           </IonCardHeader>
           <IonItem>
             <IonGrid>
@@ -169,16 +172,14 @@ const HabitListItemComponent = ({habit, dataFunctions, showEditModalFunction}:
                 color={COLOR_LIGHT}>
               <IonIcon 
                 class="habitPlantIcon"
-                src={'/assets/plants/' + state.doc.plantName+ '/' + state.doc.plantLevel + '.svg'}  />
-              <Line trailWidth={0}  percent={(state.doc.plantExp/state.doc.plantNextLevelExp*100)} 
-                className="plantProgressBar"
-                strokeWidth={5} strokeColor="#157F1F" />
+                src={getPlantPic(state.doc)}  />
             </IonFabButton>
           </IonFab>
 
           <IonModal isOpen={state.showPlantStats} onDidDismiss={() => hidePlantModal()}>
             <HabitPlantComponent 
               doc={state.doc} 
+              position={gamifyService.getPlantPosition(state.doc)}
               closeFunc = {plantModalDismissFunc}  />
           </IonModal>
         </IonCard>

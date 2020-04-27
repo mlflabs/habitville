@@ -177,6 +177,7 @@ class DataService {
     const channel = res.data.channel;
     let gotNewRightsToken = false;
     while(!gotNewRightsToken){
+      await authService.renewToken()
       const user = authService.getUser();
       if(user[env.ACCESS_META_KEY][channel]){
         gotNewRightsToken = true;

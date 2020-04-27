@@ -1,9 +1,11 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect } from 'react';
 import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel } from '@ionic/react';
 import  ulog from 'ulog';
 import { Friend } from '../models';
 import { socialService } from '../social.service';
 import { useTranslation } from 'react-i18next';
+import { HelpTooltip } from '../../../components/tooltip';
+import LandscapeComp from './Landscape.component';
 const log = ulog('social');
 
 export interface FriendsState {
@@ -12,13 +14,14 @@ export interface FriendsState {
 }
 
 
-const reducer = (state, action): FriendsState => {
-  switch(action.type) {
+const reducer = (state, {type, payload}): FriendsState => {
+  switch(type) {
     case 'showAddMemberModal':
       return {...state, ...{showAddModal: true}};
     case 'hideAddMemberModal':
       return {...state, ...{showAddModal: false}};
-
+    case 'updateFriends':
+      return {...state, friends: payload};
     default:
       log.error('Action type is not a match');
       return state;
@@ -33,10 +36,20 @@ const FriendsListComponent = () => {
 
   const { t } = useTranslation();
 
+  useEffect(() => {
+    const sub = socialService.state$.subscribe(s => {
+      dispatch('updateFriends', s.friends)
+    });
+    return () => {
+      sub.unsubscribe();
+    }
+  }, [])
+
   const dispatch = (type: 'showAddMemberModal'|
-                          'hideAddMemberModal', 
-                    data:any = {}) => {
-    _dispatch({type, data});
+                          'hideAddMemberModal'|
+                          'updateFriends', 
+                    payload:any = {}) => {
+    _dispatch({type, payload});
   }
 
   const addFriend = () => {
@@ -51,29 +64,33 @@ const FriendsListComponent = () => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>{t('Friends')}</IonCardTitle>
+        <IonCardTitle>{t('social.friends')}</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
         <IonList>
-            {state.friends.map(member => (
-              <IonItem  button 
-                        key={member.id}
+            {state.friends.map(friend => (
+              <IonItem  
+                        lines="none"
+                        key={friend.id}
                         onClick={() => {}}>
-              <IonLabel>
-                {member.username}
-              </IonLabel>
+             <LandscapeComp username={friend.username} 
+                            landscape={friend.landscape} />
             </IonItem>
             ))}
         </IonList>
         
       </IonCardContent>
         <IonFooter>
-          <IonButton onClick={()=>addFriend()} fill="clear">{t('Add Friend')}</IonButton>
+          <IonButton onClick={()=>addFriend()} fill="clear">{t('social.friendAdd')}</IonButton>
+          <HelpTooltip message={t('tooltips.addFriends')} />
+
+          <IonButton onClick={()=>socialService.updateSocialUsers()} fill="clear">Update</IonButton>
+          
         </IonFooter>
       <IonAlert 
         isOpen={state.showAddModal}
         onDidDismiss={() => hideAddUser()}
-        header= {t('Friends Username')}
+        header= {t('social.friendUsername')}
         inputs={[
           {
             name: 'username',
@@ -93,7 +110,7 @@ const FriendsListComponent = () => {
             }
           },
           {
-            text: t('Invite Friend'),
+            text: t('social.inviteFriend'),
             handler: (data) => {
               socialService.addFriend(data.username);
               hideAddUser();

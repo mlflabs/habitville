@@ -91,7 +91,7 @@ export class PartyProject extends ProjectItem {
 }
 
 export class Challenge extends Doc {
-  name: string = 'New Challenge';
+  name: string = '';
   note?: string;
   type:string = TYPE_PARTY;
   access: string = ''

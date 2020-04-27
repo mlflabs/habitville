@@ -10,6 +10,7 @@ import { getProjectChildId, canEditProjectByRights } from '../../data/utilsData'
 import { saveIntoArray } from '../../../utils';
 import  ulog from 'ulog';
 import { authService } from '../../auth/authService';
+import { useTranslation } from 'react-i18next';
 
 //ulog.level = 7;
 const log = ulog('challengelist');
@@ -46,6 +47,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
     challenges: [],
   });
 
+  const {t} = useTranslation();
   useEffect(() => {
     const sub = dataService.subscribeByPropertyChange('secondaryType', 'challenge')
       .subscribe(change => {
@@ -105,7 +107,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Challenges</IonCardTitle>
+        <IonCardTitle>{t('challenges.title')}</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
         <IonList>
@@ -125,7 +127,7 @@ const ChallengeListComponent = ({project}:{project: PartyProject}) => {
       <IonFooter>
         {canEditThisProject()? (
           <IonButton    onClick={() => addChallenge()}
-            fill="clear">Add New Challenge</IonButton>
+            fill="clear">{t('challenges.add')}</IonButton>
         ) : ( <></>)}
       </IonFooter>
     </IonCard>

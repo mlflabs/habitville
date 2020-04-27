@@ -25,6 +25,7 @@ import ulog from 'ulog';
 import { checkmarkCircleOutline, radioButtonOff, arrowDownOutline, arrowUpOutline, add } from 'ionicons/icons';
 import { dataService } from '../../modules/data/dataService';
 import { useTranslation } from 'react-i18next';
+import { HelpTooltip } from '../../components/tooltip';
 
 const log = ulog('todo');
 const { Keyboard, Device } = Plugins;
@@ -51,10 +52,22 @@ const TodosPage  = () => {
   const { docs, selectedTodo, tagDocs } = state;
 
   const printTitle = ():string => {
+    console.log(state);
     if(state.list){
-      return 'Todos: ' + capitalize(state.list.name);
+      let listname = state.list.name;
+      if(listname === 'default')
+        listname = t('todos.default')
+      return t('todosTitle') + ': ' + capitalize(listname);
     }
-    return 'Todos';
+    if(state.tag){
+      let tagname = state.tag.name;
+      if(tagname === 'today')
+        tagname = t('todos.today');
+      if(tagname === 'important')
+        tagname = t('todos.important');
+      return t('todosTitle') + ': ' + capitalize(tagname);
+    }
+    return t('todosTitle');
   }
 
   const setKeyboard = async () => {
@@ -120,6 +133,7 @@ const TodosPage  = () => {
                           icon={((state.orderAsync === -1)? arrowDownOutline : arrowUpOutline)}/>
                       ) : (<></>) }
           </IonButton>
+          <HelpTooltip message={t('tooltips.todosSort')} fontSize="24px" />
         </div>
         <IonList>
             {docs.map(todo => (

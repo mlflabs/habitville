@@ -7,6 +7,7 @@ import { authService } from '../../auth/authService';
 import { canEditProjectByRights } from '../../data/utilsData';
 import { COLOR_LIGHT, COLOR_SUCCESS, COLOR_SECONDARY } from '../../../colors';
 import ChallengeMemberScoreHistory from './Challenge.member.scoreHistory';
+import { useTranslation } from 'react-i18next';
 const log = ulog('memberlist');
 
 export interface MembersState {
@@ -34,6 +35,8 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
     showAddModal: false,
     project,
   })
+
+  const {t} = useTranslation();
 
   useEffect(() => {
     dispatch('setProject', project);
@@ -73,7 +76,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Members</IonCardTitle>
+        <IonCardTitle>{t('social.members')}</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
         <IonList>
@@ -93,13 +96,13 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
       </IonCardContent>
       {canEditThisProject()? (
         <IonFooter>
-          <IonButton onClick={()=>addMember()} fill="clear">Invite</IonButton>
+          <IonButton onClick={()=>addMember()} fill="clear">{t("invite")}</IonButton>
         </IonFooter>
       ) : ( <></>)}
       <IonAlert 
         isOpen={state.showAddModal}
         onDidDismiss={() => hideAddUser()}
-        header="Friend Username:"
+        header= {t("social.friendUsername")}
         inputs={[
           {
             name: 'username',
@@ -109,7 +112,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
         ]}
         buttons={[
           {
-            text: 'Cancel',
+            text: t("cancel"),
             role: 'cancel',
             cssClass: 'secondary',
             handler: () => {
@@ -117,7 +120,7 @@ const PartyMembersListComponent = ({project}:{project:PartyProject}) => {
             }
           },
           {
-            text: 'Invite User',
+            text: t("social.inviteFriend"),
             handler: (data) => {
               partyService.addUser(data.username, project);
               hideAddUser();

@@ -46,7 +46,7 @@ export interface HabitAction {
 }
 
 export class Habit extends Doc {
-  name: string = 'New habit';
+  name: string = '';
   note?: string;
   type:string = TYPE_HABBIT;
   stage: habitStage = habitStage.current;
@@ -69,6 +69,7 @@ export class Habit extends Doc {
   newRewards?: GamifyRewards;
 
   seedItem?: MarketItem;
+  plantId: string = '';
   plantName: string = DEFAULT_SEED_NAME;
   plantLevel: number = 0;
   plantExp: number = 0;

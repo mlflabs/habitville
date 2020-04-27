@@ -8,6 +8,14 @@
   right: 20px;
 }
 
+.cityParentLandscapeEdition {
+  display: flex;
+  position: absolute;
+  width: 400px;
+  height: 75px;
+  right: 20px;
+}
+
 .statsParent {
   display: flex;
   flex-direction: column;
@@ -78,7 +86,14 @@
   
 }
 
-
+.headerWithAvatarLandscapeEdition {
+  height: 75px;
+  
+  align-content: center;
+  position: relative;
+  display: flex;
+  
+}
 
 .headerWithAvatar h1 {
   position: absolute;

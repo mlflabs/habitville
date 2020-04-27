@@ -10,6 +10,7 @@ import { partyService } from '../../parties/party.service';
 import { COLOR_SUCCESS, COLOR_WARNING } from '../../../colors';
 import './messages.css';
 import { socialService } from '../../social/social.service';
+import { useTranslation } from 'react-i18next';
 const log = ulog('messages');
 
 export interface MessagesState {
@@ -33,11 +34,10 @@ const reducer = (state, {type, payload}): MessagesState => {
 }
 
 const MessagesListComponent = ({channel}:{channel:string}) => {
+  const {t} = useTranslation();
   const [state, _dispatch] = useReducer(reducer, {
     messages: [],
   })
-  log.warn('MSSGS:  ', channel);
-  log.error(channel, TYPE_MSG);
   useEffect(() => {
     loadMsgs()
     const sub = dataService.subscribeChannelTypeChanges(channel, TYPE_MSG)
@@ -58,7 +58,6 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
   }
 
   const loadMsgs = async () => {
-    log.info('Get all by project, type', channel, TYPE_MSG);
     const msgs = await dataService.getAllByChannel(channel, TYPE_MSG);
     log.warn(msgs);
     dispatch('setMessages', msgs.sort((a,b)=>{
@@ -104,9 +103,9 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
       return (
         <div>
           <IonButton onClick={() => partyService.acceptPartyInvitation(msg)} >
-            Accept</IonButton>
+            {t("accept")}</IonButton>
           <IonButton onClick={() => partyService.rejectPartyInviation(msg)}> 
-            Reject</IonButton>
+            {t("reject")}</IonButton>
         </div>
       )
     }
@@ -117,12 +116,28 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
       return (
         <div>
           <IonButton onClick={() => partyService.acceptFriendInvitation(msg)} >
-            Accept</IonButton>
+          {t("accept")}</IonButton>
           <IonButton onClick={() => partyService.rejectFriendInviation(msg)}> 
-            Reject</IonButton>
+          {t("reject")}</IonButton>
         </div>
       )
     }
+  }
+
+  const printChannel = (data) => {
+    console.log("DATA", data);
+    if(!data.channel) return;
+    return <p>{t('social.channel')}: {data.channel}</p>
+  }
+
+  const printFrom = (data) => {
+    if(!data.from) return;
+    return <p>{t('social.from')}: {data.from}</p>
+  }
+
+  const printFriend = (data) => {
+    if(!data.friend) return;
+    return <p>{t('social.friend')}: {data.friend}</p>
   }
 
   const printMessage = (msg) => {
@@ -132,8 +147,11 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
                 onClick={() => {}}>
         {printMessageIcon(msg)}
         <IonLabel className="ion-text-wrap">
-          <h3>{msg.message}</h3>
+          <h3>{t(msg.message)}</h3>
           <IonText color="secondary">
+              {printFrom(msg.data)}
+              {printFriend(msg.data)}
+              {printChannel(msg.data)}
               <p>{printDateRelative(msg.updated)}</p>
           </IonText>
         </IonLabel>
@@ -145,8 +163,8 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
                 onClick={() => {}}>
         {printMessageIcon(msg)}
         <IonLabel className="ion-text-wrap">
-          <h2>{msg.from} has invited you to join his club, 
-          <strong>{msg.data.name}</strong></h2>
+          <h2>{t("social.receivedClashInvitation") + msg.from + ", "}
+          <strong>{t("social.channel") + " " + msg.data.name}</strong></h2>
           <IonText  color="secondary">
             {printDateRelative(msg.updated)}
           </IonText>
@@ -162,8 +180,8 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
                 onClick={() => {}}>
         {printMessageIcon(msg)}
         <IonLabel className="ion-text-wrap">
-            <h2>You have received friend request from 
-            <strong> {msg.from}</strong></h2>
+            <h2>{t("social.receivedFriendInvitation")}
+            <strong> {msg.from} </strong></h2>
             <IonText  color="secondary">
               {printDateRelative(msg.updated)}
             </IonText>
@@ -201,8 +219,13 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Messages</IonCardTitle>
-        <IonButton onClick={() => sendMessage()} >Send Message</IonButton>
+  <IonCardTitle>{t("messages.messages")}</IonCardTitle>
+       
+      {/* 
+        <IonButton onClick={() => sendMessage()} >
+        {t("messages.sendMessage")}</IonButton>
+      */}
+      
       </IonCardHeader>
       <IonCardContent>
         <IonList>

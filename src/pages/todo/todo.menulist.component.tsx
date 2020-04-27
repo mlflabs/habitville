@@ -10,6 +10,7 @@ import { useLocation } from 'react-router';
 import { todoService } from './todo.service';
 import TodoMenuItemButtonComponet from './todo.menu.item';
 import { list } from 'ionicons/icons';
+import { useTranslation } from 'react-i18next';
 
 const log = ulog('todo');
 
@@ -65,6 +66,7 @@ const reducer =  (state = initialState, { type, payload }:{type:string, payload:
 
 const TodoMenuListComponent = ({projectid}: {projectid:string}) => {
   const location = useLocation();
+  const {t} = useTranslation();
   const path = location.pathname;
   const [state, _dispatch] = useReducer(reducer, initialState)
 
@@ -106,7 +108,6 @@ const TodoMenuListComponent = ({projectid}: {projectid:string}) => {
 
   const loadInitTags = async () => {
     const tags = await dataService.queryByProperty('name', 'startsWith', '', TYPE_TODO_TAG);
-    log.info(tags);
     dispatch('setTags', tags);
   }
 
@@ -136,20 +137,20 @@ const TodoMenuListComponent = ({projectid}: {projectid:string}) => {
       */}
       <IonItemGroup key="listsGroup">
           <TodoMenuItemButtonComponet 
-            name="Today"
+            name={t('todos.today')}
             icon="today"
             color={(path ==='/todos/tag/today'? 'light' : '')}  
             actonFunc = {() => tagButtonClickHandler('today')}
           /> 
           <TodoMenuItemButtonComponet 
-            name="Important"
+            name={t('todos.important')}
             icon="important"
             color={(path ==='/todos/tag/important'? 'light' : '')}  
             actonFunc = {() => tagButtonClickHandler('important')}
           /> 
             
           <IonItemGroup>
-            <h2>Lists</h2>
+            <h2>{t("todos.lists.title")}</h2>
           </IonItemGroup>    
         {state.lists.map( listItem => (
           <IonItemSliding key={listItem.name+'list'}>
@@ -176,7 +177,7 @@ const TodoMenuListComponent = ({projectid}: {projectid:string}) => {
       <ListAddInlineComponent key="addNewItem" projectid={projectid} />
 
       <IonItemGroup>
-        <h2>Tags</h2>
+        <h2>{t('todos.tags.title')}</h2>
       </IonItemGroup>
       {state.tags.filter(tag => (tag.name !== 'today' && tag.name !== 'important'))
         .map( tagItem => (

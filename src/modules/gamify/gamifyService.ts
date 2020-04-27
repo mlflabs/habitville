@@ -12,11 +12,10 @@ import { env } from '../../env';
 import { authService } from '../auth/authService';
 import ulog from 'ulog';
 import { MarketItem, MarketItemType, DEFAULT_SEED_NAME, defaultSeed } from '../market/models';
-import { planet } from 'ionicons/icons';
-import { messageService } from '../messages/messages.service';
 import { socialService } from '../social/social.service';
-import { MessageItem, newMessage } from '../messages/models';
-
+import { newMessage } from '../messages/models';
+import i18n from 'i18next';
+import { Landscape, getDefaultLandscape, LandscapeTree } from './models';
 const log = ulog('gamify');
 
 
@@ -29,7 +28,7 @@ export interface GamifyState {
   gold: number,
 
   userItems: MarketItem[],
-
+  landscape: Landscape
 }
 
 export const getInitGamifyState = () => {
@@ -38,8 +37,8 @@ export const getInitGamifyState = () => {
     maxExperience: 20,
     level: 1,
     gold: 0,
-
     userItems: [],
+    landscape: getDefaultLandscape(),
     
   }
 }
@@ -75,8 +74,10 @@ export class GamifyService {
       this._subscriptions.push(sub2);
       //load the init stae
       console.log(this.state, doc);
-      if(doc)
+      if(doc){
         this.state = {...this.state, ...doc.state};
+      }
+        
 
       dataSub.unsubscribe();
     })
@@ -200,7 +201,7 @@ export class GamifyService {
     if(save) this.state = this._state;
   }
 
-  public addRewards = (rewards:GamifyRewards) => {
+  public addRewards = (rewards:GamifyRewards, habit?:Habit) => {
     if(rewards.gold > 0) {
       this.messageReceivedGold(rewards.gold);
       this.addGold(rewards.gold, false);
@@ -210,33 +211,83 @@ export class GamifyService {
       this.addExperience(rewards.experience, false)
     }
 
+    if(habit) {
+      this._state.landscape = this.updateLandscapeHabit(habit);
+    }
+
+
+
     if(rewards.gold > 0 && rewards.experience > 0) {
       this.state = this._state;
     }
   }
 
-  private messageReceivedGold(gold: number, preMessage?:string, postMessage?:string) {
-    if(!preMessage) preMessage = '';
-    if(!postMessage) postMessage = '';
-    toast.success(preMessage+' You have received ' + gold + ' gold '+postMessage,{autoClose: env.MESSAGE_DURATION});
+  public updateLandscapeHabit(habit:Habit):Landscape {
+    const landscape: Landscape = Object.assign(this.state.landscape);
+    const plant = landscape.trees.find(tree => tree.habitId === habit.id)
+    console.log(plant);
+    if(!plant) {
+      //lalculate position
+      let position = Math.floor(Math.random() * 350) + 25;  
+      const tree:LandscapeTree = {
+        id: habit.seedItem?.id || "",
+        name: habit.plantName,
+        habitId: habit.id!,
+        level: habit.plantLevel,
+        position,
+      }
+      landscape.trees.push(tree);
+    } 
+    else {
+      plant.id = habit.seedItem?.id || "";
+      plant.name = habit.plantName;
+      plant.habitId = habit.id!;
+      plant.level = habit.plantLevel;
+    }
+    return landscape;
   }
 
-  private messageLostGold(gold:number, preMessage?:string, postMessage?:string) {
-    if(!preMessage) preMessage = '';
-    if(!postMessage) postMessage = '';
-    toast.error(preMessage+' You have lost ' + gold + ' gold'+postMessage, {autoClose: env.MESSAGE_DURATION});
+  public changePlantPosition(habit: Habit, position:number): Landscape|undefined {
+    const landscape: Landscape = Object.assign(this.state.landscape);
+    const plant = landscape.trees.find(tree => tree.habitId === habit.id)
+    console.log(plant);
+    if(!plant) return;
+   
+    plant.position =  position; 
+
+    this.state = {...this.state, ...{landscape}};
+    return landscape;
   }
 
-  private messageReceivedExperience(exp: number, preMessage?:string, postMessage?:string) {
-    if(!preMessage) preMessage = '';
-    if(!postMessage) postMessage = '';
-    toast.success(preMessage+' You have received ' + exp + ' experience'+postMessage,{autoClose: env.MESSAGE_DURATION});
+  public getPlantPosition(habit: Habit): number {
+    const item = this.state.landscape.trees.find(t => t.habitId === habit.id)
+    if(!item) return 0;
+
+    return item.position;
   }
 
-  private messageLostExperience(exp:number, preMessage?:string, postMessage?:string) {
-    if(!preMessage) preMessage = '';
-    if(!postMessage) postMessage = '';
-    toast.error(preMessage+' You have lost ' + exp + ' experience'+postMessage, {autoClose: env.MESSAGE_DURATION});
+  private messageReceivedGold(gold: number) {
+    const msg = i18n.t('gamify.messages.received') + 
+                " " + gold + " " + i18n.t('market.gold');
+    toast.success(msg,{autoClose: env.MESSAGE_DURATION});
+  }
+
+  private messageLostGold(gold:number) {
+    const msg = i18n.t('gamify.messages.lost') + 
+                " " + gold + " " + i18n.t('market.gold');
+    toast.error(msg,{autoClose: env.MESSAGE_DURATION});
+  }
+
+  private messageReceivedExperience(exp: number) {
+    const msg = i18n.t('gamify.messages.received') + 
+                " " + exp + " " + i18n.t('gamify.exp');
+    toast.success(msg,{autoClose: env.MESSAGE_DURATION});
+  }
+
+  private messageLostExperience(exp:number) {
+    const msg = i18n.t('gamify.messages.lost') + 
+                " " + exp + " " + i18n.t('gamify.exp');
+    toast.error(msg,{autoClose: env.MESSAGE_DURATION});
   }
   
   private async _save() {

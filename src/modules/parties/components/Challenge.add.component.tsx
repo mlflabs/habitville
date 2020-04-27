@@ -9,6 +9,7 @@ import { COLOR_DANGER, COLOR_SUCCESS, COLOR_SECONDARY, COLOR_LIGHT } from '../..
 import { trash } from 'ionicons/icons';
 import ulog from 'ulog';
 import './challenge.css'
+import { useTranslation } from 'react-i18next';
 
 const log = ulog('party');
 
@@ -64,7 +65,7 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
   log.warn('ADDDD', challenge);
   const [state, _dispatch] = useReducer(reducer, getDefaultRegularityState)
 
-
+  const {t} = useTranslation();
   useEffect(() => {
     log.warn('USE EFFECT ADD:: ', challenge);
     dispatch('challengeChange', challenge);
@@ -127,15 +128,15 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
   const printDifficultyLabel = (chdiff: ChallengeDifficulty): string => {
     switch(chdiff) {
       case ChallengeDifficulty.trivial:
-        return 'Easy peasy lemon squeezy';
+        return t("habits.difficulty.trivial");
       case ChallengeDifficulty.easy:
-        return 'Piece of Cake';
+        return t("habits.difficulty.easy");
       case ChallengeDifficulty.medium:
-        return "Let's Rock";
+        return t("habits.difficulty.medium");
       case ChallengeDifficulty.hard:
-        return 'No Pain, No Gain';
+        return t("habits.difficulty.hard");
       case ChallengeDifficulty.extreme:
-        return 'Death Wish';
+        return t("habits.difficulty.extreme");
     }
   }
 
@@ -156,22 +157,22 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
               <IonButton> <IonIcon size="large" icon={arrowBack} /></IonButton>
             </IonButtons>
             */}
-            <IonTitle>Add Challenge</IonTitle>
+            <IonTitle>{t('challenges.add')}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent>
           <IonItem>
-              <IonLabel position="floating">Name</IonLabel>
+              <IonLabel position="floating">{t('name')}</IonLabel>
               <IonInput 
                   name="name"
-                  placeholder="Read book, Go running ..." 
+                  placeholder={t('challenges.namePlaceholder')} 
                   onIonChange={handleChange}
                   value={state.doc.name} />
           </IonItem>
           <IonItem>
-              <IonLabel position="floating">Note</IonLabel>
+              <IonLabel position="floating">{t('note')}</IonLabel>
               <IonTextarea 
-                  placeholder="Enter more information here, motivate yourself..."
+                  placeholder={t('challenges.notePlaceholder')}
                   name="note"
                   onIonChange={handleChange}
                   value={state.doc.note}></IonTextarea>
@@ -180,13 +181,13 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
             <IonSegment value={state.doc.regularityInterval}
                         onIonChange={(e) => handlerRegularityIntervalChange(e.detail.value)}>
               <IonSegmentButton value="day">
-                <IonLabel>Daily</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.day")}</IonLabel>
               </IonSegmentButton>
               <IonSegmentButton value="week">
-                <IonLabel>Weekly</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.week")}</IonLabel>
               </IonSegmentButton>
               <IonSegmentButton value="month">
-                <IonLabel>Monthly</IonLabel>
+                <IonLabel>{t("habits.intervalContinious.month")}</IonLabel>
               </IonSegmentButton>
             </IonSegment>
           </IonItem>
@@ -227,45 +228,45 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
             <IonButton 
               onClick={()=>handleNamedChange('challengeType', ChallengeType.checkin)}
               color={(state.doc.challengeType === ChallengeType.checkin)?COLOR_SUCCESS : COLOR_LIGHT} >
-                Check-In</IonButton>
+                {t('challenges.types.checkin')}</IonButton>
             <IonButton 
               onClick={()=>handleNamedChange('challengeType', ChallengeType.value)}
               color={(state.doc.challengeType === ChallengeType.value)?COLOR_SUCCESS : COLOR_LIGHT} >
-                Value</IonButton>
+                {t('challenges.types.value')}</IonButton>
             <IonButton 
               onClick={()=>handleNamedChange('challengeType', ChallengeType.note)}
               color={(state.doc.challengeType === ChallengeType.note)?COLOR_SUCCESS : COLOR_LIGHT} >
-                Note</IonButton>
+                {t('challenges.types.note')}</IonButton>
             <IonButton 
               onClick={()=>handleNamedChange('challengeType', ChallengeType.gainer)}
               color={(state.doc.challengeType === ChallengeType.gainer)?COLOR_SUCCESS : COLOR_LIGHT} >
-                Biggest Gainer</IonButton>
+                {t('challenges.types.gainer')}</IonButton>
             <IonButton 
               onClick={()=>handleNamedChange('challengeType', ChallengeType.looser)}
               color={(state.doc.challengeType === ChallengeType.looser)?COLOR_SUCCESS : COLOR_LIGHT} >
-                Biggest Looser</IonButton>
+                {t('challenges.types.looser')}</IonButton>
           </div>
 
           {(state.doc.challengeType === 'Value')? (
             <>
             <IonItem>
-                  <IonLabel>Unit</IonLabel>
+                  <IonLabel>{t('habits.unitTitle')}</IonLabel>
                   <IonSelect  value={state.doc.challengeTypeUnit}
                               onIonChange={(e) => handleNamedChange('challengeTypeUnit', e.detail.value)}
                               color={COLOR_SECONDARY}
                               placeholder="Select One">
-                    <IonSelectOption value="Cup">Cup</IonSelectOption>
-                    <IonSelectOption value="Dollar">Dollar</IonSelectOption>
-                    <IonSelectOption value="Page">Page</IonSelectOption>
-                    <IonSelectOption value="Minute">Minute</IonSelectOption>
-                    <IonSelectOption value="Hour">Hour</IonSelectOption>
-                    <IonSelectOption value="Meter">Meter</IonSelectOption>
-                    <IonSelectOption value="Kilometer">Kilometer</IonSelectOption>
-                    <IonSelectOption value="Other">Other</IonSelectOption>
+                    <IonSelectOption value="Cup">{t('habits.units.cup')}</IonSelectOption>
+                    <IonSelectOption value="Dollar">{t('habits.units.dollar')}</IonSelectOption>
+                    <IonSelectOption value="Page">{t('habits.units.page')}</IonSelectOption>
+                    <IonSelectOption value="Minute">{t('habits.units.minute')}</IonSelectOption>
+                    <IonSelectOption value="Hour">{t('habits.units.hour')}</IonSelectOption>
+                    <IonSelectOption value="Meter">{t('habits.units.meter')}</IonSelectOption>
+                    <IonSelectOption value="Kilometer">{t('habits.units.kilometer')}</IonSelectOption>
+                    <IonSelectOption value="Other">{t('habits.units.other')}</IonSelectOption>
                   </IonSelect>               
             </IonItem>
             <IonItem>
-                  <IonLabel position="floating">Value</IonLabel>
+                  <IonLabel position="floating">{t('habits.valueTitle')}</IonLabel>
                   <IonInput type="number" 
                             name="regularityEachDayGoal"
                             onIonChange={handleChange}
@@ -276,7 +277,7 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
           {(state.doc.challengeType === 'Value' &&
             state.doc.challengeTypeUnit === ChallengeTypeUnit.Other)? (
             <IonItem>
-                  <IonLabel position="floating">Unit</IonLabel>
+                  <IonLabel position="floating">{t('habits.unitTitle')}</IonLabel>
                   <IonInput name="chalengeTypeOther"
                             onIonChange={handleChange}
                             value={state.doc.chalengeTypeOther}/>
@@ -286,11 +287,9 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
           {(state.doc.challengeType === ChallengeType.looser)? (
             <IonItem>
                   <IonLabel className="paddingDown" position="floating">
-                    <h2>Multiplier</h2>
+                    <h2>{t('challenges.typesDesc.multiplier')}</h2>
                     <IonNote  className="ion-text-wrap">
-                      Points will be calculated based on progress times multiplier. For example
-                      if multiplier is 5, and first day your proggress is 5 less than starting value, 
-                      then the points gained would be 25 (5 x 5 = 25)
+                      {t('challenges.typesDesc.looserMultiplier')}
                     </IonNote>
                   </IonLabel>
                   <IonInput name="challengePointMultiplier"
@@ -303,11 +302,9 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
           {(state.doc.challengeType === ChallengeType.gainer)? (
             <IonItem>
                   <IonLabel className="paddingDown" position="floating">
-                    <h2>Multiplier</h2>
+                    <h2>{t('challenges.typesDesc.multiplier')}</h2>
                     <IonNote  className="ion-text-wrap">
-                      Points will be calculated based on progress times multiplier. For example
-                      if multiplier is 5, and first day your proggress is 2 more than starting value, 
-                      then the points gained would be 25 (5 x 2 = 10)
+                      {t('challenges.typesDesc.gainerMultiplier')}
                     </IonNote>
                   </IonLabel>
                   <IonInput name="challengePointMultiplier"
@@ -321,7 +318,7 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
 
           {(state.doc.challengeType ===  ChallengeType.note)? (
             <IonItem>
-              <IonLabel>Vote Enabled: </IonLabel>
+              <IonLabel>{t('challenges.typesDesc.voteEnabled')}: </IonLabel>
               <IonCheckbox  name = "chalengeTypeNoteVote"
                             onIonChange={(e) => handleNamedChange('chalengeTypeNoteVote', e.detail.checked)}
                             checked={state.doc.chalengeTypeNoteVote} />
@@ -330,35 +327,29 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
           ) : (<></>)}
         </IonContent> 
 
-
-
-
-
-
-
-
-
-
-
-
         <IonFooter>
           <IonToolbar>
             <IonTitle>
-              <IonButton onClick={() => dismissFunc(state.doc, 'save')}>Save</IonButton>
-              <IonButton onClick={() => dismissFunc(null, 'none')}>Cancel</IonButton>
+              <IonButton onClick={() => dismissFunc(state.doc, 'save')}>{t('save')}</IonButton>
+              <IonButton onClick={() => dismissFunc(null, 'none')}>{t('cancel')}</IonButton>
             </IonTitle>
           </IonToolbar>
         </IonFooter>
-        <IonFab horizontal="end" vertical="bottom" >
-          <IonFabButton size="small" color={COLOR_DANGER} onClick={() => dispatch('showRemoveWarrning')}>
-            <IonIcon size="large" icon={trash} />
-          </IonFabButton>
-        </IonFab>
+        
+        {(state.doc.id)? (
+          <IonFab horizontal="end" vertical="bottom" >
+            <IonFabButton size="small" color={COLOR_DANGER} onClick={() => dispatch('showRemoveWarrning')}>
+              <IonIcon size="large" icon={trash} />
+            </IonFabButton>
+          </IonFab>
+        ) : (<></>)}
+
+
         <IonAlert
           isOpen={state.showDeleteWarrning}
           onDidDismiss={() => dispatch('hideRemoveWarrning')}
-          header={'Warrning!!!'}
-          message={'Are you sure you want to <strong>delete</strong> this habit?'}
+          header={t('warning')}
+          message={t('deleteMessage')}
           buttons={[
             {
               text: 'Cancel',
@@ -367,7 +358,7 @@ const ChallengeAddComponent = ({challenge, dismissFunc}:
               
             },
             {
-              text: 'Yes Im Sure',
+              text: t('deleteAccept'),
               handler: () => removehabit()
             }
           ]}

@@ -10,6 +10,7 @@ const PartyListItemComponent = ({partyProject, history,  showEditModalFunction}:
 
   useEffect(() => {
     setState({...state, ...{party:partyProject}});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partyProject])
 
   return(

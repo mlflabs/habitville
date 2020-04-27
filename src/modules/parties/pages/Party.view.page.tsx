@@ -4,11 +4,11 @@ import HeaderWithProgress from '../../../components/HeaderWithProgress';
 import { PartyProject, TYPE_PARTY } from '../models';
 import { useParams, useHistory } from 'react-router-dom';
 import { dataService } from '../../data/dataService';
-import { HabitsService } from '../../../pages/habits/habits.service';
 import PartyMembersListComponent from '../components/Members.list.component';
 import ChallengeListComponent from '../components/Challenge.list.component';
 import MessagesListComponent from '../../messages/components/Messages.list.component';
 import { getChannelFromProjectId } from '../../data/utilsData';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -43,6 +43,7 @@ const PartyViewPage = () => {
   const {id} = useParams();
   const history = useHistory();
   const [state, setState] = useState<State>(getInitState)
+  const {t} = useTranslation();
  
   useEffect(() => {
     if(id)
@@ -70,7 +71,7 @@ const PartyViewPage = () => {
 
   return (
     <IonPage>
-      <HeaderWithProgress title={"Party: " + state.party.name} />
+      <HeaderWithProgress title={t('clash.party')+": " + state.party.name} />
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
             <IonRefresherContent></IonRefresherContent>

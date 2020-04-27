@@ -1,6 +1,6 @@
 export const TYPE_MARKET = 'mkt';
 
-export const DEFAULT_SEED_NAME = 'starter';
+export const DEFAULT_SEED_NAME = 'Maple';
 
 
 export enum MarketItemType {
@@ -9,32 +9,28 @@ export enum MarketItemType {
   clothing = 'clothing'
 }
 
-export const getMarketItem = (name, 
+export const getMarketItem = (id,
+                              name, 
                               itemType: MarketItemType,
                               price:number,
-                              difficulty:number = 0,
-                              pic:string = "default.svg"):MarketItem => {
+                              difficulty:number = 0,):MarketItem => {
   return {
+    id,
     name,
-    id: 'mi.'+name,
     itemType,
     price,
-    pic,
     difficulty,
     quantity:1
   }
 }
 
 export const defaultSeed: MarketItem = 
-  getMarketItem(DEFAULT_SEED_NAME, MarketItemType.seed, 1, 0, DEFAULT_SEED_NAME);
-
-
+  getMarketItem('tree.' + DEFAULT_SEED_NAME, DEFAULT_SEED_NAME, MarketItemType.seed, 1, 0);
 
 export const MarketItems: MarketItem[]  = [
-  getMarketItem('plant1', MarketItemType.seed, 1, 1, 'plant1'),
-  getMarketItem('plant2', MarketItemType.seed, 1, 1, 'plant2'),
-  getMarketItem('plant3', MarketItemType.seed, 1, 1, 'plant3'),
-
+  getMarketItem('tree.plant1', 'Green Ash', MarketItemType.seed, 10, 1),
+  getMarketItem('tree.plant2', 'River Birch', MarketItemType.seed, 25, 1),
+  getMarketItem('tree.plant3', 'Paper Birch', MarketItemType.seed, 25, 1),
 ]
 
 
@@ -44,8 +40,7 @@ export class MarketItem  {
   id!: string;
   itemType!: MarketItemType;
   price!: number;
-  difficulty: number = 0;
-  pic: string = 'default.svg';
+  difficulty: number = 0; 
   quantity: number = 0;
 
   constructor(values: Object = {}) {

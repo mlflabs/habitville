@@ -9,6 +9,7 @@ import { loadPreferedLanguage } from '../../../i18n';
 import { useHistory } from 'react-router-dom';
 import { TYPE_SETTINGS } from '../../data/utilsData';
 import { appService } from '../appService';
+import { socialService } from '../../social/social.service';
 
 
 const log = ulog('app');
@@ -45,6 +46,7 @@ export function useAppStatus(): [{status:AppStatus, dataReady:boolean, username:
         await gamifyService.init(userid);
         await partyService.init();
         await appService.init();
+        await socialService.init(authService.userid);
         await loadPreferedLanguage();
         //load our tutorial if not already watched
         //await showIntroTutorial();

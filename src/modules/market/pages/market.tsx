@@ -6,6 +6,8 @@ import HeaderWithProgress from '../../../components/HeaderWithProgress';
 import "./market.css";
 import { gamifyService } from '../../gamify/gamifyService';
 import { MarketItem, MarketItems } from '../models';
+import { useTranslation } from 'react-i18next';
+import { getPlantSeedPic } from '../../../pages/habits/utilsHabits';
 
 const log = ulog('default');
 
@@ -27,7 +29,7 @@ const reducer = (state, {type, payload}) => {
 
 
 const Market = () => {
-
+  const {t} = useTranslation();
   const [state, _dispatch] = useReducer(reducer, {
     view:'user', // user or market
     gold: 0,
@@ -54,7 +56,7 @@ const Market = () => {
       sub.unsubscribe();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [state.view])
 
   const buyItem = (item:MarketItem) => {
     gamifyService.buyItem(item);
@@ -63,18 +65,21 @@ const Market = () => {
 
   return (
   <IonPage>
-    <HeaderWithProgress title="Farmers Market" />
+    <HeaderWithProgress title={t('market.title')} />
     <IonContent>
       
       <IonRefresher slot="fixed" onIonRefresh={(e) => dataService.refresh(e)}>
         <IonRefresherContent></IonRefresherContent>
       </IonRefresher>
+      <div>
+        <img className="marketPic" src={"/assets/pics/marketheader.svg"}  alt="MarketLogo"/>
+      </div>
       <IonSegment value={state.view} onIonChange={e => dispatch('setView', e.detail.value)}>
           <IonSegmentButton value="user">
-            <IonLabel>User Items</IonLabel>
+            <IonLabel>{t('market.userItems')}</IonLabel>
           </IonSegmentButton>
           <IonSegmentButton value="market">
-            <IonLabel>Market</IonLabel>
+            <IonLabel>{t('market.marketItems')}</IonLabel>
           </IonSegmentButton>
       </IonSegment>
       <IonList>
@@ -83,14 +88,15 @@ const Market = () => {
         {(state.view === 'user')? (
           <>
           <IonListHeader lines="inset">
-            <IonLabel>User Items</IonLabel>
+            <IonLabel>{t('market.userItems')}</IonLabel>
           </IonListHeader>
+          
           {state.userItems.map(item => (
             <IonItem key={item.id}>
               <IonAvatar slot="start">
-                <img src={"assets/market/"+ item.pic + '.svg'} alt="item" />
+                <img src={getPlantSeedPic(item)} alt="item" />
               </IonAvatar>
-              <IonLabel><h2>{item.name}</h2></IonLabel>
+              <IonLabel><h2>{t('plants.names.' + item.name)}</h2></IonLabel>
               <IonBadge slot="end" color="primary">
                 {item.quantity}
               </IonBadge>
@@ -100,19 +106,19 @@ const Market = () => {
         ) : (
           <>
           <IonListHeader lines="inset">
-            <IonLabel>Market</IonLabel>
+            <IonLabel>{t('market.marketItems')}</IonLabel>
           </IonListHeader>
           {MarketItems.map(item => (
             <IonItem key={item.id}>
               <IonAvatar slot="start">
-                <img src={"assets/market/"+ item.pic + '.svg'} alt="item" />
+                <img src={getPlantSeedPic(item)} alt="item" />
               </IonAvatar>
-              <IonLabel><h2>{item.name}</h2></IonLabel>
+              <IonLabel><h2>{t('plants.names.' + item.name)}</h2></IonLabel>
               <IonButton  disabled={item.price > state.gold} 
                           onClick={() => buyItem(item)}
                           slot="end">
-                Buy<br />
-                {item.price} Gold
+                {t('market.buy')}<br />
+                {item.price} {t('market.gold')}
               </IonButton>
             </IonItem>
   
@@ -123,9 +129,7 @@ const Market = () => {
       </IonList>
 
 
-      <div>
-        <img className="marketPic" src={"/assets/pics/marketheader.svg"}  alt="MarketLogo"/>
-      </div>
+     
     </IonContent>
   </IonPage>
   )
