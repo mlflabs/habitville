@@ -60,11 +60,12 @@ export class SocialService {
 
 
 
-  public async addFriend(username?:string) {
+  public async addFriend(username:string, note: string) {
     try {
       const res = await post(getPostRequest(env.AUTH_API_URL +'/social/sendAddFriendRequest',
                       { token: authService.getToken(), 
                         username,
+                        data: {note}
                       }), 
                       true, 'Sending invitatin request, please wait');
       if(!res.success){

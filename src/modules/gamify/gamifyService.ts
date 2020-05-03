@@ -28,7 +28,9 @@ export interface GamifyState {
   gold: number,
 
   userItems: MarketItem[],
-  landscape: Landscape
+  landscape: Landscape,
+
+  messages:{},
 }
 
 export const getInitGamifyState = () => {
@@ -39,7 +41,7 @@ export const getInitGamifyState = () => {
     gold: 0,
     userItems: [],
     landscape: getDefaultLandscape(),
-    
+    messages:{}
   }
 }
 
@@ -182,7 +184,52 @@ export class GamifyService {
 
   private addGold(value:number, save = true) {
     this._state = {...this._state, ...{gold: this._state.gold + value}};
+    this.addGoldMessages();
     if(save)this.state = this._state;
+  }
+
+  private addGoldMessages = () => {
+    if(this.state.gold >= 100 && !this.state.messages['gold100']){
+      this._state.messages['gold100'] = true;
+      socialService.sendMessage(newMessage( 'New level reached', 
+                      'userGoldUp', '', 
+                      { 'gold':100,
+                        'username': authService.getUsername()}));
+ 
+    }
+    if(this.state.gold >= 500 && !this.state.messages['gold500']){
+      this._state.messages['gold500'] = true;
+      socialService.sendMessage(newMessage( 'New level reached', 
+                      'userGoldUp', '', 
+                      { 'gold':500,
+                        'username': authService.getUsername()}));
+ 
+    }
+    if(this.state.gold >= 1000 && !this.state.messages['gold1000']){
+      this._state.messages['gold1000'] = true;
+      socialService.sendMessage(newMessage( 'New level reached', 
+                      'userGoldUp', '', 
+                      { 'gold':1000,
+                        'username': authService.getUsername()}));
+ 
+    }
+    if(this.state.gold >= 5000 && !this.state.messages['gold5000']){
+      this._state.messages['gold5000'] = true;
+      socialService.sendMessage(newMessage( 'New level reached', 
+                      'userGoldUp', '', 
+                      { 'gold':5000, 
+                        'username': authService.getUsername()}));
+ 
+    }
+    if(this.state.gold >= 1000 && !this.state.messages['gold10000']){
+      this._state.messages['gold10000'] = true;
+      socialService.sendMessage(newMessage( 'New level reached', 
+                      'userGoldUp', '', 
+                      { 'gold':10000,
+                        'username': authService.getUsername()}));
+ 
+    }
+
   }
 
   private addExperience(value: number, save = true) {
@@ -195,11 +242,16 @@ export class GamifyService {
         ...{maxExperience: calculateLevelExperience(this._state.level+1),
             level}}
 
-      socialService.sendMessage(newMessage('New level reached', 'userLevelUp', '', { level }));
+      socialService.sendMessage(newMessage( 'New level reached', 
+                                            'userLevelUp', '', 
+                                            { level,
+                                              'username': authService.getUsername()}));
     }
     this._state = {...this._state, ...{experience}}
     if(save) this.state = this._state;
   }
+
+
 
   public addRewards = (rewards:GamifyRewards, habit?:Habit) => {
     if(rewards.gold > 0) {

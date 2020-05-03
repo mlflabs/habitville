@@ -1,11 +1,13 @@
 import React, { useReducer, useEffect } from 'react';
-import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel } from '@ionic/react';
+import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonAlert, IonFooter, IonButton, IonLabel, IonFab, IonFabButton, IonIcon } from '@ionic/react';
 import  ulog from 'ulog';
 import { Friend } from '../models';
 import { socialService } from '../social.service';
 import { useTranslation } from 'react-i18next';
 import { HelpTooltip } from '../../../components/tooltip';
 import LandscapeComp from './Landscape.component';
+import { COLOR_LIGHT } from '../../../colors';
+import { refresh } from 'ionicons/icons';
 const log = ulog('social');
 
 export interface FriendsState {
@@ -74,6 +76,7 @@ const FriendsListComponent = () => {
                         key={friend.id}
                         onClick={() => {}}>
              <LandscapeComp username={friend.username} 
+                            level={friend.level}
                             landscape={friend.landscape} />
             </IonItem>
             ))}
@@ -83,9 +86,14 @@ const FriendsListComponent = () => {
         <IonFooter>
           <IonButton onClick={()=>addFriend()} fill="clear">{t('social.friendAdd')}</IonButton>
           <HelpTooltip message={t('tooltips.addFriends')} />
-
-          <IonButton onClick={()=>socialService.updateSocialUsers()} fill="clear">Update</IonButton>
-          
+          <IonFab horizontal="end" vertical="top" >
+            <IonFabButton  
+                onClick={()=>socialService.updateSocialUsers()}
+                color={COLOR_LIGHT}>
+              <IonIcon 
+                icon={refresh} />
+            </IonFabButton>
+          </IonFab>
         </IonFooter>
       <IonAlert 
         isOpen={state.showAddModal}
@@ -96,8 +104,13 @@ const FriendsListComponent = () => {
             name: 'username',
             type: 'text',
             id: 'username',
-
-
+            placeholder: t('auth.username')
+          },
+          {
+            name: 'note',
+            type: 'textarea',
+            id: 'note',
+            placeholder: t('note')
           }
         ]}
         buttons={[
@@ -112,7 +125,7 @@ const FriendsListComponent = () => {
           {
             text: t('social.inviteFriend'),
             handler: (data) => {
-              socialService.addFriend(data.username);
+              socialService.addFriend(data.username, data.note);
               hideAddUser();
             }
           }

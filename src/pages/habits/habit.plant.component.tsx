@@ -9,6 +9,7 @@ import HeaderWithProgress from '../../components/HeaderWithProgress';
 import { COLOR_WARNING } from '../../colors';
 import { gamifyService } from '../../modules/gamify/gamifyService';
 import { caretBackCircleOutline, caretForwardCircleOutline, caretBackOutline, caretForwardOutline } from 'ionicons/icons';
+import { getPlantPic } from './utilsHabits';
 
 
 const log = ulog('default');
@@ -87,7 +88,7 @@ export const HabitPlantComponent = ({doc, position, closeFunc}:
        <img 
         alt="Plant"
         style={{padding:"20px", height: '100px'}}
-        src={'/assets/plants/' + doc.plantName+ '/' + doc.plantLevel + '.svg'}  />
+        src={getPlantPic(doc)}  />
     </IonContent>
     <IonToolbar>
     <IonRange 

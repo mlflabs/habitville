@@ -1,16 +1,17 @@
 import React, { useReducer, useEffect } from 'react';
-import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonLabel, IonAvatar, IonIcon, IonText, IonButton } from '@ionic/react';
+import { IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonList, IonItem, IonLabel, IonAvatar, IonIcon, IonText, IonButton, IonThumbnail } from '@ionic/react';
 import  ulog from 'ulog';
 import { Msg } from '../../messages/models';
 import { dataService } from '../../data/dataService';
 import { TYPE_MSG, newMessage } from '../models';
-import { mail, personAdd, happy, sad, peopleCircle, documentTextOutline } from 'ionicons/icons';
+import { mail, personAdd, happy, sad, peopleCircle, documentTextOutline, thumbsUp, wallet } from 'ionicons/icons';
 import { printDateRelative, saveIntoArray } from '../../../utils';
 import { partyService } from '../../parties/party.service';
-import { COLOR_SUCCESS, COLOR_WARNING } from '../../../colors';
+import { COLOR_SUCCESS, COLOR_WARNING, COLOR_TERTIARY } from '../../../colors';
 import './messages.css';
 import { socialService } from '../../social/social.service';
 import { useTranslation } from 'react-i18next';
+import { NumberSvg } from '../../../icons/numberIcons';
 const log = ulog('messages');
 
 export interface MessagesState {
@@ -76,6 +77,12 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
     }
     else if(msg.messageType === 'friendinvite') {
       return <IonIcon icon={personAdd}  slot="start" />
+    }
+    else if(msg.messageType === 'userLevelUp') {
+      return <IonIcon icon={thumbsUp}  slot="start" />
+    }
+    else if(msg.messageType === 'userGoldUp') {
+      return <IonIcon icon={wallet}  slot="start" />
     }
     else if(msg.messageType === 'action' && msg.messageSubType === 'Note2') {
       return <IonIcon icon={documentTextOutline}  slot="start" />
@@ -175,6 +182,7 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
       </IonItem>
     }
     else if(msg.messageType === 'friendinvite') {
+      console.log(msg);
       return <IonItem  button 
                 key={msg.id}
                 onClick={() => {}}>
@@ -182,6 +190,11 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
         <IonLabel className="ion-text-wrap">
             <h2>{t("social.receivedFriendInvitation")}
             <strong> {msg.from} </strong></h2>
+            {(msg.data.note)? (
+              <IonText  color={COLOR_TERTIARY}>
+                <h3>Note: {msg.data.note}</h3>
+              </IonText>
+            ) : (<></>)}
             <IonText  color="secondary">
               {printDateRelative(msg.updated)}
             </IonText>
@@ -190,6 +203,48 @@ const MessagesListComponent = ({channel}:{channel:string}) => {
         {printReplyStatus(msg)}
       </IonItem>
     }  
+    else if(msg.messageType === 'userLevelUp') {
+      console.error(msg)
+      return <IonItem  
+                key={msg.id}
+                onClick={() => {}}>
+        {printMessageIcon(msg)}
+        <IonLabel className="ion-text-wrap">
+            <h2><strong> {t("social.levelUpMessage")}</strong></h2>
+            <h3>{msg.data.username}</h3>
+            <IonText  color="secondary">
+              {printDateRelative(msg.updated)}
+            </IonText>
+              {printFriendRequestAcceptRejectButtons(msg)}
+        </IonLabel>
+        <IonThumbnail slot="end">
+            <NumberSvg number={msg.data.level} color="#2c8c35" />
+        </IonThumbnail>
+        {printReplyStatus(msg)}
+      </IonItem>
+    } 
+    
+    else if(msg.messageType === 'userGoldUp') {
+      console.error(msg)
+      return <IonItem  
+                key={msg.id}
+                onClick={() => {}}>
+        {printMessageIcon(msg)}
+        <IonLabel className="ion-text-wrap">
+            <h2><strong> {t("social.goldUpMessage")}</strong></h2>
+            <h3>{msg.data.username}</h3>
+            <IonText  color="secondary">
+              {printDateRelative(msg.updated)}
+            </IonText>
+              {printFriendRequestAcceptRejectButtons(msg)}
+        </IonLabel>
+        <IonThumbnail slot="end">
+            <NumberSvg number={msg.data.gold} color="#EAD94C" />
+        </IonThumbnail>
+        {printReplyStatus(msg)}
+      </IonItem>
+    }  
+
     else if(msg.messageType === 'action' && msg.messageSubType === 'Note') {
       return <IonItem  button 
                 key={msg.id}

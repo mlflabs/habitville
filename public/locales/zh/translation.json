@@ -1,108 +1,204 @@
 {
-  "habitville":"习惯维尔**",
   "home": "首页",
-  "habits": "习惯",
-
-
+  "habitville": "习惯维尔**",
+  "homeTitle": "首页",
+  "habitsTitle": "习惯",
+  "habits": {
+      "name": "名",
+      "namePlaceholder": "看书，跑步，等等",
+      "notePlaceholder": "输入信息在这里",
+      "Add Habit": "添加习惯",
+      "I will repeat this habit every day": "我会天天做",
+      "I will repeat this habit": "我会再次做",
+      "regularity": "规律",
+      "interval": {
+          "day": "日",
+          "week": "周",
+          "month": "月"
+      },
+      "intervalContinious": {
+          "day": "天天",
+          "week": "每周",
+          "month": "每月"
+      },
+      "everyinterval": {
+          "day": "几次一天",
+          "week": "几次一周",
+          "month": "几次一月"
+      },
+      "difficultyTitle": "难度",
+      "difficulty": {
+          "trivial": "简单容易的",
+          "easy": "小菜一碟",
+          "medium": "我得加油",
+          "hard": "没有痛苦，没有收获",
+          "extreme": "差点会死"
+      },
+      "unitTitle": "单位",
+      "valueTitle": "价值",
+      "units": {
+          "cup": "杯",
+          "dollar": "元",
+          "page": "页",
+          "minute": "分钟",
+          "hour": "小时",
+          "meter": "米",
+          "kilometer": "公里",
+          "Other": "其他"
+      }
+  },
+  "plants": {
+      "exp": "植物成长",
+      "info": "植物信息",
+      "chooseSeed": "选种子",
+      "changePlantPosition": "换植物位置",
+      "names": {
+          "Maple": "枫树",
+          "Green Ash": "白蜡树",
+          "River Birch": "桦树",
+          "Paper Birch": "白桦树",
+          "starter": "枫树",
+          "plant1": "白蜡树",
+          "plant2": "桦树",
+          "plant3": "白桦树"
+      }
+  },
   "clashTitle": "村民冲突",
   "clash": {
+      "party": "派对",
       "header": "标头",
       "createBtn": "组织派对",
       "Friends": "朋友",
       "Add Friend": "添加好友",
       "Invite Friend": "邀请朋友",
-      "Friends Username": "朋友用户名"
+      "Friends Username": "朋友用户名",
+      "editTitle": "编辑派对",
+      "namePlaceholder": "给派对起名",
+      "notePlaceholder": "更多派对的细节"
   },
-  "todosTitle": "托多 TODO",
+  "challenges": {
+      "title": "挑战",
+      "add": "添加新的挑战",
+      "types": {
+          "checkin": "打卡",
+          "value": "价值",
+          "note": "备注",
+          "gainer": "胖子",
+          "looser": "瘦猴儿"
+      },
+      "typesDesc": {
+          "multiplier": "乘数",
+          "looserMultiplier": "分数是根据进步和乘数计算的，假如，你的乘数是5，第一天你的进步达不到5，那你分数就是25（5X5)",
+          "gainerMultiplier": "分数是根据进步和乘数计算的，假如，你的乘数是5，第一天你的进步是2，那你分数就是10（2X5)"
+      },
+      "namePlaceholder": "看书，跑步，等等",
+      "notePlaceholder": "输入信息在这里",
+      "voteEnabled": "投票"
+  },
+  "todosTitle": "任务表",
   "todos": {
+      "default": "默认",
       "today": "今天",
-      "important": "重要"
+      "important": "重要",
+      "lists": {
+          "title": "列表",
+          "AddNewList": "添加新列表"
+      },
+      "tags": {
+          "title": "标签"
+      }
   },
-  "listsTitle": "待办事项列表",
-  "lists": {
-      "AddNewList": "添加新列表"
-  },
-  "tagsTitle": "标签标题",
-  "tags": {
-
-  },
-
-  "marketTitle": "集市",
   "market": {
-
+      "title": "农贸市场",
+      "userItems": "用户物品",
+      "marketItems": "市场",
+      "buy": "买",
+      "gold": "黄金"
   },
-
   "settingsTitle": "装置 Settings",
   "settings": {
-    "changeLanguageRestartMessage": "Currently to initiate change language, a full app restart is needed**"
+      "changeLanguageRestartMessage": "换语言需要重启app"
   },
-
   "auth": {
       "login": "登录",
       "logout": "登出",
       "name": "名称",
       "username": "用户名",
-      "ID": "ID"
+      "ID": "身份"
   },
-
   "social": {
-    "members": "Members**",
-    "friends": "Friends**",
-    "friend": "Friend**",
-    "from": "From**",
-    "friendAdd": "Add Friend**",
-    "friendUsername": "Friends Username**",
-    "inviteFriend": "Invite Friend**",
-    "receivedFriendInvitation": "You have received friend invitation. Friend: **",
-    "receivedClashInvitation": "You have received party join invitation from **",
-    "channel": "Party Name**"
+      "members": "成员",
+      "friends": "朋友",
+      "friendAdd": "添加朋友",
+      "from": "来自",
+      "friendUsername": "朋友用户名",
+      "inviteFriend": "邀请朋友",
+      "receivedFriendInvitation": "你收到了朋友邀请，朋友：",
+      "receivedClashInvitation": "你收到了派对邀请，来自：",
+      "channel": "排队名",
+      "levelUpMessage": "提升了！现在是更高水平了!",
+      "goldUpMessage": "发财喽！"
   },
-
+  "gamify": {
+      "messages": {
+          "received": "收到了",
+          "lost": "输了！"
+      },
+      "exp": "经验"
+  },
   "messages": {
-    "messages": "Messages**",
-    "sendMessage": "Send Message**"
+      "messages": "信",
+      "sendMessage": "发信"
   },
-
-  "Channel invitation accepted": "Party invitation accepted***",
-  "Friend invitation accepted": "Friend invitation accepted***",
-  "Friend invitation send": "Friend invitation send**", 
-  "Friend username is invalid": "Friend username is invalid**", 
-  "System Doc saved": "System Doc saved**",
-  "Channel saved": "Channel saved**",
-  "Channel name is not valid": "Channel name is not valid**",
-  "Request for this memeber has alread been sent": "Request for this memeber has alread been sent**",
-  "Invitation accepted": "Invitation accepted**",
-  "Challenge is not accepting invitations": "Challenge is not accepting invitations**",
-  "Challenge Accepted": "Challenge Accepted**",
-  "Action saved": "Action saved**",
-
-
-  "Insufficient rights": "Insufficient rights**",
-  "You do not have rights to this channel": "You do not have rights to this channel**",
-  "Already joined this challenge": "Already joined this challenge**",
-  "Friend Username is not valid": "Friend Username is not valid**",
-
-  "Token is not valid": "Token is not valid**",
-  "Message id is not valid": "Message id is not valid**",
-
-  "Singup successful": "Singup successful**",
-  "Username or Email not found": "Username or Email not found**",
-  "Error Username not found": "Error Username not found**",
-  "Error email or password not valid": "Error email or password not valid**",
-  "Error password not valid": "Error password not valid**",
-  "Invalid token, or token has expired. Please relogin": "Invalid token, or token has expired. Please relogin**",
-  "Error removing token, please try again": "Error removing token, please try again**", 
-  "Email is already in use": "Email is already in use**",
-
-
-  "Error saving, please wait and try again later": "Error saving, please wait and try again later**",
-
-
-
-  "accept": "Accept**",
-  "reject": "Reject**",
+  "tooltips": {
+      "todosSort": "在这里你能看到完成和还没完成的任务。你也可以改变顺序按照日期或者名字。当你点击日期或者名字两次可以调整顺序排列。",
+      "havitStreakBadge": "第一个奖章代表你这次的连胜，第二个代表你的最长的连胜在这个习惯上。连胜越长就会得到越多的奖励。",
+      "habitsSeed": "不同种子发芽后有不同的植物成长，你可以看到在上头的田里。你可以买种子在农贸市场里。",
+      "addFriends": "你能够看朋友们的进步，可以聊天，和发加油的信息",
+      "habitRegularity": "你不需要天天持续每一种习惯，你可以定次数在这里。连胜会计算根据你自己定的规律。",
+      "habitDifficultry": "更高难度，更多奖励"
+  },
+  "Channel invitation accepted": "排队邀请接受了",
+  "Friend invitation accepted": "朋友邀请接受了",
+  "Friend invitation send": "朋友邀请发送了",
+  "Friend already added": "朋友添加了",
+  "Friend username is invalid": "朋友用户名不正确",
+  "System Doc saved": "文件存好了",
+  "Channel saved": "派对文件存好了",
+  "Channel name is not valid": "群名无效",
+  "Request for this memeber has alread been sent": "邀请已经发送了",
+  "Invitation accepted": "邀请接受了",
+  "Challenge is not accepting invitations": "挑战已经开始了，无法加入",
+  "Challenge Accepted": "挑战接受了",
+  "Action saved": "打卡了",
+  "Insufficient rights": "没有权利做出改变",
+  "You do not have rights to this channel": "没有权利做出改变在这个群里",
+  "Already joined this challenge": "已经加入了这个挑战",
+  "Friend Username is not valid": "朋友用户名有错误",
+  "Token is not valid": "您输入了无效的标记代码",
+  "Message id is not valid": "信息ID无效",
+  "Singup successful": "登录成功了",
+  "Username or Email not found": "没找到这个用户名或者邮件",
+  "Error Username not found": "错误，没找到这个用户名",
+  "Error email or password not valid": "错误，邮件或者密码有错误",
+  "Error password not valid": "错误，密码有错误",
+  "Invalid token, or token has expired. Please relogin": "无效的标记代码，请重新登录",
+  "Error removing token, please try again": "错误，标记代码没卸掉， 请重试",
+  "Email is already in use": "你输入的邮件已经在用",
+  "Error saving, please wait and try again later": "错误，正在存着，请稍等再试",
+  "deleteMessage": "你确定你想删除？",
+  "deleteAccept": "确定",
+  "save": "存",
+  "accept": "接受",
+  "reject": "拒绝",
+  "name": "名",
+  "note": "备注",
+  "level": "级别",
+  "nextLevelReq": "下个级别的要求",
   "menu": "菜单",
   "date": "日期",
-  "invite": "Invite**",
-  "cancel": "取消"
+  "invite": "邀请",
+  "cancel": "取消",
+  "close": "关闭",
+  "warning": "警告"
 }

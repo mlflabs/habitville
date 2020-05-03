@@ -9,6 +9,7 @@ export class Friend extends Doc {
   username!: string;
   id!: string;
   landscape!: Landscape;
+  level: number = 0;
   secondaryType?: string;
 
 

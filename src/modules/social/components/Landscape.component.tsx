@@ -1,11 +1,12 @@
 import React from 'react';
-import { IonHeader} from '@ionic/react';
-
-
+import { IonHeader, IonBadge} from '@ionic/react';
 import '../../../components/header.css';
 import { Landscape } from '../../gamify/models';
+import {  getLandscapePlantPic } from '../../../pages/habits/utilsHabits';
+import { NumberSvg } from '../../../icons/numberIcons';
 
-const LandscapeComp = ({username, landscape}:{username:string, landscape:Landscape}) => {
+
+const LandscapeComp = ({username, landscape, level}:{username:string, landscape:Landscape, level:number}) => {
 
   
 
@@ -32,7 +33,7 @@ const LandscapeComp = ({username, landscape}:{username:string, landscape:Landsca
         <img src="/assets/pics/ground.svg" className="headerGround" alt="Ground"/>
         
         {landscape.trees.map(tree => (
-          <img  src={'/assets/plants/' + tree.id+ '/' + tree.level + '.svg'}
+          <img  src={getLandscapePlantPic(tree)}
                 key={tree.habitId}
                 style={{left: tree.position +'px', bottom: getTreeTop(tree.level), width: getTreeSize(tree.level)}} 
                 className="habitPlant" alt="Tree"/>
@@ -40,6 +41,10 @@ const LandscapeComp = ({username, landscape}:{username:string, landscape:Landsca
 
       </div>
       <h1>{username}</h1>
+      <div className="userLevelPic">
+        <IonBadge color="success" >Level: {level}</IonBadge>
+      </div>
+     
     </IonHeader>
   )
 }

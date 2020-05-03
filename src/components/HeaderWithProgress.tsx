@@ -55,7 +55,7 @@ const HeaderWithProgress = ({title, showDetail = true}:{title:string, showDetail
 
   const getPlantTop = (level:number): string => {
     if(level < 3) return '4px'
-    return '10px';
+    return '9px';
   }
 
   return (
