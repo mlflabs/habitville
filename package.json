@@ -47,7 +47,7 @@
     "shortid": "^2.2.15",
     "typescript": "3.7.4",
     "ulog": "^1.1.0",
-    "validator": "^12.2.0"
+    "validator": "^13.7.0"
   },
   "scripts": {
     "start": "react-scripts start",
